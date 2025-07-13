@@ -7,9 +7,12 @@ name = "Cowcord"
 version = "0.0.1"
 dependencies = [
  "dioxus",
+ "discord-types",
  "gloo-timers",
  "js-sys",
  "reqwest",
+ "serde",
+ "serde_json",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",

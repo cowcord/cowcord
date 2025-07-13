@@ -2,8 +2,8 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use dioxus::prelude::*;
+use discord_types::api::websocket::GatewayRecieveEvent;
 use gloo_timers::callback::Interval;
-use models::http::websocket::GatewayRecieveEvent;
 use serde_json::json;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::prelude::*;
@@ -16,8 +16,6 @@ use views::*;
 
 // pub mod components;
 // use components::*;
-
-pub mod models;
 
 // https://github.com/DioxusLabs/dioxus/issues/3211
 #[derive(Debug, Clone, Routable, PartialEq)]
