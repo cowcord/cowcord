@@ -10,7 +10,7 @@ use crate::models::{api_types::{guild::{PartialGuild, RoleConnectionOperatorType
 #[derive(Serialize, Deserialize)]
 pub struct Application {
 	/// The ID of the application
-	pub id: Snowflake,
+	pub id: ApplicationId,
 	/// The name of the application
 	pub name: String,
 	/// The description of the application

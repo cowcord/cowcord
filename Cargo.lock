@@ -6,22 +6,10 @@ version = 4
 name = "Cowcord"
 version = "0.0.1"
 dependencies = [
- "base64",
- "bitflags 2.9.0",
- "chrono",
- "console_error_panic_hook",
  "dioxus",
  "gloo-timers",
  "js-sys",
- "prost-types",
  "reqwest",
- "serde",
- "serde_json",
- "serde_repr",
- "serde_urlencoded",
- "time",
- "typesize",
- "url",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
@@ -1084,7 +1072,6 @@ dependencies = [
  "serde",
  "server_fn",
  "tracing",
- "web-sys",
 ]
 
 [[package]]
@@ -1322,6 +1309,21 @@ dependencies = [
  "option-ext",
  "redox_users",
  "windows-sys 0.59.0",
+]
+
+[[package]]
+name = "discord-types"
+version = "0.0.1"
+dependencies = [
+ "bitflags 2.9.0",
+ "chrono",
+ "prost-types",
+ "serde",
+ "serde_json",
+ "serde_repr",
+ "serde_urlencoded",
+ "time",
+ "typesize",
 ]
 
 [[package]]

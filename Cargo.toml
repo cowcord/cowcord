@@ -1,3 +1,7 @@
+[workspace]
+members = ["crates/discord-types", "crates/app"]
+resolver = "3"
+
 [profile.release]
 opt-level = "z"
 debug = false
