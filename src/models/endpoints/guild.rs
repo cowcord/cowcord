@@ -2,8 +2,8 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::models::data::channel::Channel;
-use crate::models::data::guild::{
+use crate::models::api_types::data::channel::Channel;
+use crate::models::api_types::data::guild::{
 	Guild,
 	GuildMember,
 	GuildMemberUnusualDmActivity,
@@ -14,7 +14,7 @@ use crate::models::data::guild::{
 	UserGuild,
 	WelcomeScreen,
 };
-use crate::models::types::{CdnUri, Snowflake, Timestamp};
+use crate::models::api_types::types::{CdnUri, Snowflake, Timestamp};
 use crate::utils::request::to_string_query;
 
 /// Type: get

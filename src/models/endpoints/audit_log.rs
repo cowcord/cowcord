@@ -2,8 +2,8 @@
 
 use serde::Serialize;
 
-use crate::models::audit_log::AuditLog;
-use crate::models::types::Snowflake;
+use crate::models::api_types::audit_log::AuditLog;
+use crate::models::api_types::types::Snowflake;
 
 /// Type: get
 pub fn GET_GUILD_AUDIT_LOG_ENDPOINT(guild_id: Snowflake) -> String {
