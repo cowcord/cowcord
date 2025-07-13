@@ -54,6 +54,7 @@ pub struct GetEmojiSourceResponse {
 }
 
 /// Type: post
+///
 /// supports the X-Audit-Log-Reason header
 /// requires CREATE_EXPRESSIONS permission
 pub fn CREATE_GUILD_EMOJI_ENDPOINT(guild_id: Snowflake) -> String {
@@ -71,6 +72,7 @@ pub struct CreateGuildEmojiRequest {
 pub type CreateGuildEmojiResponse = Emoji;
 
 /// Type: patch
+///
 /// supports the X-Audit-Log-Reason header
 /// requires MANAGE_EXPRESSIONS permission, if the emoji was created byt the user though, CREATE_EXPRESSIONS permission works too
 pub fn MODIFY_GUILD_EMOJI_ENDPOINT(
@@ -90,6 +92,7 @@ pub struct ModifyGuildEmojiRequest {
 pub type ModifyGuildEmojiResponse = Emoji;
 
 /// Type: delete
+///
 /// supports the X-Audit-Log-Reason header
 /// requires MANAGE_EXPRESSIONS permission, if the emoji was created byt the user though, CREATE_EXPRESSIONS permission works too
 pub fn REMOVE_GUILD_EMOJI_ENDPOINT(

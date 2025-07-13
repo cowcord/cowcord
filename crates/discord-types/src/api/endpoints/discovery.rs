@@ -50,6 +50,7 @@ pub struct SearchDiscoverableGuildsRequest {
 }
 
 /// Type: get
+///
 /// doesnt require Authentication header
 pub fn SEARCH_PUBLISHED_GUILDS_ENDPOINT(query: SearchPublishedGuildsRequest) -> String {
 	format!("/discovery/search{}", to_string_query(&query))
@@ -64,6 +65,7 @@ pub struct SearchPublishedGuildsRequest {
 }
 
 /// Type: get
+///
 /// doesnt require Authentication header
 pub fn GET_DISCOVERY_SLUG_ENDPOINT(guild_id: Snowflake) -> String {
 	format!("/discovery/{}", guild_id)
@@ -107,6 +109,7 @@ pub struct ValidateDiscoverySearchTermResponse {
 }
 
 /// Type: get
+///
 /// requires MANAGE_GUILD permission
 pub fn GET_GUILD_DISCOVERY_REQUIREMENTS_ENDPOINT(guild_id: Snowflake) -> String {
 	format!("/guilds/{}/discovery-requirements", guild_id)
@@ -115,6 +118,7 @@ pub fn GET_GUILD_DISCOVERY_REQUIREMENTS_ENDPOINT(guild_id: Snowflake) -> String 
 pub type GetGuildDiscoveryRequirementsResponse = DiscoveryRequirements;
 
 /// Type: get
+///
 /// requires MANAGE_GUILD permission
 pub fn GET_GUILD_DISCOVERY_METADATA_ENDPOINT(guild_id: Snowflake) -> String {
 	format!("/guilds/{}/discovery-metadata", guild_id)
@@ -123,6 +127,7 @@ pub fn GET_GUILD_DISCOVERY_METADATA_ENDPOINT(guild_id: Snowflake) -> String {
 pub type GetGuildDiscoveryMetadataResponse = DiscoveryMetadata;
 
 /// Type: patch
+///
 /// requires MANAGE_GUILD permission
 pub fn MODIFY_GUILD_DISCOVERY_METADATA_ENDPOINT(guild_id: Snowflake) -> String {
 	format!("/guilds/{}/discovery-metadata", guild_id)
@@ -143,6 +148,7 @@ pub struct ModifyGuildDiscoveryMetadataRequest {
 pub type ModifyGuildDiscoveryMetadataResponse = DiscoveryMetadata;
 
 /// Type: put
+///
 /// requires MANAGE_GUILD permission
 pub fn ADD_GUILD_DISCOVERY_CATEGORY_ENDPOINT(
 	guild_id: Snowflake,
@@ -152,6 +158,7 @@ pub fn ADD_GUILD_DISCOVERY_CATEGORY_ENDPOINT(
 }
 
 /// Type: delete
+///
 /// requires MANAGE_GUILD permission
 pub fn REMOVE_GUILD_DISCOVERY_CATEGORY_ENDPOINT(
 	guild_id: Snowflake,

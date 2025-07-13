@@ -7,6 +7,7 @@ use crate::api::guild_template::GuildTemplate;
 use crate::api::types::{CdnUri, Snowflake};
 
 /// Type: get
+///
 /// doesnt require Authentication header
 pub fn GET_GUILD_TEMPLATE_ENDPOINT(template_code: Snowflake) -> String {
 	format!("/guilds/templates/{}", template_code)
@@ -29,6 +30,7 @@ pub struct UseGuildTemplateRequest {
 pub type UseGuildTemplateResponse = Guild;
 
 /// Type: get
+///
 /// requires MANAGE_GUILD permission
 pub fn GET_GUILD_TEMPLATES_ENDPOINT(guild_id: Snowflake) -> String {
 	format!("/guilds/{}/templates", guild_id)
@@ -37,6 +39,7 @@ pub fn GET_GUILD_TEMPLATES_ENDPOINT(guild_id: Snowflake) -> String {
 pub type GetGuildTemplatesResponse = Vec<GuildTemplate>;
 
 /// Type: post
+///
 /// requires MANAGE_GUILD permission
 pub fn CREATE_GUILD_TEMPLATES_ENDPOINT(guild_id: Snowflake) -> String {
 	format!("/guilds/{}/templates", guild_id)
@@ -52,6 +55,7 @@ pub struct CreateGuildTemplatesRequest {
 pub type CreateGuildTemplatesResponse = GuildTemplate;
 
 /// Type: put
+///
 /// requires MANAGE_GUILD permission
 pub fn SYNC_GUILD_TEMPLATES_ENDPOINT(
 	guild_id: Snowflake,
@@ -63,6 +67,7 @@ pub fn SYNC_GUILD_TEMPLATES_ENDPOINT(
 pub type SyncGuildTemplatesResponse = GuildTemplate;
 
 /// Type: patch
+///
 /// requires MANAGE_GUILD permission
 pub fn MODIFY_GUILD_TEMPLATES_ENDPOINT(
 	guild_id: Snowflake,
@@ -81,6 +86,7 @@ pub struct ModifyGuildTemplatesRequest {
 pub type ModifyGuildTemplatesResponse = GuildTemplate;
 
 /// Type: delete
+///
 /// requires MANAGE_GUILD permission
 pub fn DELETE_GUILD_TEMPLATES_ENDPOINT(
 	guild_id: Snowflake,
