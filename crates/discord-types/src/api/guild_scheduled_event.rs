@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use crate::models::{api_types::{guild::{GuildMember, PrivacyLevel}, users::PartialUser}, types::Timestamp};
+use crate::{api::{guild::{GuildMember, PrivacyLevel}, users::PartialUser}, common::Timestamp};
 
 #[derive(Serialize, Deserialize)]
 pub struct GuildScheduledEvent {

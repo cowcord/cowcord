@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use crate::models::{api_types::{application::PartialApplication, channel::{Channel, PartialChannel}, components::{Component, SelectMenuResolved}, emoji::Emoji, integrations::IntegrationApplication, presences::ActivityActionType, soundboard::SoundboardSound, stickers::{Sticker, StickerItem}, users::PartialUser}, types::Timestamp};
+use crate::{api::{application::PartialApplication, channel::{Channel, PartialChannel}, components::{Component, SelectMenuResolved}, emoji::Emoji, integrations::IntegrationApplication, presences::ActivityActionType, soundboard::SoundboardSound, stickers::{Sticker, StickerItem}, users::PartialUser}, common::Timestamp};
 
 #[derive(Serialize, Deserialize)]
 pub struct Message {

@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::models::api_types::users::PartialUser;
+use crate::api::users::PartialUser;
 
 #[derive(Serialize, Deserialize)]
 pub struct Emoji {

@@ -2,9 +2,9 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::models::api_types::discovery::DiscoverableGuild;
-use crate::models::api_types::emoji::{Emoji, EmojiApplication, EmojiGuild, TopEmoji};
-use crate::models::api_types::types::{CdnUri, Snowflake};
+use crate::api::discovery::DiscoverableGuild;
+use crate::api::emoji::{Emoji, EmojiApplication, EmojiGuild, TopEmoji};
+use crate::api::types::{CdnUri, Snowflake};
 
 /// Type: get
 pub fn GET_GUILD_EMOJIS_ENDPOINT(guild_id: Snowflake) -> String {

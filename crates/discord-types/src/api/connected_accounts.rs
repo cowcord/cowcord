@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use crate::models::api_types::integrations::{IntegrationAccount, IntegrationGuild, IntegrationType};
+use crate::api::integrations::{IntegrationAccount, IntegrationGuild, IntegrationType};
 
 #[derive(Serialize, Deserialize)]
 pub struct Connection {

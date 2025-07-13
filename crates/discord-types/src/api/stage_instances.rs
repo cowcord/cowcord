@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::models::api_types::guild::PrivacyLevel;
+use crate::api::guild::PrivacyLevel;
 
 #[derive(Serialize, Deserialize)]
 pub struct StageInstance {

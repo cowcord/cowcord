@@ -4,8 +4,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use crate::models::{api_types::{guild::{PartialGuild, RoleConnectionOperatorType}, integrations::IntegrationApplication, teams::{Company, Team}, users::PartialUser}, types::Timestamp};
-
+use crate::{api::{guild::{PartialGuild, RoleConnectionOperatorType}, integrations::IntegrationApplication, teams::{Company, Team}, users::PartialUser}, common::Timestamp};
 
 #[derive(Serialize, Deserialize)]
 pub struct Application {

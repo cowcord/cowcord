@@ -2,8 +2,8 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::models::api_types::family_center::{FamilyCenter, LinkedUsers};
-use crate::models::api_types::types::Snowflake;
+use crate::api::family_center::{FamilyCenter, LinkedUsers};
+use crate::api::types::Snowflake;
 
 /// Type: get
 pub const GET_FAMILY_CENTER_OVERVIEW_ENDPOINT: &str = "/family-center/@me";

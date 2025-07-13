@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use crate::models::api_types::users::PartialUser;
+use crate::api::users::PartialUser;
 
 #[derive(Serialize, Deserialize)]
 pub struct StickerPack {

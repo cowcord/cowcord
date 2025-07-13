@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
-use crate::models::{api_types::{guild::Guild, users::PartialUser}, types::Timestamp};
+use crate::{api::{guild::Guild, users::PartialUser}, common::Timestamp};
 
 #[derive(Serialize, Deserialize)]
 pub struct FamilyCenter {

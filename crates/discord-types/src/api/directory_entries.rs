@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use crate::models::api_types::{guild::PartialGuild, guild_scheduled_event::GuildScheduledEvent};
+use crate::api::{guild::PartialGuild, guild_scheduled_event::GuildScheduledEvent};
 
 #[derive(Serialize, Deserialize)]
 pub struct DirectoryEntry {

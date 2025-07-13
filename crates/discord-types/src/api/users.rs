@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use crate::models::{api_types::{emoji::Emoji, family_center::LinkedUser}, types::Timestamp};
+use crate::{api::{emoji::Emoji, family_center::LinkedUser}, common::Timestamp};
 
 #[derive(Serialize, Deserialize)]
 pub struct User {

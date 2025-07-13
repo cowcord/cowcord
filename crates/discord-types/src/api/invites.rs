@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use crate::models::{api_types::{application::PartialApplication, channel::PartialChannel, discovery::GuildProfile, guild::{GuildFeatures, NsfwLevel, PremiumGuildSubscription, VerificationLevel}, guild_scheduled_event::GuildScheduledEvent, users::PartialUser}, types::Timestamp};
+use crate::{api::{application::PartialApplication, channel::PartialChannel, discovery::GuildProfile, guild::{GuildFeatures, NsfwLevel, PremiumGuildSubscription, VerificationLevel}, guild_scheduled_event::GuildScheduledEvent, users::PartialUser}, common::Timestamp};
 
 #[derive(Serialize, Deserialize)]
 pub struct Invite {

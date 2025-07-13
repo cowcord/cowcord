@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use crate::models::{api_types::{application::Application, auto_moderation::AutomodIncidentsData, discovery::GuildProfile, emoji::Emoji, integrations::IntegrationApplication, stickers::Sticker, users::{AvatarDecorationData, PartialUser}}, types::Timestamp};
+use crate::{api::{application::Application, auto_moderation::AutomodIncidentsData, discovery::GuildProfile, emoji::Emoji, integrations::IntegrationApplication, stickers::Sticker, users::{AvatarDecorationData, PartialUser}}, common::Timestamp};
 
 #[derive(Serialize, Deserialize)]
 pub struct Guild {

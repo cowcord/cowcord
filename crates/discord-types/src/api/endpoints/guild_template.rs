@@ -2,9 +2,9 @@
 
 use serde::Serialize;
 
-use crate::models::api_types::guild::Guild;
-use crate::models::api_types::guild_template::GuildTemplate;
-use crate::models::api_types::types::{CdnUri, Snowflake};
+use crate::api::guild::Guild;
+use crate::api::guild_template::GuildTemplate;
+use crate::api::types::{CdnUri, Snowflake};
 
 /// Type: get
 ///

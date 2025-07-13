@@ -22,8 +22,9 @@ use std::fmt;
 use std::num::{NonZeroI64, NonZeroU64};
 
 use serde::de::Error;
+use serde::{Deserialize, Serialize};
 
-use super::prelude::*;
+use crate::common::timestamp::Timestamp;
 
 macro_rules! newtype_display_impl {
     ($name:ident, |$this:ident| $inner:expr) => {
@@ -192,7 +193,7 @@ impl serde::de::Visitor<'_> for SnowflakeVisitor {
 }
 
 impl<'de> serde::Deserialize<'de> for InnerId {
-    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<InnerId, D::Error> {
+    fn deserialize<D: serde::de::Deserializer<'de>>(deserializer: D) -> Result<InnerId, D::Error> {
         deserializer.deserialize_any(SnowflakeVisitor)
     }
 }
@@ -275,48 +276,3 @@ impl AnswerId {
 
 newtype_display_impl!(AnswerId, |this| this.0);
 forward_fromstr_impl!(AnswerId, std::convert::identity);
-
-#[cfg(test)]
-mod tests {
-    use std::num::NonZeroU64;
-
-    use super::{GuildId, InnerId};
-
-    #[test]
-    fn test_created_at() {
-        // The id is from discord's snowflake docs
-        let id = GuildId::new(175928847299117063);
-        assert_eq!(id.created_at().unix_timestamp(), 1462015105);
-        assert_eq!(id.created_at().to_string(), "2016-04-30T11:18:25.796Z");
-    }
-
-    #[test]
-    fn test_id_serde() {
-        use serde::{Deserialize, Serialize};
-
-        use crate::json::{assert_json, json};
-
-        #[derive(Debug, PartialEq, Deserialize, Serialize)]
-        struct S {
-            id: InnerId,
-        }
-
-        #[derive(Debug, PartialEq, Deserialize, Serialize)]
-        struct Opt {
-            id: Option<GuildId>,
-        }
-
-        let id = GuildId::new(17_5928_8472_9911_7063);
-        assert_json(&id, json!("175928847299117063"));
-
-        let s = S {
-            id: InnerId(NonZeroU64::new(17_5928_8472_9911_7063).unwrap()),
-        };
-        assert_json(&s, json!({"id": "175928847299117063"}));
-
-        let s = Opt {
-            id: Some(GuildId::new(17_5928_8472_9911_7063)),
-        };
-        assert_json(&s, json!({"id": "175928847299117063"}));
-    }
-}

@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use crate::models::{api_types::{emoji::Emoji, guild::GuildFeatures, stickers::Sticker}, types::Timestamp};
+use crate::{api::{emoji::Emoji, guild::GuildFeatures, stickers::Sticker}, common::Timestamp};
 
 #[derive(Serialize, Deserialize)]
 pub struct DiscoverableGuild {

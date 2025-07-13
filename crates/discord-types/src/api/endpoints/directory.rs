@@ -2,8 +2,8 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::models::api_types::directory::DirectoryEntry;
-use crate::models::api_types::types::Snowflake;
+use crate::api::directory::DirectoryEntry;
+use crate::api::types::Snowflake;
 use crate::utils::request::to_string_query;
 
 /// Type: get

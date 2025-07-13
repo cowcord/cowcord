@@ -2,14 +2,14 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::models::api_types::discovery::{
+use crate::api::discovery::{
 	DiscoverableGuild,
 	DiscoveryMetadata,
 	DiscoveryReason,
 	DiscoveryRequirements,
 	MonetizationStorePage,
 };
-use crate::models::api_types::types::Snowflake;
+use crate::api::types::Snowflake;
 use crate::utils::request::to_string_query;
 
 /// Type: get

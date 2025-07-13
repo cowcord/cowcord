@@ -4,7 +4,7 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
-use crate::models::api_types::application::{
+use crate::api::application::{
 	Application,
 	ApplicationAsset,
 	ApplicationDistributor,
@@ -18,7 +18,7 @@ use crate::models::api_types::application::{
 	EmbeddedActivityPlatformConfig,
 	ExternalAsset,
 };
-use crate::models::api_types::users::User;
+use crate::api::users::User;
 use crate::utils::request::to_string_query;
 
 /// Type: get

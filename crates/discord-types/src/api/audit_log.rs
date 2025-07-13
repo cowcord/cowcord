@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use crate::models::api_types::{channel::PermissionOverwriteType, integrations::{IntegrationAccount, IntegrationType}};
+use crate::api::{channel::PermissionOverwriteType, integrations::{IntegrationAccount, IntegrationType}};
 
 #[derive(Serialize, Deserialize)]
 pub struct AuditLogEntry {

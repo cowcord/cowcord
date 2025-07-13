@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
-use crate::models::api_types::channel::Channel;
+use crate::api::channel::Channel;
 
 #[derive(Serialize, Deserialize)]
 pub struct Lobby {

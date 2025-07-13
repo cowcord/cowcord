@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use crate::models::{api_types::{application::{ApplicationRoleConnectionMetadata, ApplicationSku, ApplicationType}, users::PartialUser}, types::Timestamp};
+use crate::{api::{application::{ApplicationRoleConnectionMetadata, ApplicationSku, ApplicationType}, users::PartialUser}, common::Timestamp};
 
 #[derive(Serialize, Deserialize)]
 pub struct Integration {

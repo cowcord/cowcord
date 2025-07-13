@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use crate::models::{api_types::{audit_log::PartialRole, channel::PartialChannel, emoji::Emoji, guild::GuildMember, messages::{AttachmentFlags, ContentScanMetadata}, users::PartialUser}, types::{Snowflake, Timestamp}};
+use crate::{api::{audit_log::PartialRole, channel::PartialChannel, emoji::Emoji, guild::GuildMember, messages::{AttachmentFlags, ContentScanMetadata}, users::PartialUser}, common::{Snowflake, Timestamp}};
 
 /// All components have the following fields:
 #[derive(Serialize, Deserialize)]

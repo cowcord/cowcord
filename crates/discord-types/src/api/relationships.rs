@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use crate::models::{api_types::{connected_accounts::ConnectionType, users::PartialUser}, types::Timestamp};
+use crate::{api::{connected_accounts::ConnectionType, users::PartialUser}, common::Timestamp};
 
 #[derive(Serialize, Deserialize)]
 pub struct Relationship {

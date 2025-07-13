@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use crate::models::{api_types::{quests::QuestRewardCode, users::PartialUser}, types::Timestamp};
+use crate::{api::{quests::QuestRewardCode, users::PartialUser}, common::Timestamp};
 
 #[derive(Serialize, Deserialize)]
 pub struct Entitlement {
