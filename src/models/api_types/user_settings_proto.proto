@@ -1,26 +1,26 @@
-// MIT License
-//
-// Copyright (c) 2022-present dolfies
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
-//
-// Source: https://github.com/discord-userdoccers/discord-protos/blob/master/discord_protos/discord_users/v1/PreloadedUserSettings.proto
+//! MIT License
+//!
+//! Copyright (c) 2022-present dolfies
+//!
+//! Permission is hereby granted, free of charge, to any person obtaining a copy
+//! of this software and associated documentation files (the "Software"), to deal
+//! in the Software without restriction, including without limitation the rights
+//! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//! copies of the Software, and to permit persons to whom the Software is
+//! furnished to do so, subject to the following conditions:
+//!
+//! The above copyright notice and this permission notice shall be included in all
+//! copies or substantial portions of the Software.
+//!
+//! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+//! SOFTWARE.
+//!
+//! Source: https://github.com/discord-userdoccers/discord-protos/blob/master/discord_protos/discord_users/v1/PreloadedUserSettings.proto
 
 syntax = "proto3";
 
@@ -78,6 +78,13 @@ message PreloadedUserSettings {
     optional google.protobuf.StringValue message_previews = 2;
   }
 
+  message GuildDismissibleContentState {
+    bool dismissed = 1;
+    uint32 last_dismissed_version = 2;
+    uint64 last_dismissed_at_ms = 3;
+    uint64 last_dismissed_object_id = 4;
+  }
+
   message GuildSettings {
     map<fixed64, ChannelSettings> channels = 1;
     uint32 hub_progress = 2;
@@ -90,6 +97,7 @@ message PreloadedUserSettings {
     bool disable_raid_alert_nag = 9;
     optional CustomNotificationSoundConfig custom_notification_sound_config = 10;
     bool leaderboards_disabled = 11;
+    map<int32, GuildDismissibleContentState> guild_dismissible_content_states = 12;
   }
 
   message AllGuildSettings {
@@ -166,6 +174,12 @@ message PreloadedUserSettings {
     optional google.protobuf.BoolValue slurs = 3;
   }
 
+  message GoreContentSettings {
+    ExplicitContentRedaction gore_content_guilds = 1;
+    ExplicitContentRedaction gore_content_friend_dm = 2;
+    ExplicitContentRedaction gore_content_non_friend_dm = 3;
+  }
+
   message TextAndImagesSettings {
     optional google.protobuf.StringValue diversity_surrogate = 1;
     optional google.protobuf.BoolValue use_rich_chat_input = 2;
@@ -197,12 +211,26 @@ message PreloadedUserSettings {
     optional ExplicitContentSettings explicit_content_settings = 29;
     optional KeywordFilterSettings keyword_filter_settings = 30;
     optional google.protobuf.BoolValue include_soundmoji_in_autocomplete = 31;
+    optional GoreContentSettings gore_content_settings = 32;
   }
 
   enum ReactionNotificationType {
     REACTION_NOTIFICATION_TYPE_NOTIFICATIONS_ENABLED = 0;
     REACTION_NOTIFICATION_TYPE_ONLY_DMS = 1;
     REACTION_NOTIFICATION_TYPE_NOTIFICATIONS_DISABLED = 2;
+  }
+
+  enum GameActivityNotificationType {
+    GAME_ACTIVITY_NOTIFICATION_TYPE_ACTIVITY_NOTIFICATIONS_UNSET = 0;
+    GAME_ACTIVITY_NOTIFICATION_TYPE_ACTIVITY_NOTIFICATIONS_DISABLED = 1;
+    GAME_ACTIVITY_NOTIFICATION_TYPE_ACTIVITY_NOTIFICATIONS_ENABLED = 2;
+    GAME_ACTIVITY_NOTIFICATION_TYPE_ONLY_GAMES_PLAYED = 3;
+  }
+
+  enum CustomStatusPushNotificationType {
+    CUSTOM_STATUS_PUSH_NOTIFICATION_TYPE_STATUS_PUSH_UNSET = 0;
+    CUSTOM_STATUS_PUSH_NOTIFICATION_TYPE_STATUS_PUSH_ENABLED = 1;
+    CUSTOM_STATUS_PUSH_NOTIFICATION_TYPE_STATUS_PUSH_DISABLED = 2;
   }
 
   message NotificationSettings {
@@ -213,6 +241,10 @@ message PreloadedUserSettings {
     optional google.protobuf.BoolValue quiet_mode = 5;
     fixed64 focus_mode_expires_at_ms = 6;
     ReactionNotificationType reaction_notifications = 7;
+    GameActivityNotificationType game_activity_notifications = 8;
+    CustomStatusPushNotificationType custom_status_push_notifications = 9;
+    optional google.protobuf.BoolValue game_activity_exclude_steam_notifications = 10;
+    optional google.protobuf.BoolValue enable_voice_activity_notifications = 11;
   }
 
   enum GuildActivityStatusRestrictionDefault {
@@ -301,8 +333,16 @@ message PreloadedUserSettings {
     THEME_MIDNIGHT = 4;
   }
 
+  message CustomUserThemeSettings {
+    repeated string colors = 1 [packed = false];
+    repeated float gradient_color_stops = 2;
+    int32 gradient_angle = 3;
+    int32 base_mix = 4;
+  }
+
   message ClientThemeSettings {
     optional google.protobuf.UInt32Value background_gradient_preset_id = 2;
+    optional CustomUserThemeSettings custom_user_theme_settings = 4;
   }
 
   enum TimestampHourCycle {
@@ -433,11 +473,16 @@ message PreloadedUserSettings {
   }
 
   message ApplicationDMSettings {
-    bool dm_disabled = 1;
+    bool allow_mobile_push = 2;
+  }
+
+  message ApplicationSharingSettings {
+    bool disable_application_activity_sharing = 1;
   }
 
   message ApplicationSettings {
     optional ApplicationDMSettings app_dm_settings = 1;
+    optional ApplicationSharingSettings app_sharing_settings = 2;
   }
 
   message AllApplicationSettings {
@@ -446,6 +491,15 @@ message PreloadedUserSettings {
 
   message AdsSettings {
     bool always_deliver = 1;
+  }
+
+  message InAppFeedbackState {
+    optional google.protobuf.UInt64Value last_impression_time = 1;
+    optional google.protobuf.UInt64Value opt_out_expiry_time = 2;
+  }
+
+  message InAppFeedbackSettings {
+    map<int32, InAppFeedbackState> in_app_feedback_states = 1;
   }
 
   optional Versions versions = 1;
@@ -472,4 +526,5 @@ message PreloadedUserSettings {
   optional ICYMISettings icymi_settings = 22;
   optional AllApplicationSettings applications = 23;
   optional AdsSettings ads = 24;
+  optional InAppFeedbackSettings in_app_feedback_settings = 25;
 }
