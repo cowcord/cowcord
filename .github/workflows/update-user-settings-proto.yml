@@ -1,0 +1,18 @@
+on:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Update user_settings_proto.proto
+        run: bash ./scripts/update-user-settings
+      - uses: EndBug/add-and-commit@v9
+        with:
+          message: Update user settings protobuf definitions
+          committer_name: github-actions[bot]
+          committer_email: github-actions[bot]@users.noreply.github.com
