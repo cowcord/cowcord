@@ -3,7 +3,8 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use crate::models::types::Timestamp;
+use crate::common::id::{AutomodRuleId, ChannelId, GuildId, MessageId, RoleId, UserId};
+use crate::common::timestamp::Timestamp;
 
 #[derive(Serialize, Deserialize)]
 pub struct AutomodAlertEmbed {
@@ -18,10 +19,10 @@ pub struct AutomodAlertEmbed {
 	pub decision_outcome: String,
 	/// The ID of the channel in which the user content was posted
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub channel_id: Option<Snowflake>,
+	pub channel_id: Option<ChannelId>,
 	/// The ID of the message that triggered the rule
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub flagged_message_id: Option<Snowflake>,
+	pub flagged_message_id: Option<MessageId>,
 	/// The word or phrase configured that triggered the rule
 	pub keyword: String,
 	/// The substring in content that triggered the rule
@@ -46,13 +47,13 @@ pub struct AutomodAlertEmbed {
 	pub application_name: Option<String>,
 	/// The ID of the user that triggered the rule, if the author is a user application
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub interaction_user_id: Option<Snowflake>,
+	pub interaction_user_id: Option<UserId>,
 	/// The type of interaction callback that triggered the rule
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub interaction_callback_type: Option<String>,
 	/// Duration (in seconds) after which the timeout expires
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub timeout_duration: Option<i64>,
+	pub timeout_duration: Option<u64>,
 	/// The actions that were executed on the AutoMod alert
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub alert_actions_execution: Option<AutomodAlertActionsExecution>,
@@ -102,7 +103,7 @@ pub enum AutomodInteractionCallbackType {
 #[derive(Serialize, Deserialize)]
 pub struct AutomodAlertActionsExecution {
 	/// The alert actions execution protocol version (currently 0)
-	pub v: i64,
+	pub v: u8,
 	/// The actions that were executed on the AutoMod alert, keyed by action type
 	pub actions: HashMap<String, AutomodAlertAction>,
 }
@@ -123,9 +124,9 @@ pub enum AutomodAlertActionType {
 #[derive(Serialize, Deserialize)]
 pub struct AutomodAlertAction {
 	/// The ID of the user that executed the action
-	pub actor: Snowflake,
-    /// ts pmo 🥀
-    /// 
+	pub actor: UserId,
+	/// ts pmo 🥀
+	///
 	/// When the action was executed
 	pub ts: Timestamp,
 }
@@ -140,7 +141,7 @@ pub struct AutomodIncidentNotificationEmbed {
 	pub decision_id: Option<String>,
 	/// The ID of the user that executed the action (only applicable to activity_alerts_enabled  notification types )
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub action_by_user_id: Option<Snowflake>,
+	pub action_by_user_id: Option<UserId>,
 	/// The type of raid that was detected
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub raid_type: Option<String>,
@@ -149,10 +150,10 @@ pub struct AutomodIncidentNotificationEmbed {
 	pub raid_datetime: Option<Timestamp>,
 	/// The approximate number of join attempts as part of the raid
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub join_attempts: Option<i64>,
+	pub join_attempts: Option<u16>,
 	/// The approximate number of sent DMs as part of the raid
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub dms_sent: Option<i64>,
+	pub dms_sent: Option<u16>,
 	/// When the mention activity restrictions will end (only applicable to mention_raid  notification types )
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub suspicious_mention_activity_until: Option<Timestamp>,
@@ -197,17 +198,17 @@ pub enum AutomodRaidResolutionReason {
 #[derive(Serialize, Deserialize)]
 pub struct AutomodRule {
 	/// The ID of the rule
-	pub id: Snowflake,
+	pub id: AutomodRuleId,
 	/// The ID of the guild which this rule belongs to
-	pub guild_id: Snowflake,
+	pub guild_id: GuildId,
 	/// The name of the rule
 	pub name: String,
 	/// The ID of the user that created the rule
-	pub creator_id: Snowflake,
+	pub creator_id: UserId,
 	/// The type of event that triggers the rule
-	pub event_type: i64,
+	pub event_type: AutomodEventType,
 	/// The type of trigger that invokes the rule
-	pub trigger_type: i64,
+	pub trigger_type: AutomodTriggerType,
 	/// Metadata used to determine whether the rule should be triggered
 	pub trigger_metadata: AutomodTriggerMetadata,
 	/// The actions that will execute when the rule is triggered
@@ -215,9 +216,9 @@ pub struct AutomodRule {
 	/// Whether the rule is enabled
 	pub enabled: bool,
 	/// The IDs of the roles that won't be affected by the rule (max 20)
-	pub exempt_roles: Vec<Snowflake>,
+	pub exempt_roles: Vec<RoleId>,
 	/// The IDs of the channels that won't be affected by the rule (max 50)
-	pub exempt_channels: Vec<Snowflake>,
+	pub exempt_channels: Vec<ChannelId>,
 }
 
 /// Characterizes the type of content which can trigger the rule.
@@ -246,11 +247,11 @@ pub struct AutomodTriggerMetadata {
 	/// Regular expression patterns which will be matched against content (1-260 characters, max 10)
 	pub regex_patterns: Vec<String>,
 	/// The internally predefined wordsets which will be searched for in content
-	pub presets: Vec<i64>,
+	pub presets: Vec<AutomodKeywordPresetType>,
 	/// Substrings which should not trigger the rule (1-60 characters, max 100 or 1000 respectively)
 	pub allow_list: Vec<String>,
 	/// Number of unique role and user mentions allowed per message (max 50)
-	pub mention_total_limit: i64,
+	pub mention_total_limit: u8,
 	/// Whether to automatically detect mention raids
 	pub mention_raid_protection_enabled: bool,
 }
@@ -302,9 +303,9 @@ pub enum AutomodActionType {
 #[derive(Serialize, Deserialize)]
 pub struct AutomodActionMetadata {
 	/// The channel where user content should be logged
-	pub channel_id: Snowflake,
+	pub channel_id: ChannelId,
 	/// Duration (in seconds) after which the timeout expires (max 2419200)
-	pub duration_seconds: i64,
+	pub duration_seconds: u32,
 	/// Additional explanation that will be shown to members whenever their message is blocked
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub custom_message: Option<String>,

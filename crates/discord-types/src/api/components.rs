@@ -3,7 +3,23 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use crate::{api::{audit_log::PartialRole, channel::PartialChannel, emoji::Emoji, guild::GuildMember, messages::{AttachmentFlags, ContentScanMetadata}, users::PartialUser}, common::{Snowflake, Timestamp}};
+use crate::api::audit_log::PartialRole;
+use crate::api::channel::{ChannelType, PartialChannel};
+use crate::api::emoji::Emoji;
+use crate::api::guild::GuildMember;
+use crate::api::messages::{AttachmentFlags, ContentScanMetadata};
+use crate::api::users::PartialUser;
+use crate::common::id::{
+	ApplicationId,
+	AttachmentId,
+	ChannelId,
+	GenericSnowflake,
+	GuildId,
+	RoleId,
+	SkuId,
+	UserId,
+};
+use crate::common::timestamp::Timestamp;
 
 /// All components have the following fields:
 #[derive(Serialize, Deserialize)]
@@ -12,46 +28,46 @@ pub struct Component {
 	pub r#type: ComponentType,
 	/// 32 bit integer used as an optional identifier for component
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub id: Option<i64>,
+	pub id: Option<i32>,
 	#[serde(flatten)]
-    pub component: ComponentType,
+	pub component: ComponentType,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Serialize, Deserialize)]
 #[serde(tag = "type")]
 pub enum ComponentType {
-    #[serde(rename = "1")]
-    ActionRow(ActionRow),
-    #[serde(rename = "2")]
-    Button(Button),
-    #[serde(rename = "3")]
-    StringSelect(StringSelect),
-    #[serde(rename = "4")]
-    TextInput(TextInput),
-    #[serde(rename = "5")]
-    UserSelect(UserSelect),
-    #[serde(rename = "6")]
-    RoleSelect(RoleSelect),
-    #[serde(rename = "7")]
-    MentionableSelect(MentionableSelect),
-    #[serde(rename = "8")]
-    ChannelSelect(ChannelSelect),
-    #[serde(rename = "9")]
-    Section(Section),
-    #[serde(rename = "10")]
-    TextDisplay(TextDisplay),
-    #[serde(rename = "11")]
-    Thumbnail(Thumbnail),
-    #[serde(rename = "12")]
-    MediaGallery(MediaGallery),
-    #[serde(rename = "13")]
-    File(File),
-    #[serde(rename = "14")]
-    Separator(Separator),
-    #[serde(rename = "16")]
-    ContentInventoryEntry(ContentInventoryEntry),
-    #[serde(rename = "17")]
-    Container(Container),
+	#[serde(rename = "1")]
+	ActionRow(ActionRow),
+	#[serde(rename = "2")]
+	Button(Button),
+	#[serde(rename = "3")]
+	StringSelect(StringSelect),
+	#[serde(rename = "4")]
+	TextInput(TextInput),
+	#[serde(rename = "5")]
+	UserSelect(UserSelect),
+	#[serde(rename = "6")]
+	RoleSelect(RoleSelect),
+	#[serde(rename = "7")]
+	MentionableSelect(MentionableSelect),
+	#[serde(rename = "8")]
+	ChannelSelect(ChannelSelect),
+	#[serde(rename = "9")]
+	Section(Section),
+	#[serde(rename = "10")]
+	TextDisplay(TextDisplay),
+	#[serde(rename = "11")]
+	Thumbnail(Thumbnail),
+	#[serde(rename = "12")]
+	MediaGallery(MediaGallery),
+	#[serde(rename = "13")]
+	File(File),
+	#[serde(rename = "14")]
+	Separator(Separator),
+	#[serde(rename = "16")]
+	ContentInventoryEntry(ContentInventoryEntry),
+	#[serde(rename = "17")]
+	Container(Container),
 }
 
 #[derive(Serialize, Deserialize)]
@@ -63,7 +79,7 @@ pub struct ActionRow {
 #[derive(Serialize, Deserialize)]
 pub struct Button {
 	/// A button style
-	pub style: i64,
+	pub style: ButtonStyle,
 	/// Text that appears on the button (max 80 characters)
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub label: Option<String>,
@@ -74,7 +90,7 @@ pub struct Button {
 	pub custom_id: String,
 	/// Identifier for a purchasable SKU, only available when using premium-style buttons
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub sku_id: Option<Snowflake>,
+	pub sku_id: Option<SkuId>,
 	/// URL for link-style buttons (max 512 characters)
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub url: Option<String>,
@@ -105,10 +121,10 @@ pub struct StringSelect {
 	pub placeholder: Option<String>,
 	/// Minimum number of items that must be chosen (max 25, default 1)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub min_values: Option<i64>,
+	pub min_values: Option<u8>,
 	/// Maximum number of items that can be chosen (max 25, default 1)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub max_values: Option<i64>,
+	pub max_values: Option<u8>,
 	/// Whether the select menu is disabled (default false)
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub disabled: Option<bool>,
@@ -131,22 +147,22 @@ pub struct SelectOption {
 	pub default: Option<bool>,
 }
 
-/// members and users may both be present in the resolved object when a user is selected (in either a [user select](https://0d40096b.discord-userdoccers.pages.dev/resources/components#user-select) or [mentionable select](https://0d40096b.discord-userdoccers.pages.dev/resources/components#mentionable-select)).
+/// members and users may both be present in the resolved object when a user is selected (in either a [user select](https://docs.discord.food/resources/components#user-select) or [mentionable select](https://docs.discord.food/resources/components#mentionable-select)).
 /// The resolved object is included in interaction payloads for user, role, mentionable, and channel select menu components. resolved contains a nested object with additional details about the selected options.
 #[derive(Serialize, Deserialize)]
 pub struct SelectMenuResolved {
 	/// Selected channels
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub channels: Option<HashMap<Snowflake, PartialChannel>>,
+	pub channels: Option<HashMap<ChannelId, PartialChannel>>,
 	/// Selected roles
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub roles: Option<HashMap<Snowflake, PartialRole>>,
+	pub roles: Option<HashMap<RoleId, PartialRole>>,
 	/// Selected users
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub users: Option<HashMap<Snowflake, PartialUser>>,
+	pub users: Option<HashMap<UserId, PartialUser>>,
 	/// Selected members
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub members: Option<HashMap<Snowflake, GuildMember>>,
+	pub members: Option<HashMap<UserId, GuildMember>>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -154,15 +170,15 @@ pub struct TextInput {
 	/// Developer-defined identifier for the input (max 100 characters)
 	pub custom_id: String,
 	/// The text input style
-	pub style: i64,
+	pub style: TextInputStyle,
 	/// Label for this component (max 45 characters)
 	pub label: String,
 	/// Minimum input length for a text input (max 4000)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub min_length: Option<i64>,
+	pub min_length: Option<u16>,
 	/// Maximum input length for a text input (1-4000)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub max_length: Option<i64>,
+	pub max_length: Option<u16>,
 	/// Whether this component is required to be filled (default true)
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub required: Option<bool>,
@@ -195,10 +211,10 @@ pub struct UserSelect {
 	pub default_values: Option<Vec<SelectDefaultValue>>,
 	/// Minimum number of items that must be chosen (max 25, default 1)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub min_values: Option<i64>,
+	pub min_values: Option<u8>,
 	/// Maximum number of items that can be chosen (max 25, default 1)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub max_values: Option<i64>,
+	pub max_values: Option<u8>,
 	/// Whether the select menu is disabled (default false)
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub disabled: Option<bool>,
@@ -207,9 +223,16 @@ pub struct UserSelect {
 #[derive(Serialize, Deserialize)]
 pub struct SelectDefaultValue {
 	/// ID of a user, role, or channel
-	pub id: Snowflake,
+	pub id: UserRoleChannelId,
 	/// Type of value associated with the ID
 	pub r#type: String,
+}
+
+#[derive(Serialize, Deserialize)]
+enum UserRoleChannelId {
+	UserId(UserId),
+	RoleId(RoleId),
+	ChannelId(ChannelId),
 }
 
 #[derive(Serialize, Deserialize)]
@@ -224,10 +247,10 @@ pub struct RoleSelect {
 	pub default_values: Option<Vec<SelectDefaultValue>>,
 	/// Minimum number of items that must be chosen (max 25, default 1)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub min_values: Option<i64>,
+	pub min_values: Option<u8>,
 	/// Maximum number of items that can be chosen (max 25, default 1)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub max_values: Option<i64>,
+	pub max_values: Option<u8>,
 	/// Whether the select menu is disabled (default false)
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub disabled: Option<bool>,
@@ -245,10 +268,10 @@ pub struct MentionableSelect {
 	pub default_values: Option<Vec<SelectDefaultValue>>,
 	/// Minimum number of items that must be chosen (max 25, default 1)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub min_values: Option<i64>,
+	pub min_values: Option<u8>,
 	/// Maximum number of items that can be chosen (max 25, default 1)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub max_values: Option<i64>,
+	pub max_values: Option<u8>,
 	/// Whether the select menu is disabled (default false)
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub disabled: Option<bool>,
@@ -260,7 +283,7 @@ pub struct ChannelSelect {
 	pub custom_id: String,
 	/// Channel types to include in the channel select component
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub channel_types: Option<Vec<i64>>,
+	pub channel_types: Option<Vec<ChannelType>>,
 	/// Placeholder text if nothing is selected (max 150 characters)
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub placeholder: Option<String>,
@@ -269,10 +292,10 @@ pub struct ChannelSelect {
 	pub default_values: Option<Vec<SelectDefaultValue>>,
 	/// Minimum number of items that must be chosen (max 25, default 1)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub min_values: Option<i64>,
+	pub min_values: Option<u8>,
 	/// Maximum number of items that can be chosen (max 25, default 1)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub max_values: Option<i64>,
+	pub max_values: Option<u8>,
 	/// Whether the select menu is disabled (default false)
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub disabled: Option<bool>,
@@ -338,7 +361,7 @@ pub struct File {
 	/// The name of the file
 	pub name: String,
 	/// The size of the file in bytes
-	pub size: i64,
+	pub size: u64,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -348,7 +371,7 @@ pub struct Separator {
 	pub divider: Option<bool>,
 	/// Size of separator padding (default SMALL )
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub spacing: Option<i64>,
+	pub spacing: Option<SeparatorSpacingType>,
 }
 
 #[derive(Serialize_repr, Deserialize_repr)]
@@ -371,18 +394,18 @@ pub struct ContentInventoryEntry {
 	/// The ID of the entry as a snowflake when sent in guild or a string of numbers when DMed
 	pub id: String,
 	/// The ID of the user this entry is for
-	pub author_id: Snowflake,
+	pub author_id: UserId,
 	/// The type of author that created this entry
-	pub author_type: i64,
+	pub author_type: ContentInventoryAuthorType,
 	/// [The type of content] ](#content-inventory-content-type)
-	pub content_type: i64,
+	pub content_type: ContentInventoryContentType,
 	/// Contains info such as streak, marathon, and time
 	pub traits: Vec<ContentInventoryTrait>,
 	/// Metadata, such as a game or song
 	pub extra: ContentInventoryMetadata,
 	/// The IDs of all users involved with this entry
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub participants: Option<Vec<Snowflake>>,
+	pub participants: Option<Vec<UserId>>,
 	/// When this entry expires
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub expires_at: Option<Timestamp>,
@@ -394,16 +417,16 @@ pub struct ContentInventoryEntry {
 	pub started_at: Option<Timestamp>,
 	/// ID of the entry
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub original_id: Option<Snowflake>,
+	pub original_id: Option<GenericSnowflake>,
 	/// Guild ID this entry happened in
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub guild_id: Option<Snowflake>,
+	pub guild_id: Option<GuildId>,
 	/// Channel ID this entry happened in
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub channel_id: Option<Snowflake>,
+	pub channel_id: Option<ChannelId>,
 	/// Session ID of this entry
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub session_id: Option<Snowflake>,
+	pub session_id: Option<GenericSnowflake>,
 	/// Signature metadata for validation
 	pub signature: ContentInventorySignature,
 }
@@ -451,13 +474,13 @@ pub struct ContentInventoryTrait {
 	pub first_time: Option<bool>,
 	/// Total time elapsed during the entry (only DURATION_SECONDS )
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub duration_seconds: Option<i64>,
+	pub duration_seconds: Option<u64>,
 	/// Whether the entry is still ongoing (only IS_LIVE )
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub is_live: Option<bool>,
 	/// Time range (only AGGREGATE_RANGE )
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub range: Option<i64>,
+	pub range: Option<ContentInventoryAggregateRangeType>,
 	/// When the game for the entry was last played (only RESURRECTED )
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub resurrected_last_played: Option<Timestamp>,
@@ -466,13 +489,13 @@ pub struct ContentInventoryTrait {
 	pub marathon: Option<bool>,
 	/// Number of days for the streak text (only STREAK_DAYS )
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub streak_count_days: Option<i64>,
+	pub streak_count_days: Option<u64>,
 	/// The trending type (only TRENDING_CONTENT )
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub trending: Option<i64>,
+	pub trending: Option<ContentInventoryTrendingType>,
 	/// Total count (only TOP_ITEM_TOTAL_COUNT , TOP_PARENT_ITEM_TOTAL_COUNT , AGGREGATE_COUNT )
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub count: Option<i64>,
+	pub count: Option<u64>,
 }
 
 #[derive(Serialize_repr, Deserialize_repr)]
@@ -533,10 +556,10 @@ pub struct ContentInventoryMetadata {
 	pub game_name: Option<String>,
 	/// The ID of the associated application
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub application_id: Option<Snowflake>,
+	pub application_id: Option<ApplicationId>,
 	/// The type of platform (only played_game_extra )
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub platform: Option<i64>,
+	pub platform: Option<ContentInventoryPlatformType>,
 	/// When the entry was last updated
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub last_update: Option<Timestamp>,
@@ -548,10 +571,10 @@ pub struct ContentInventoryMetadata {
 	pub media: Option<Box<ContentInventoryMetadataEntry>>,
 	/// The provider of the media (only listened_media_extra )
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub provider: Option<i64>,
+	pub provider: Option<ContentInventoryProviderType>,
 	/// The type of media (only listened_media_extra )
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub media_type: Option<i64>,
+	pub media_type: Option<ContentInventoryMediaType>,
 	/// The title of the media's parent (album title when media_type is TRACK ) (only listened_media_extra )
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub parent_title: Option<String>,
@@ -639,10 +662,10 @@ pub struct ContentInventoryMetadataEntry {
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub media: Option<ContentInventoryMetadata>,
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub verification_state: Option<i64>,
+	pub verification_state: Option<u8>,
 	/// How many times this track has been played on repeat
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub repeat_count: Option<i64>,
+	pub repeat_count: Option<u32>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -681,7 +704,7 @@ pub struct ContentInventorySignature {
 	/// Key ID for the signature
 	pub kid: String,
 	/// Signature version (currently 1)
-	pub version: i64,
+	pub version: u8,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -690,7 +713,7 @@ pub struct Container {
 	pub components: Vec<Component>,
 	/// Color for the accent on the container encoded as an integer representation of a hexadecimal color code
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub accent_color: Option<Option<i64>>,
+	pub accent_color: Option<Option<u32>>,
 	/// Whether the container should be spoilered (default false)
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub spoiler: Option<bool>,
@@ -705,10 +728,10 @@ pub struct UnfurledMediaItem {
 	pub proxy_url: Option<String>,
 	/// The height of the media item
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub height: Option<Option<i64>>,
+	pub height: Option<Option<u16>>,
 	/// The width of the media item
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub width: Option<Option<i64>>,
+	pub width: Option<Option<u16>>,
 	/// The media's attachment flags
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub flags: Option<AttachmentFlags>,
@@ -720,16 +743,16 @@ pub struct UnfurledMediaItem {
 	pub content_scan_metadata: Option<ContentScanMetadata>,
 	/// The attachment placeholder protocol version (currently 1)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub placeholder_version: Option<i64>,
+	pub placeholder_version: Option<u8>,
 	/// A low-resolution thumbhash of the media, to display before it is loaded
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub placeholder: Option<String>,
 	/// The loading state of the media item
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub loading_state: Option<i64>,
+	pub loading_state: Option<UnfurledMediaItemLoadingState>,
 	/// The ID of the uploaded attachment, if any
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub attachment_id: Option<Snowflake>,
+	pub attachment_id: Option<AttachmentId>,
 }
 
 #[derive(Serialize_repr, Deserialize_repr)]

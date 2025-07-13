@@ -1,7 +1,14 @@
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use crate::{api::{application::PartialApplication, channel::PartialChannel, discovery::GuildProfile, guild::{GuildFeatures, NsfwLevel, PremiumGuildSubscription, VerificationLevel}, guild_scheduled_event::GuildScheduledEvent, users::PartialUser}, common::Timestamp};
+use crate::api::application::PartialApplication;
+use crate::api::channel::PartialChannel;
+use crate::api::discovery::GuildProfile;
+use crate::api::guild::{GuildFeatures, NsfwLevel, PremiumGuildSubscription, VerificationLevel};
+use crate::api::guild_scheduled_event::GuildScheduledEvent;
+use crate::api::users::PartialUser;
+use crate::common::id::GuildId;
+use crate::common::timestamp::Timestamp;
 
 #[derive(Serialize, Deserialize)]
 pub struct Invite {
@@ -13,7 +20,7 @@ pub struct Invite {
 	pub channel: Option<PartialChannel>,
 	/// The ID of the guild this invite is for
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub guild_id: Option<Snowflake>,
+	pub guild_id: Option<GuildId>,
 	/// The guild this invite is for
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub guild: Option<InviteGuild>,
@@ -37,10 +44,10 @@ pub struct Invite {
 	pub target_application: Option<PartialApplication>,
 	/// Approximate count of total members in the guild or group DM
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub approximate_member_count: Option<i64>,
+	pub approximate_member_count: Option<u32>,
 	/// Approximate count of non-offline members in the guild
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub approximate_presence_count: Option<i64>,
+	pub approximate_presence_count: Option<u32>,
 	/// The expiry date of the invite, if it expires
 	pub expires_at: Option<Timestamp>,
 	/// Guild scheduled event data, only included if guild_scheduled_event_id contains a valid guild scheduled event ID
@@ -98,13 +105,13 @@ bitflags! {
 pub struct InviteMetadata {
 	/// Number of times this invite has been used
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub uses: Option<i64>,
+	pub uses: Option<u32>,
 	/// Max number of times this invite can be used
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub max_uses: Option<i64>,
+	pub max_uses: Option<u32>,
 	/// Duration (in seconds) after which the invite expires (default 0)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub max_age: Option<i64>,
+	pub max_age: Option<u32>,
 	/// Whether this invite only grants temporary membership (default false for unsupported invite types)
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub temporary: Option<bool>,
@@ -115,7 +122,7 @@ pub struct InviteMetadata {
 #[derive(Serialize, Deserialize)]
 pub struct InviteGuild {
 	/// The ID of the guild
-	pub id: Snowflake,
+	pub id: GuildId,
 	/// The name of the guild (2-100 characters)
 	pub name: String,
 	/// The guild's icon hash
@@ -134,7 +141,7 @@ pub struct InviteGuild {
 	pub vanity_url_code: Option<String>,
 	/// The number of premium subscriptions (boosts) the guild currently has
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub premium_subscription_count: Option<i64>,
+	pub premium_subscription_count: Option<u32>,
 	/// The guild's premium tier (boost level)
 	pub premium_tier: PremiumGuildSubscription,
 	/// Whether the guild is considered NSFW ( EXPLICIT or AGE_RESTRICTED )
@@ -143,4 +150,3 @@ pub struct InviteGuild {
 	/// The guild's NSFW level
 	pub nsfw_level: NsfwLevel,
 }
-

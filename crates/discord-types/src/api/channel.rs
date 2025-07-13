@@ -1,17 +1,31 @@
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use crate::{api::{guild::GuildMember, users::PartialUser}, common::Timestamp};
+use crate::api::guild::GuildMember;
+use crate::api::users::PartialUser;
+use crate::common::id::{
+	ApplicationId,
+	ChannelId,
+	EmojiId,
+	ForumTagId,
+	GenericSnowflake,
+	GuildId,
+	LobbyId,
+	MessageId,
+	UserId,
+	WebhookId,
+};
+use crate::common::timestamp::Timestamp;
 
 #[derive(Serialize, Deserialize)]
 pub struct Channel {
 	/// The ID of the channel
-	pub id: Snowflake,
+	pub id: ChannelId,
 	/// The type of channel
 	pub r#type: ChannelType,
 	/// The ID of the guild the channel is in
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub guild_id: Option<Snowflake>,
+	pub guild_id: Option<GuildId>,
 	/// Sorting position of the channel
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub position: Option<i64>,
@@ -29,16 +43,16 @@ pub struct Channel {
 	pub nsfw: Option<bool>,
 	/// The ID of the last message sent (or thread created for thread-only channels, guild added for directory channels) in this channel (may not point to an existing resource)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub last_message_id: Option<Option<Snowflake>>,
+	pub last_message_id: Option<Option<MessageId>>,
 	/// The bitrate (in bits) of the voice channel
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub bitrate: Option<i64>,
+	pub bitrate: Option<u32>,
 	/// The user limit of the voice channel (max 99, 0 refers to no limit)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub user_limit: Option<i64>,
+	pub user_limit: Option<u8>,
 	/// Duration in seconds seconds a user has to wait before sending another message (max 21600); bots, as well as users with the permission MANAGE_MESSAGES or MANAGE_CHANNELS , are unaffected
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub rate_limit_per_user: Option<i64>,
+	pub rate_limit_per_user: Option<u16>,
 	/// The recipients of the private channel, excluding the requesting user
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub recipients: Option<Vec<PartialUser>>,
@@ -62,16 +76,16 @@ pub struct Channel {
 	pub safety_warnings: Option<Vec<SafetyWarning>>,
 	/// The ID of the application that manages the group DM
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub application_id: Option<Snowflake>,
+	pub application_id: Option<ApplicationId>,
 	/// The ID of the owner of the group DM or thread
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub owner_id: Option<Snowflake>,
+	pub owner_id: Option<UserId>,
 	/// The owner of this thread; only included on certain API endpoints
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub owner: Option<Option<GuildMember>>,
 	/// The ID of the parent category/channel for the guild channel/thread
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub parent_id: Option<Option<Snowflake>>,
+	pub parent_id: Option<Option<ChannelId>>,
 	/// When the last pinned message was pinned, if any
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub last_pin_timestamp: Option<Option<Timestamp>>,
@@ -80,19 +94,19 @@ pub struct Channel {
 	pub rtc_region: Option<Option<String>>,
 	/// The camera video quality mode of the voice channel (default AUTO )
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub video_quality_mode: Option<i64>,
+	pub video_quality_mode: Option<VideoQualityMode>,
 	/// The number of messages ever sent in a thread; similar to message_count on message creation, but will not decrement the number when a message is deleted
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub total_message_sent: Option<i64>,
+	pub total_message_sent: Option<u32>,
 	/// The number of messages (not including the initial message or deleted messages) in a thread (if the thread was created before July 1, 2022, it stops counting at 50)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub message_count: Option<i64>,
+	pub message_count: Option<u32>,
 	/// An approximate count of users in a thread, stops counting at 50
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub member_count: Option<i64>,
+	pub member_count: Option<u8>,
 	/// The IDs of some of the members in a thread
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub member_ids_preview: Option<Vec<Snowflake>>,
+	pub member_ids_preview: Option<Vec<UserId>>,
 	/// Thread-specific channel metadata
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub thread_metadata: Option<ThreadMetadata>,
@@ -101,10 +115,10 @@ pub struct Channel {
 	pub member: Option<ThreadMember>,
 	/// Default duration in minutes for newly created threads to stop showing in the channel list after inactivity (one of 60, 1440, 4320, 10080)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub default_auto_archive_duration: Option<Option<i64>>,
+	pub default_auto_archive_duration: Option<Option<u16>>,
 	/// Default duration in seconds a user has to wait before sending another message in newly created threads; this field is copied to the thread at creation time and does not live update
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub default_thread_rate_limit_per_user: Option<i64>,
+	pub default_thread_rate_limit_per_user: Option<u32>,
 	/// Computed permissions for the invoking user in the channel, including overwrites
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub permissions: Option<String>,
@@ -116,16 +130,16 @@ pub struct Channel {
 	pub available_tags: Option<Vec<ForumTag>>,
 	/// The IDs of tags that are applied to a thread in a thread-only channel (max 5)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub applied_tags: Option<Vec<Snowflake>>,
+	pub applied_tags: Option<Vec<ForumTagId>>,
 	/// The emoji to show in the add reaction button on a thread in a thread-only channel
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub default_reaction_emoji: Option<Option<DefaultReaction>>,
 	/// The default layout of a thread-only channel
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub default_forum_layout: Option<i64>,
+	pub default_forum_layout: Option<ForumLayoutType>,
 	/// The default sort order of a thread-only channel's threads (default LATEST_ACTIVITY )
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub default_sort_order: Option<Option<i64>>,
+	pub default_sort_order: Option<Option<SortOrderType>>,
 	/// The default tag search setting for a thread-only channel
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub default_tag_setting: Option<String>,
@@ -143,7 +157,7 @@ pub struct Channel {
 	pub is_spam: Option<bool>,
 	/// The background color of the channel icon emoji encoded as an integer representation of a hexadecimal color code
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub theme_color: Option<Option<i64>>,
+	pub theme_color: Option<Option<u32>>,
 	/// The status of the voice channel (max 500 characters)
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub status: Option<Option<String>>,
@@ -152,7 +166,7 @@ pub struct Channel {
 	pub hd_streaming_until: Option<Option<Timestamp>>,
 	/// The ID of the user who applied the HD streaming entitlement to the voice channel
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub hd_streaming_buyer_id: Option<Option<Snowflake>>,
+	pub hd_streaming_buyer_id: Option<Option<UserId>>,
 	/// The lobby linked to the channel
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub linked_lobby: Option<Option<LinkedLobby>>,
@@ -162,7 +176,7 @@ pub struct Channel {
 #[derive(Serialize, Deserialize)]
 pub struct PartialChannel {
 	/// The ID of the channel
-	pub id: Snowflake,
+	pub id: ChannelId,
 	/// The type of channel
 	pub r#type: ChannelType,
 	/// The name of the channel (1-100 characters)
@@ -175,13 +189,13 @@ pub struct PartialChannel {
 	pub icon: Option<Option<String>>,
 	/// The ID of the guild the channel is in
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub guild_id: Option<Option<Snowflake>>,
+	pub guild_id: Option<Option<GuildId>>,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct ChannelNick {
 	/// The ID of the user
-	pub id: Snowflake,
+	pub id: UserId,
 	/// The nickname of the user
 	pub nick: String,
 }
@@ -328,15 +342,15 @@ pub enum SearchTagSetting {
 #[derive(Serialize, Deserialize)]
 pub struct FollowedChannel {
 	/// The source channel ID
-	pub channel_id: Snowflake,
+	pub channel_id: ChannelId,
 	/// Created target webhook ID
-	pub webhook_id: Snowflake,
+	pub webhook_id: WebhookId,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct PermissionOverwrite {
 	/// Role or user ID
-	pub id: Snowflake,
+	pub id: GenericSnowflake,
 	/// The type of overwritten entity
 	pub r#type: PermissionOverwriteType,
 	/// The bitwise value of all allowed permissions
@@ -359,7 +373,7 @@ pub struct ThreadMetadata {
 	/// Whether the thread is archived
 	pub archived: bool,
 	/// Duration in minutes to stop showing in the channel list after inactivity (one of 60, 1440, 4320, 10080)
-	pub auto_archive_duration: i64,
+	pub auto_archive_duration: u16,
 	/// Timestamp when the thread's archive status was last changed, used for calculating recent activity
 	pub archive_timestamp: Timestamp,
 	/// Whether the thread is locked; when a thread is locked, only users with MANAGE_THREADS can interact with it
@@ -376,10 +390,10 @@ pub struct ThreadMetadata {
 pub struct ThreadMember {
 	/// The ID of the thread
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub id: Option<Snowflake>,
+	pub id: Option<ChannelId>,
 	/// The ID of the user
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub user_id: Option<Snowflake>,
+	pub user_id: Option<UserId>,
 	/// The time the current user last joined the thread
 	pub join_timestamp: Timestamp,
 	/// The user's thread flags
@@ -411,7 +425,7 @@ bitflags! {
 #[derive(Serialize, Deserialize)]
 pub struct DefaultReaction {
 	/// The ID of a guild's custom emoji
-	pub emoji_id: Option<Snowflake>,
+	pub emoji_id: Option<EmojiId>,
 	/// The unicode character of the emoji
 	pub emoji_name: Option<String>,
 }
@@ -419,7 +433,7 @@ pub struct DefaultReaction {
 #[derive(Serialize, Deserialize)]
 pub struct IconEmoji {
 	/// The ID of a guild's custom emoji
-	pub id: Option<Snowflake>,
+	pub id: Option<EmojiId>,
 	/// The unicode character of the emoji
 	pub name: Option<String>,
 }
@@ -427,13 +441,13 @@ pub struct IconEmoji {
 #[derive(Serialize, Deserialize)]
 pub struct ForumTag {
 	/// The ID of the tag
-	pub id: Snowflake,
+	pub id: ForumTagId,
 	/// The name of the tag (max 50 characters)
 	pub name: String,
 	/// Whether this tag can only be added to or removed from threads by members with the MANAGE_THREADS permission
 	pub moderated: bool,
 	/// The ID of a guild's custom emoji
-	pub emoji_id: Option<Snowflake>,
+	pub emoji_id: Option<EmojiId>,
 	/// The unicode character of the emoji
 	pub emoji_name: Option<String>,
 }
@@ -441,12 +455,11 @@ pub struct ForumTag {
 #[derive(Serialize, Deserialize)]
 pub struct LinkedLobby {
 	/// The ID of the application
-	pub application_id: Snowflake,
+	pub application_id: ApplicationId,
 	/// The ID of the lobby
-	pub lobby_id: Snowflake,
+	pub lobby_id: LobbyId,
 	/// The ID of the user who linked the lobby
-	pub linked_by: Snowflake,
+	pub linked_by: UserId,
 	/// When the lobby was linked to channel
 	pub linked_at: Timestamp,
 }
-

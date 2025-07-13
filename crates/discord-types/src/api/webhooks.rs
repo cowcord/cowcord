@@ -1,14 +1,19 @@
+use serde::{Deserialize, Serialize};
+use serde_repr::{Deserialize_repr, Serialize_repr};
+
+use crate::{api::{integrations::IntegrationGuild, users::PartialUser}, common::id::{ApplicationId, ChannelId, GuildId, WebhookId}};
+
 #[derive(Serialize, Deserialize)]
 pub struct Webhook {
 	/// The ID of the webhook
-	pub id: Snowflake,
+	pub id: WebhookId,
 	/// The type of webhook
 	pub r#type: WebhookType,
 	/// The guild ID this webhook is for, if any
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub guild_id: Option<Option<Snowflake>>,
+	pub guild_id: Option<Option<GuildId>>,
 	/// The channel ID this webhook is for, if any
-	pub channel_id: Option<Snowflake>,
+	pub channel_id: Option<ChannelId>,
 	/// The user this webhook was created by
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub user: Option<Option<PartialUser>>,
@@ -20,7 +25,7 @@ pub struct Webhook {
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub token: Option<String>,
 	/// The application that created this webhook
-	pub application_id: Option<Snowflake>,
+	pub application_id: Option<ApplicationId>,
 	/// The guild of the channel that this webhook is following (returned for CHANNEL_FOLLOWER webhooks)
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub source_guild: Option<IntegrationGuild>,
@@ -46,7 +51,7 @@ pub enum WebhookType {
 #[derive(Serialize, Deserialize)]
 pub struct WebhookChannel {
 	/// The ID of the channel
-	pub id: Snowflake,
+	pub id: ChannelId,
 	/// The name of the channel (1-100 characters)
 	pub name: String,
 }

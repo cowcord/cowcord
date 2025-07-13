@@ -2,21 +2,33 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use crate::api::{channel::PermissionOverwriteType, integrations::{IntegrationAccount, IntegrationType}};
+use crate::api::channel::PermissionOverwriteType;
+use crate::api::integrations::{IntegrationAccount, IntegrationType};
+use crate::common::id::{
+	ApplicationId,
+	AuditLogEntryId,
+	ChannelId,
+	GenericSnowflake,
+	IntegrationId,
+	MessageId,
+	RoleId,
+	ScheduledEventId,
+	UserId,
+};
 
 #[derive(Serialize, Deserialize)]
 pub struct AuditLogEntry {
 	/// ID of the affected entity (webhook, user, role, etc.)
-	pub target_id: Option<Snowflake>,
+	pub target_id: Option<GenericSnowflake>,
 	/// Changes made to the `target_id``
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub changes: Option<Vec<AuditLogChange>>,
 	/// The user who made the changes
-	pub user_id: Option<Snowflake>,
+	pub user_id: Option<UserId>,
 	/// The ID of the entry
-	pub id: Snowflake,
+	pub id: AuditLogEntryId,
 	/// The type of action that occurred
-	pub action_type: i64,
+	pub action_type: AuditLogActionType,
 	/// Additional info for certain action types
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub options: Option<OptionalAuditEntryInfo>,
@@ -181,13 +193,13 @@ pub enum AuditLogActionType {
 #[derive(Serialize, Deserialize)]
 pub struct OptionalAuditEntryInfo {
 	/// The ID of the application whose permissions were targeted
-	pub application_id: Snowflake,
+	pub application_id: ApplicationId,
 	/// The name of the AutoMod rule that was triggered
 	pub auto_moderation_rule_name: String,
 	/// The trigger type of the AutoMod rule that was triggered
 	pub auto_moderation_rule_trigger_type: String,
 	/// The channel in which the entities were targeted
-	pub channel_id: Snowflake,
+	pub channel_id: ChannelId,
 	/// Number of entities that were targeted
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub count: Option<String>,
@@ -195,9 +207,9 @@ pub struct OptionalAuditEntryInfo {
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub delete_member_days: Option<String>,
 	/// The ID of the guild scheduled event exception that was targeted
-	pub event_exception_id: Snowflake,
+	pub event_exception_id: ScheduledEventId,
 	/// The ID of the overwritten entity
-	pub id: Snowflake,
+	pub id: GenericSnowflake,
 	/// The type of integration which performed the action
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub integration_type: Option<String>,
@@ -205,7 +217,7 @@ pub struct OptionalAuditEntryInfo {
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub members_removed: Option<String>,
 	/// The ID of the message that was targeted
-	pub message_id: Snowflake,
+	pub message_id: MessageId,
 	/// The name of the role (only present if type is "0")
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub role_name: Option<String>,
@@ -234,7 +246,7 @@ pub struct AuditLogChange {
 #[derive(Serialize, Deserialize)]
 pub struct PartialIntegration {
 	/// The ID of the integration
-	pub id: Snowflake,
+	pub id: IntegrationId,
 	/// The name of the integration
 	pub name: String,
 	/// The type of integration
@@ -243,15 +255,13 @@ pub struct PartialIntegration {
 	pub account: IntegrationAccount,
 	/// The OAuth2 application for Discord integrations
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub application_id: Option<Snowflake>,
+	pub application_id: Option<ApplicationId>,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct PartialRole {
 	/// The ID of the role
-	pub id: Snowflake,
+	pub id: RoleId,
 	/// The name of the role
 	pub name: String,
 }
-
-

@@ -1,17 +1,19 @@
 use serde::{Deserialize, Serialize};
 
+use crate::{api::guild::GuildMember, common::{id::{ChannelId, GuildId, LobbyId, UserId}, timestamp::Timestamp}};
+
 #[derive(Serialize, Deserialize)]
 pub struct VoiceState {
 	/// The guild ID this voice state is for
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub guild_id: Option<Option<Snowflake>>,
+	pub guild_id: Option<Option<GuildId>>,
 	/// The channel ID this user is connected to
-	pub channel_id: Option<Snowflake>,
+	pub channel_id: Option<ChannelId>,
 	/// The ID of the lobby this user is connected to
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub lobby_id: Option<Snowflake>,
+	pub lobby_id: Option<LobbyId>,
 	/// The user ID this voice state is for
-	pub user_id: Snowflake,
+	pub user_id: UserId,
 	/// The guild member this voice state is for
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub member: Option<GuildMember>,
@@ -36,7 +38,7 @@ pub struct VoiceState {
 	pub request_to_speak_timestamp: Option<Timestamp>,
 	/// Volume level of the user (0-100)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub user_volume: Option<float>,
+	pub user_volume: Option<f64>,
 }
 
 #[derive(Serialize, Deserialize)]

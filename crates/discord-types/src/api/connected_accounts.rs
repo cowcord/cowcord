@@ -3,6 +3,7 @@ use serde_json::Value;
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
 use crate::api::integrations::{IntegrationAccount, IntegrationGuild, IntegrationType};
+use crate::common::id::{DeviceId, IntegrationId};
 
 #[derive(Serialize, Deserialize)]
 pub struct Connection {
@@ -18,7 +19,7 @@ pub struct Connection {
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub metadata: Option<Value>,
 	/// Visibility of the connection's metadata
-	pub metadata_visibility: i64,
+	pub metadata_visibility: VisibilityType,
 	/// whether the connection is revoked
 	pub revoked: bool,
 	/// The guild integrations attached to the connection
@@ -30,7 +31,7 @@ pub struct Connection {
 	/// Whether this connection has a corresponding third party OAuth2 token
 	pub two_way_link: bool,
 	/// Visibility of the connection
-	pub visibility: i64,
+	pub visibility: VisibilityType,
 	/// The access token for the connection account
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub access_token: Option<String>,
@@ -54,7 +55,7 @@ pub struct PartialConnection {
 #[derive(Serialize, Deserialize)]
 pub struct ConnectionIntegration {
 	/// The ID of the integration
-	pub id: Snowflake,
+	pub id: IntegrationId,
 	/// The type of integration
 	pub r#type: IntegrationType,
 	/// The integration's account information
@@ -65,7 +66,7 @@ pub struct ConnectionIntegration {
 
 #[derive(Serialize, Deserialize)]
 pub enum ConnectionType {
-    #[serde(rename = "amazon-music")]
+	#[serde(rename = "amazon-music")]
 	amazon_music,
 	battlenet,
 	bluesky,
@@ -82,7 +83,7 @@ pub enum ConnectionType {
 	mastodon,
 	paypal,
 	playstation,
-    #[serde(rename = "playstation-stg")]
+	#[serde(rename = "playstation-stg")]
 	playstation_stg,
 	reddit,
 	roblox,
@@ -111,10 +112,9 @@ pub enum VisibilityType {
 #[derive(Serialize, Deserialize)]
 pub struct ConsoleDevice {
 	/// The ID of the device
-	pub id: Snowflake,
+	pub id: DeviceId,
 	/// The name of the device
 	pub name: String,
 	/// The console platform (only playstation and playstation-stg are allowed)
 	pub platform: String,
 }
-

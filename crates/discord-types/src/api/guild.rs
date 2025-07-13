@@ -1,14 +1,33 @@
-use either::Either;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use crate::{api::{application::Application, auto_moderation::AutomodIncidentsData, discovery::GuildProfile, emoji::Emoji, integrations::IntegrationApplication, stickers::Sticker, users::{AvatarDecorationData, PartialUser}}, common::Timestamp};
+use crate::api::auto_moderation::AutomodIncidentsData;
+use crate::api::discovery::GuildProfile;
+use crate::api::emoji::Emoji;
+use crate::api::integrations::IntegrationApplication;
+use crate::api::stickers::Sticker;
+use crate::api::users::{AvatarDecorationData, PartialUser};
+use crate::common::id::{
+	ApplicationId,
+	ChannelId,
+	GenericSnowflake,
+	GuildId,
+	GuildJoinRequestId,
+	IntegrationId,
+	OnboardingPromptId,
+	OnboardingPromptOptionId,
+	RoleId,
+	SkuId,
+	SubscriptionId,
+	UserId,
+};
+use crate::common::timestamp::Timestamp;
 
 #[derive(Serialize, Deserialize)]
 pub struct Guild {
 	/// The ID of the guild
-	pub id: Snowflake,
+	pub id: GuildId,
 	/// The name of the guild (2-100 characters)
 	pub name: String,
 	/// The guild's icon hash
@@ -22,9 +41,9 @@ pub struct Guild {
 	/// The guild's discovery splash hash
 	pub discovery_splash: Option<String>,
 	/// The user ID of the guild's owner
-	pub owner_id: Snowflake,
+	pub owner_id: UserId,
 	/// The application ID of the guild's owner, if bot-created
-	pub application_id: Option<Snowflake>,
+	pub application_id: Option<ApplicationId>,
 	/// The description for the guild (max 300 characters)
 	pub description: Option<String>,
 	/// The main voice region ID of the guild
@@ -32,15 +51,15 @@ pub struct Guild {
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub region: Option<Option<String>>,
 	/// The ID of the guild's AFK channel; this is where members in voice idle for longer than afk_timeout are moved
-	pub afk_channel_id: Option<Snowflake>,
+	pub afk_channel_id: Option<ChannelId>,
 	/// The AFK timeout of the guild (one of 60, 300, 900, 1800, 3600, in seconds)
-	pub afk_timeout: i64,
+	pub afk_timeout: u16,
 	/// Whether the guild widget is enabled
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub widget_enabled: Option<bool>,
 	/// The channel ID that the widget will generate an invite to, if any
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub widget_channel_id: Option<Option<Snowflake>>,
+	pub widget_channel_id: Option<Option<ChannelId>>,
 	/// The verification level required for the guild
 	pub verification_level: VerificationLevel,
 	/// Default message notification level for the guild
@@ -58,35 +77,35 @@ pub struct Guild {
 	/// Required MFA level for administrative actions within the guild
 	pub mfa_level: MfaLevel,
 	/// The ID of the channel where system event messages, such as member joins and premium subscriptions (boosts), are posted
-	pub system_channel_id: Option<Snowflake>,
+	pub system_channel_id: Option<ChannelId>,
 	/// The flags that limit system event messages
 	pub system_channel_flags: SystemChannelFlags,
 	/// The ID of the channel where community guilds display rules and/or guidelines
-	pub rules_channel_id: Option<Snowflake>,
+	pub rules_channel_id: Option<ChannelId>,
 	/// The ID of the channel where admins and moderators of community guilds receive notices from Discord
-	pub public_updates_channel_id: Option<Snowflake>,
+	pub public_updates_channel_id: Option<ChannelId>,
 	/// The ID of the channel where admins and moderators of community guilds receive safety alerts from Discord
-	pub safety_alerts_channel_id: Option<Snowflake>,
-	/// The maximum number of presences for the guild ( null is usually returned, apart from the largest of guilds)
+	pub safety_alerts_channel_id: Option<ChannelId>,
+	/// The maximum number of presences for the guild (null is usually returned, apart from the largest of guilds)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub max_presences: Option<Option<i64>>,
+	pub max_presences: Option<Option<u32>>,
 	/// The maximum number of members for the guild
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub max_members: Option<i64>,
+	pub max_members: Option<u64>,
 	/// The guild's vanity invite code
 	pub vanity_url_code: Option<String>,
 	/// The guild's premium tier (boost level)
 	pub premium_tier: PremiumTier,
 	/// The number of premium subscriptions (boosts) the guild currently has
-	pub premium_subscription_count: i64,
+	pub premium_subscription_count: u32,
 	/// The preferred locale of the guild; used in discovery and notices from Discord (default "en-US")
 	pub preferred_locale: String,
 	/// The maximum number of users in a voice channel while someone has video enabled
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub max_video_channel_users: Option<i64>,
+	pub max_video_channel_users: Option<u16>,
 	/// The maximum number of users in a stage channel while someone has video enabled
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub max_stage_video_channel_users: Option<i64>,
+	pub max_stage_video_channel_users: Option<u16>,
 	/// Whether the guild is considered NSFW ( EXPLICIT or AGE_RESTRICTED )
 	#[deprecated]
 	pub nsfw: bool,
@@ -97,7 +116,7 @@ pub struct Guild {
 	/// Whether the guild has the premium (boost) progress bar enabled
 	pub premium_progress_bar_enabled: bool,
 	/// The ID of the guild's latest onboarding prompt option
-	pub latest_onboarding_question_id: Option<Snowflake>,
+	pub latest_onboarding_question_id: Option<OnboardingPromptOptionId>,
 	/// Information on the guild's AutoMod incidents
 	pub incidents_data: Option<AutomodIncidentsData>,
 	/// Settings for emoji packs
@@ -105,10 +124,10 @@ pub struct Guild {
 	pub inventory_settings: Option<GuildInventorySettings>,
 	/// Approximate count of total members in the guild
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub approximate_member_count: Option<i64>,
+	pub approximate_member_count: Option<u32>,
 	/// Approximate count of non-offline members in the guild
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub approximate_presence_count: Option<i64>,
+	pub approximate_presence_count: Option<u32>,
 	/// The guild's powerup information
 	pub premium_features: Option<GuildPremiumFeatures>,
 	/// The guild's identity
@@ -118,7 +137,7 @@ pub struct Guild {
 #[derive(Serialize, Deserialize)]
 pub struct PartialGuild {
 	/// The ID of the guild
-	pub id: Snowflake,
+	pub id: GuildId,
 	/// The name of the guild (2-100 characters)
 	pub name: String,
 	/// The guild's icon hash
@@ -141,10 +160,10 @@ pub struct PartialGuild {
 	pub stickers: Option<Vec<Sticker>>,
 	/// Approximate number of total members in the guild
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub approximate_member_count: Option<i64>,
+	pub approximate_member_count: Option<u32>,
 	/// Approximate number of non-offline members in the guild
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub approximate_presence_count: Option<i64>,
+	pub approximate_presence_count: Option<u32>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -167,11 +186,11 @@ pub struct GuildPremiumFeatures {
 	/// Enabled powerup-specific guild features
 	pub features: Vec<String>,
 	/// The number of additional emoji slots available to the guild
-	pub additional_emoji_slots: i64,
+	pub additional_emoji_slots: u16,
 	/// The number of additional sticker slots available to the guild
-	pub additional_sticker_slots: i64,
+	pub additional_sticker_slots: u16,
 	/// The number of additional soundboard slots available to the guild
-	pub additional_sound_slots: i64,
+	pub additional_sound_slots: u16,
 }
 
 #[derive(Serialize_repr, Deserialize_repr)]
@@ -206,7 +225,6 @@ pub enum MfaLevel {
 	/// Guild has a MFA requirement for moderation actions
 	ELEVATED = 1,
 }
-
 
 #[derive(Serialize_repr, Deserialize_repr)]
 #[repr(u8)]
@@ -288,7 +306,6 @@ pub enum HubType {
 	COLLEGE = 2,
 }
 
-///
 /// The available guild features, their functionality, and their requirements is subject to arbitrary change. The following table is a best-effort attempt to document the current state of guild features.
 #[derive(Serialize, Deserialize)]
 pub enum GuildFeatures {
@@ -516,7 +533,7 @@ pub enum MutableGuildFeatures {
 #[derive(Serialize, Deserialize)]
 pub struct UserGuild {
 	/// The ID of the guild
-	pub id: Snowflake,
+	pub id: GuildId,
 	/// The name of the guild (2-100 characters)
 	pub name: String,
 	/// The guild's icon hash
@@ -531,22 +548,22 @@ pub struct UserGuild {
 	pub permissions: String,
 	/// Approximate count of total members in the guild
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub approximate_member_count: Option<i64>,
+	pub approximate_member_count: Option<u32>,
 	/// Approximate count of non-offline members in the guild
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub approximate_presence_count: Option<i64>,
+	pub approximate_presence_count: Option<u32>,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct GuildWidget {
 	/// The ID of the guild the widget is for
-	pub id: Snowflake,
+	pub id: GuildId,
 	/// The name of the guild the widget is for
 	pub name: String,
 	/// The invite URL for the guild's widget channel, if any
 	pub instant_invite: Option<String>,
 	/// Approximate count of non-offline members in the guild
-	pub presence_count: i64,
+	pub presence_count: u32,
 	/// The public voice and stage channels in the guild
 	pub channels: Vec<GuildWidgetChannel>,
 	/// The non-offline guild members (max 100)
@@ -556,7 +573,7 @@ pub struct GuildWidget {
 #[derive(Serialize, Deserialize)]
 pub struct GuildWidgetChannel {
 	/// The ID of the channel
-	pub id: Snowflake,
+	pub id: ChannelId,
 	/// The name of the channel (1-100 characters)
 	pub name: String,
 	/// Sorting position of the channel
@@ -567,7 +584,7 @@ pub struct GuildWidgetChannel {
 #[derive(Serialize, Deserialize)]
 pub struct GuildWidgetMember {
 	/// The incrementing ID of the member
-	pub id: Snowflake,
+	pub id: u64,
 	/// The display name or censored username of the member
 	pub username: String,
 	/// The avatar URL of the member
@@ -579,7 +596,7 @@ pub struct GuildWidgetMember {
 	pub activity: Option<GuildWidgetMemberActivity>,
 	/// The ID of the voice or stage channel the member is in
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub channel_id: Option<Snowflake>,
+	pub channel_id: Option<ChannelId>,
 	/// Whether the member is deafened by the guild, if any
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub deaf: Option<bool>,
@@ -608,20 +625,20 @@ pub struct GuildWidgetSettings {
 	/// Whether the widget is enabled
 	pub enabled: bool,
 	/// The channel ID that the widget will generate an invite to, if any
-	pub channel_id: Option<Snowflake>,
+	pub channel_id: Option<ChannelId>,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct Role {
 	/// The ID of the role
-	pub id: Snowflake,
+	pub id: RoleId,
 	/// The name of the role (max 100 characters)
 	pub name: String,
 	/// The description for the role (max 90 characters)
 	pub description: Option<String>,
 	/// The color of the role represented as an integer representation of a hexadecimal color code
 	#[deprecated]
-	pub color: i64,
+	pub color: u32,
 	/// The colors of the role encoded as an integer representation of hexadecimal color codes
 	pub colors: RoleColors,
 	/// Whether this role is pinned in the user listing
@@ -650,12 +667,12 @@ pub struct Role {
 
 #[derive(Serialize, Deserialize)]
 pub struct RoleColors {
-	/// The primary color of the role (matches color )
-	pub primary_color: i64,
+	/// The primary color of the role (matches color)
+	pub primary_color: u32,
 	/// The secondary color of the role, creating a two-point gradient
-	pub secondary_color: Option<i64>,
+	pub secondary_color: Option<u32>,
 	/// The tertiary color of the role, creating a three-point gradient
-	pub tertiary_color: Option<i64>,
+	pub tertiary_color: Option<u32>,
 }
 
 /// Tags with type null represent booleans. They will be present and set to null if they are true, and will be not present if they are false.
@@ -663,16 +680,16 @@ pub struct RoleColors {
 pub struct RoleTags {
 	/// The ID of the bot this role belongs to
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub bot_id: Option<Snowflake>,
+	pub bot_id: Option<UserId>,
 	/// The ID of the integration this role belongs to
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub integration_id: Option<Snowflake>,
+	pub integration_id: Option<IntegrationId>,
 	/// Whether this is the guild's premium subscriber (booster) role
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub premium_subscriber: Option<Value>,
 	/// The ID of this role's subscription SKU and listing
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub subscription_listing_id: Option<Snowflake>,
+	pub subscription_listing_id: Option<SkuId>,
 	/// Whether this role is available for purchase
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub available_for_purchase: Option<Value>,
@@ -697,13 +714,13 @@ pub struct RoleConnectionRequirement {
 	pub connection_metadata_field: Option<Option<String>>,
 	/// The comparison operator to use
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub operator: Option<Option<i64>>,
+	pub operator: Option<Option<RoleConnectionOperatorType>>,
 	/// The value to compare the metadata field to
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub value: Option<Option<String>>,
 	/// The ID of the application to check for the connection
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub application_id: Option<Snowflake>,
+	pub application_id: Option<ApplicationId>,
 	/// The application to check for the connection
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub application: Option<IntegrationApplication>,
@@ -756,7 +773,7 @@ pub struct GuildMember {
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub banner: Option<Option<String>>,
 	/// The role IDs assigned to this member
-	pub roles: Vec<Snowflake>,
+	pub roles: Vec<RoleId>,
 	/// When the user joined the guild
 	pub joined_at: Timestamp,
 	/// When the member subscribed to (started boosting ) the guild
@@ -813,7 +830,7 @@ bitflags! {
 pub struct SupplementalGuildMember {
 	/// The ID of the user this guild member represents
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub user_id: Option<Snowflake>,
+	pub user_id: Option<UserId>,
 	/// The associated guild member
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub member: Option<GuildMember>,
@@ -822,7 +839,7 @@ pub struct SupplementalGuildMember {
 	/// The invite code or vanity used to join the guild, if applicable
 	pub source_invite_code: Option<String>,
 	/// The ID of the user who invited the user to the guild, if applicable
-	pub inviter_id: Option<Snowflake>,
+	pub inviter_id: Option<UserId>,
 	/// The type of integration that added the user to the guild, if applicable
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub integration_type: Option<Option<i64>>,
@@ -868,11 +885,11 @@ pub struct WelcomeScreen {
 #[derive(Serialize, Deserialize)]
 pub struct WelcomeScreenChannel {
 	/// The ID of the channel
-	pub channel_id: Snowflake,
+	pub channel_id: ChannelId,
 	/// The description shown for the channel (1-50 characters)
 	pub description: String,
 	/// The emoji ID , if the emoji is custom
-	pub emoji_id: Option<Snowflake>,
+	pub emoji_id: Option<Emoji>,
 	/// The emoji name if custom, the unicode character if standard, or null if no emoji is set
 	pub emoji_name: Option<String>,
 }
@@ -921,7 +938,7 @@ pub struct MemberVerificationFormField {
 enum MemberVerificationFormFieldResponse {
 	bool(bool),
 	i64(i64),
-	String(String,)
+	String(String),
 }
 
 #[derive(Serialize, Deserialize)]
@@ -939,7 +956,7 @@ pub enum MemberVerificationFormFieldType {
 #[derive(Serialize, Deserialize)]
 pub struct MemberVerificationGuild {
 	/// The ID of the guild
-	pub id: Snowflake,
+	pub id: GuildId,
 	/// The name of the guild (2-100 characters)
 	pub name: String,
 	/// The guild's icon hash
@@ -959,23 +976,23 @@ pub struct MemberVerificationGuild {
 	/// Custom guild emojis
 	pub emojis: Vec<Emoji>,
 	/// Approximate number of total members in the guild
-	pub approximate_member_count: i64,
+	pub approximate_member_count: u32,
 	/// Approximate number of non-offline members in the guild
-	pub approximate_presence_count: i64,
+	pub approximate_presence_count: u32,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct GuildJoinRequest {
 	/// The ID of the join request
-	pub id: Snowflake,
+	pub id: GuildJoinRequestId,
 	/// The ID of the join request
-	pub join_request_id: Snowflake,
+	pub join_request_id: GuildJoinRequestId,
 	/// When the join request was created
 	pub created_at: Timestamp,
 	/// The status of the join request
 	pub application_status: GuildJoinRequestStatus,
 	/// The ID of the guild this join request is for
-	pub guild_id: Snowflake,
+	pub guild_id: GuildId,
 	/// Responses to the guild's member verification questions
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub form_responses: Option<Option<Vec<MemberVerificationFormField>>>,
@@ -983,19 +1000,19 @@ pub struct GuildJoinRequest {
 	pub last_seen: Option<Timestamp>,
 	/// A snowflake representing when the join request was actioned
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub actioned_at: Option<Snowflake>,
+	pub actioned_at: Option<GenericSnowflake>,
 	/// The moderator who actioned the join request
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub actioned_by_user: Option<PartialUser>,
 	/// Why the join request was rejected
 	pub rejection_reason: Option<String>,
 	/// The ID of the user who created this join request
-	pub user_id: Snowflake,
+	pub user_id: UserId,
 	/// The user who created this join request
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub user: Option<PartialUser>,
 	/// The ID of a channel where an interview regarding this join request may be conducted
-	pub interview_channel_id: Option<Snowflake>,
+	pub interview_channel_id: Option<ChannelId>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -1013,11 +1030,11 @@ pub enum GuildJoinRequestStatus {
 #[derive(Serialize, Deserialize)]
 pub struct Onboarding {
 	/// The ID of the guild this onboarding is part of
-	pub guild_id: Snowflake,
+	pub guild_id: GuildId,
 	/// The prompts shown during onboarding and in community customization
 	pub prompts: Vec<OnboardingPrompt>,
 	/// The channel IDs that members get opted into automatically
-	pub default_channel_ids: Vec<Snowflake>,
+	pub default_channel_ids: Vec<ChannelId>,
 	/// Whether onboarding is enabled in the guild
 	pub enabled: bool,
 	/// Whether the guild is below the requirements for onboarding
@@ -1039,7 +1056,7 @@ pub enum OnboardingMode {
 #[derive(Serialize, Deserialize)]
 pub struct OnboardingPrompt {
 	/// The ID of the prompt
-	pub id: Snowflake,
+	pub id: OnboardingPromptId,
 	/// The type of prompt
 	pub r#type: OnboardingPromptType,
 	/// Options available within the prompt
@@ -1057,11 +1074,11 @@ pub struct OnboardingPrompt {
 #[derive(Serialize, Deserialize)]
 pub struct OnboardingPromptOption {
 	/// The ID of the prompt option
-	pub id: Snowflake,
+	pub id: OnboardingPromptOptionId,
 	/// The channel IDs a member is added to when the option is selected
-	pub channel_ids: Vec<Snowflake>,
+	pub channel_ids: Vec<ChannelId>,
 	/// The role IDs assigned to a member when the option is selected
-	pub role_ids: Vec<Snowflake>,
+	pub role_ids: Vec<RoleId>,
 	/// Emoji representing the option
 	pub emoji: Emoji,
 	/// The title of the option
@@ -1082,11 +1099,11 @@ pub enum OnboardingPromptType {
 #[derive(Serialize, Deserialize)]
 pub struct PremiumGuildSubscription {
 	/// The ID of the premium guild subscription
-	pub id: Snowflake,
+	pub id: SubscriptionId,
 	/// The ID of the guild this subscription is for
-	pub guild_id: Snowflake,
+	pub guild_id: GuildId,
 	/// The ID of the user who created this premium guild subscription
-	pub user_id: Snowflake,
+	pub user_id: UserId,
 	/// If this premium guild subscription has ended
 	pub ended: bool,
 	/// When this premium guild subscription will expire
@@ -1097,4 +1114,3 @@ pub struct PremiumGuildSubscription {
 	/// The user this premium guild subscription is for
 	pub user: PartialUser,
 }
-

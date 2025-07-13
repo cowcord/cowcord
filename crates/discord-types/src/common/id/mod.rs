@@ -27,25 +27,28 @@ use serde::{Deserialize, Serialize};
 use crate::common::timestamp::Timestamp;
 
 macro_rules! newtype_display_impl {
-    ($name:ident, |$this:ident| $inner:expr) => {
-        impl fmt::Display for $name {
-            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-                fmt::Display::fmt(&(|$this: $name| $inner)(*self), f)
-            }
-        }
-    };
+	($name:ident, |$this:ident| $inner:expr) => {
+		impl fmt::Display for $name {
+			fn fmt(
+				&self,
+				f: &mut fmt::Formatter<'_>,
+			) -> fmt::Result {
+				fmt::Display::fmt(&(|$this: $name| $inner)(*self), f)
+			}
+		}
+	};
 }
 
 macro_rules! forward_fromstr_impl {
-    ($name:ident, $wrapper:path) => {
-        impl std::str::FromStr for $name {
-            type Err = <u64 as std::str::FromStr>::Err;
+	($name:ident, $wrapper:path) => {
+		impl std::str::FromStr for $name {
+			type Err = <u64 as std::str::FromStr>::Err;
 
-            fn from_str(s: &str) -> Result<Self, Self::Err> {
-                Ok(Self($wrapper(s.parse()?)))
-            }
-        }
-    };
+			fn from_str(s: &str) -> Result<Self, Self::Err> {
+				Ok(Self($wrapper(s.parse()?)))
+			}
+		}
+	};
 }
 
 macro_rules! id_u64 {
@@ -161,76 +164,121 @@ macro_rules! id_u64 {
 pub(crate) struct InnerId(NonZeroU64);
 
 impl fmt::Debug for InnerId {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let inner = self.0;
-        inner.fmt(f)
-    }
+	fn fmt(
+		&self,
+		f: &mut fmt::Formatter<'_>,
+	) -> fmt::Result {
+		let inner = self.0;
+		inner.fmt(f)
+	}
 }
 
 struct SnowflakeVisitor;
 
 impl serde::de::Visitor<'_> for SnowflakeVisitor {
-    type Value = InnerId;
+	type Value = InnerId;
 
-    fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        formatter.write_str("a string or integer snowflake that is not u64::MAX")
-    }
+	fn expecting(
+		&self,
+		formatter: &mut fmt::Formatter<'_>,
+	) -> fmt::Result {
+		formatter.write_str("a string or integer snowflake that is not u64::MAX")
+	}
 
-    // Called by formats like TOML.
-    fn visit_i64<E: Error>(self, value: i64) -> Result<Self::Value, E> {
-        self.visit_u64(u64::try_from(value).map_err(Error::custom)?)
-    }
+	// Called by formats like TOML.
+	fn visit_i64<E: Error>(
+		self,
+		value: i64,
+	) -> Result<Self::Value, E> {
+		self.visit_u64(u64::try_from(value).map_err(Error::custom)?)
+	}
 
-    fn visit_u64<E: Error>(self, value: u64) -> Result<Self::Value, E> {
-        NonZeroU64::new(value)
-            .map(InnerId)
-            .ok_or_else(|| Error::custom("invalid value, expected non-max"))
-    }
+	fn visit_u64<E: Error>(
+		self,
+		value: u64,
+	) -> Result<Self::Value, E> {
+		NonZeroU64::new(value)
+			.map(InnerId)
+			.ok_or_else(|| Error::custom("invalid value, expected non-max"))
+	}
 
-    fn visit_str<E: Error>(self, value: &str) -> Result<Self::Value, E> {
-        value.parse().map(InnerId).map_err(Error::custom)
-    }
+	fn visit_str<E: Error>(
+		self,
+		value: &str,
+	) -> Result<Self::Value, E> {
+		value.parse().map(InnerId).map_err(Error::custom)
+	}
 }
 
 impl<'de> serde::Deserialize<'de> for InnerId {
-    fn deserialize<D: serde::de::Deserializer<'de>>(deserializer: D) -> Result<InnerId, D::Error> {
-        deserializer.deserialize_any(SnowflakeVisitor)
-    }
+	fn deserialize<D: serde::de::Deserializer<'de>>(deserializer: D) -> Result<InnerId, D::Error> {
+		deserializer.deserialize_any(SnowflakeVisitor)
+	}
 }
 
 impl serde::Serialize for InnerId {
-    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-        serializer.collect_str(&{ self.0 })
-    }
+	fn serialize<S: serde::Serializer>(
+		&self,
+		serializer: S,
+	) -> Result<S::Ok, S::Error> {
+		serializer.collect_str(&{ self.0 })
+	}
 }
 
 id_u64! {
-    AttachmentId: "An identifier for an attachment.";
-    ApplicationId: "An identifier for an Application.";
-    ChannelId: "An identifier for a Channel";
-    EmojiId: "An identifier for an Emoji";
-    GenericId: "An identifier for an unspecific entity.";
-    GuildId: "An identifier for a Guild";
-    IntegrationId: "An identifier for an Integration";
-    MessageId: "An identifier for a Message";
-    RoleId: "An identifier for a Role";
-    ScheduledEventId: "An identifier for a Scheduled Event";
-    StickerId: "An identifier for a sticker.";
-    StickerPackId: "An identifier for a sticker pack.";
-    StickerPackBannerId: "An identifier for a sticker pack banner.";
-    SkuId: "An identifier for a SKU.";
-    UserId: "An identifier for a User";
-    WebhookId: "An identifier for a [`Webhook`]";
-    AuditLogEntryId: "An identifier for an audit log entry.";
-    InteractionId: "An identifier for an interaction.";
-    CommandId: "An identifier for a slash command.";
-    CommandPermissionId: "An identifier for a slash command permission Id.";
-    CommandVersionId: "An identifier for a slash command version Id.";
-    TargetId: "An identifier for a slash command target Id.";
-    StageInstanceId: "An identifier for a stage channel instance.";
-    RuleId: "An identifier for an auto moderation rule";
-    ForumTagId: "An identifier for a forum tag.";
-    EntitlementId: "An identifier for an entitlement.";
+	AttachmentId: "An identifier for an attachment.";
+	ApplicationId: "An identifier for an Application.";
+	ChannelId: "An identifier for a Channel";
+	EmojiId: "An identifier for an Emoji";
+	GenericSnowflake: "A generic snowflake type.";
+	GuildId: "An identifier for a Guild";
+	IntegrationId: "An identifier for an Integration";
+	MessageId: "An identifier for a Message";
+	RoleId: "An identifier for a Role";
+	ScheduledEventId: "An identifier for a Scheduled Event";
+	StickerId: "An identifier for a sticker.";
+	StickerPackId: "An identifier for a sticker pack.";
+	StickerPackBannerId: "An identifier for a sticker pack banner.";
+	SkuId: "An identifier for a SKU.";
+	UserId: "An identifier for a User";
+	WebhookId: "An identifier for a [`Webhook`]";
+	EntitlementId: "An identifier for an entitlement.";
+	AuditLogEntryId: "An identifier for an audit log entry.";
+	InteractionId: "An identifier for an interaction.";
+	CommandId: "An identifier for a slash command.";
+	CommandPermissionId: "An identifier for a slash command permission Id.";
+	CommandVersionId: "An identifier for a slash command version Id.";
+	TargetId: "An identifier for a slash command target Id.";
+	StageInstanceId: "An identifier for a stage channel instance.";
+	AutomodRuleId: "An identifier for an auto moderation rule";
+	ForumTagId: "An identifier for a forum tag.";
+	LobbyId: "An identifier for a game lobby a user is connected to.";
+	ProfileEffectId: "An identifier for a user profile effect.";
+	HarvestId: "An identifier for a user data harvest.";
+	SurveyId: "An identifier for a survey.";
+	TeamId: "An identifier for a developer team.";
+	PayoutId: "An identifier for a developer team payout.";
+	CompanyId: "An identifier for a company.";
+	SoundboardSoundId: "An identifier for a soundboard sound.";
+	QuestId: "An identifier for a quest.";
+	PremiumReferralId: "An identifier for a nitro referral.";
+	TrialId: "An identifier for a nitro trial.";
+	ChangelogId: "An identifier for a changelog.";
+	GuildListingId: "An identifier for a guild product listing.";
+	SummaryId: "An identifier for the AI chat summaries.";
+	OnboardingPromptId: "An identifier for a prompt in an onboarding.";
+	OnboardingPromptOptionId: "An identifier for a prompt option in an onboarding.";
+	GuildJoinRequestId: "An identifier for a request to join a guild.";
+	EntityId: "An identifier for an entity.";
+	FamilyEventActionId: "An identifier for a family center event action.";
+	PromotionId: "An identifier for a product promotion.";
+	SubscriptionId: "An identifier for a subscription.";
+	GiftCodeBatchId: "An identifier for a batch of gift codes.";
+	ApplicationBranchId: "An identifier for an application branch.";
+	ApplicationAssetId: "An Identifier for an applicaiton asset.";
+	DiscoveryCategoryId: "An identifier for a server discovery category.";
+	DeviceId: "An identifier for the user device.";
+	EulaId: "An Identifier for an EULA.";
 }
 
 /// An identifier for a Shard.
@@ -242,14 +290,14 @@ id_u64! {
 pub struct ShardId(pub u32);
 
 impl ShardId {
-    /// Retrieves the value as a [`u32`].
-    ///
-    /// This is not a [`u64`] as [`ShardId`]s are not a discord concept and are simply used for
-    /// internal type safety.
-    #[must_use]
-    pub fn get(self) -> u32 {
-        self.0
-    }
+	/// Retrieves the value as a [`u32`].
+	///
+	/// This is not a [`u64`] as [`ShardId`]s are not a discord concept and are simply used for
+	/// internal type safety.
+	#[must_use]
+	pub fn get(self) -> u32 {
+		self.0
+	}
 }
 
 newtype_display_impl!(ShardId, |this| this.0);
@@ -265,13 +313,13 @@ newtype_display_impl!(ShardId, |this| this.0);
 pub struct AnswerId(u8);
 
 impl AnswerId {
-    /// Retrieves the value as a [`u64`].
-    ///
-    /// Keep in mind that this is **not a snowflake** and the values are subject to change.
-    #[must_use]
-    pub fn get(self) -> u64 {
-        self.0.into()
-    }
+	/// Retrieves the value as a [`u64`].
+	///
+	/// Keep in mind that this is **not a snowflake** and the values are subject to change.
+	#[must_use]
+	pub fn get(self) -> u64 {
+		self.0.into()
+	}
 }
 
 newtype_display_impl!(AnswerId, |this| this.0);

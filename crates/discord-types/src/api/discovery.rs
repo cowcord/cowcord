@@ -3,12 +3,17 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use crate::{api::{emoji::Emoji, guild::GuildFeatures, stickers::Sticker}, common::Timestamp};
+use crate::api::connected_accounts::VisibilityType;
+use crate::api::emoji::Emoji;
+use crate::api::guild::{GuildFeatures, PremiumTier};
+use crate::api::stickers::Sticker;
+use crate::common::id::{ApplicationId, ChannelId, DiscoveryCategoryId, EmojiId, GuildId};
+use crate::common::timestamp::Timestamp;
 
 #[derive(Serialize, Deserialize)]
 pub struct DiscoverableGuild {
 	/// The ID of the guild
-	pub id: Snowflake,
+	pub id: GuildId,
 	/// The name of the guild (2-100 characters)
 	pub name: String,
 	/// The guild's icon hash
@@ -28,27 +33,27 @@ pub struct DiscoverableGuild {
 	/// The preferred locale of the guild; used in discovery and notices from Discord (default "en-US")
 	pub preferred_locale: String,
 	/// The number of premium subscriptions (boosts) the guild currently has
-	pub premium_subscription_count: i64,
+	pub premium_subscription_count: u64,
 	/// Approximate number of members in the guild
-	pub approximate_member_count: i64,
+	pub approximate_member_count: u64,
 	/// Approximate number of online members in the guild
-	pub approximate_presence_count: i64,
+	pub approximate_presence_count: u64,
 	/// Custom guild emojis; limited to 30 entries
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub emojis: Option<Vec<Emoji>>,
 	/// Total number of custom guild emojis
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub emoji_count: Option<i64>,
+	pub emoji_count: Option<u16>,
 	/// Custom guild stickers; limited to 30 entries
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub stickers: Option<Vec<Sticker>>,
 	/// Total number of custom guild stickers
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub sticker_count: Option<i64>,
+	pub sticker_count: Option<u16>,
 	/// Whether the guild has automatically been removed from discovery for not hitting required targets
 	pub auto_removed: bool,
 	/// The ID of the primary discovery category set for the guild
-	pub primary_category_id: i64,
+	pub primary_category_id: DiscoveryCategoryId,
 	/// The primary discovery category set for the guild
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub primary_category: Option<DiscoveryCategory>,
@@ -67,7 +72,7 @@ pub struct DiscoverableGuild {
 	pub about: Option<Option<String>>,
 	/// The IDs of discovery subcategories set for the guild (max 5)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub category_ids: Option<Vec<Snowflake>>,
+	pub category_ids: Option<Vec<DiscoveryCategoryId>>,
 	/// The discovery categories set for the guild (max 5)
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub categories: Option<Vec<DiscoveryCategory>>,
@@ -80,7 +85,7 @@ pub struct DiscoverableGuild {
 pub struct DiscoveryRequirements {
 	/// The ID of the guild
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub guild_id: Option<Snowflake>,
+	pub guild_id: Option<GuildId>,
 	/// Whether the guild has not been flagged by Trust & Safety
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub safe_environment: Option<bool>,
@@ -117,13 +122,13 @@ pub struct DiscoveryRequirements {
 	pub age: Option<bool>,
 	/// The minimum guild age requirement (in days)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub minimum_age: Option<Option<i64>>,
+	pub minimum_age: Option<Option<u16>>,
 	/// The guild's activity metrics
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub health_score: Option<DiscoveryHealthScore>,
 	/// The minimum guild member count requirement
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub minimum_size: Option<Option<i64>>,
+	pub minimum_size: Option<Option<u16>>,
 	/// When the guild's grace period ends
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub grace_period_end_date: Option<Timestamp>,
@@ -133,10 +138,10 @@ pub struct DiscoveryRequirements {
 pub struct DiscoveryNsfwProperties {
 	/// The IDs of the channels with names containing disallowed terms
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub channels: Option<Vec<Snowflake>>,
+	pub channels: Option<Vec<ChannelId>>,
 	/// The disallowed terms found in the given channel names
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub channel_banned_keywords: Option<HashMap<Snowflake, Vec<String>>>,
+	pub channel_banned_keywords: Option<HashMap<ChannelId, Vec<String>>>,
 	/// The guild name, if it contains disallowed terms
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub name: Option<String>,
@@ -167,9 +172,9 @@ pub struct DiscoveryHealthScore {
 #[derive(Serialize, Deserialize)]
 pub struct DiscoveryMetadata {
 	/// The ID of the guild
-	pub guild_id: Snowflake,
+	pub guild_id: GuildId,
 	/// The ID of the primary discovery category set for the guild
-	pub primary_category_id: i64,
+	pub primary_category_id: DiscoveryCategoryId,
 	/// The discovery search keywords for the guild (max 30 characters, max 10)
 	pub keywords: Option<Vec<String>>,
 	/// Whether the guild is shown as a source through custom guild expressions
@@ -187,7 +192,7 @@ pub struct DiscoveryMetadata {
 	/// The guild's long description shown in the discovery web page (max 2400 characters)
 	pub about: Option<String>,
 	/// The IDs of discovery subcategories set for the guild (max 5)
-	pub category_ids: Vec<Snowflake>,
+	pub category_ids: Vec<DiscoveryCategoryId>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -195,7 +200,7 @@ pub struct DiscoveryReason {
 	/// The reason to join the guild
 	pub reason: String,
 	/// The ID of a guild's custom emoji
-	pub emoji_id: Option<Snowflake>,
+	pub emoji_id: Option<EmojiId>,
 	/// The unicode character of the emoji
 	pub emoji_name: Option<String>,
 }
@@ -203,7 +208,7 @@ pub struct DiscoveryReason {
 #[derive(Serialize, Deserialize)]
 pub struct DiscoveryCategory {
 	/// The ID of the category
-	pub id: i64,
+	pub id: DiscoveryCategoryId,
 	/// The name of the category
 	pub name: String,
 	/// Whether the category can be used as a guild's primary category
@@ -213,15 +218,15 @@ pub struct DiscoveryCategory {
 #[derive(Serialize, Deserialize)]
 pub struct GuildProfile {
 	/// The ID of the guild
-	pub id: Snowflake,
+	pub id: GuildId,
 	/// The name of the guild (2-100 characters)
 	pub name: String,
 	/// The guild's icon hash
 	pub icon_hash: Option<String>,
 	/// Approximate count of total members in the guild
-	pub member_count: i64,
+	pub member_count: u32,
 	/// Approximate count of non-offline members in the guild
-	pub online_count: i64,
+	pub online_count: u32,
 	/// The description for the guild (max 300 characters)
 	pub description: String,
 	/// The guild's accent color as a hexadecimal color string
@@ -230,13 +235,13 @@ pub struct GuildProfile {
 	#[deprecated]
 	pub banner_hash: Option<String>,
 	/// The IDs of the applications representing the games the guild plays (max 20)
-	pub game_application_ids: Vec<Snowflake>,
+	pub game_application_ids: Vec<ApplicationId>,
 	/// The activity of the guild in each game
-	pub game_activity: HashMap<Snowflake, GameActivity>,
+	pub game_activity: HashMap<ApplicationId, GameActivity>,
 	/// The tag of the guild (2-4 characters)
 	pub tag: Option<String>,
 	/// The badge shown on the guild's tag
-	pub badge: i64,
+	pub badge: GuildBadgeType,
 	/// The primary color of the badge as a hexadecimal color string
 	pub badge_color_primary: String,
 	/// The secondary color of the badge as a hexadecimal color string
@@ -248,13 +253,13 @@ pub struct GuildProfile {
 	/// Enabled guild features
 	pub features: Vec<String>,
 	/// The visibility level of the guild
-	pub visibility: i64,
+	pub visibility: VisibilityType,
 	/// The guild's discovery splash hash
 	pub custom_banner_hash: Option<String>,
 	/// The number of premium subscriptions (boosts) the guild currently has
-	pub premium_subscription_count: i64,
+	pub premium_subscription_count: u32,
 	/// The guild's premium tier (boost level)
-	pub premium_tier: i64,
+	pub premium_tier: PremiumTier,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -268,7 +273,7 @@ pub struct GameActivity {
 #[derive(Serialize, Deserialize)]
 pub struct GuildTrait {
 	/// ID of the emoji associated with the trait
-	pub emoji_id: Option<Snowflake>,
+	pub emoji_id: Option<EmojiId>,
 	/// Name of the emoji associated with the trait
 	pub emoji_name: Option<String>,
 	/// Whether the associated emoji is animated
@@ -315,4 +320,3 @@ pub enum GuildVisibility {
 	/// The guild is considered public, allowing anyone to view it and submit a join request
 	PUBLIC_WITH_RECRUITMENT = 3,
 }
-

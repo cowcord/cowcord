@@ -1,19 +1,24 @@
+use std::num::NonZeroU16;
+
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use crate::{api::{guild::{GuildMember, PrivacyLevel}, users::PartialUser}, common::Timestamp};
+use crate::api::guild::{GuildMember, PrivacyLevel};
+use crate::api::users::PartialUser;
+use crate::common::id::{ChannelId, EntityId, GenericSnowflake, GuildId, ScheduledEventId, UserId};
+use crate::common::timestamp::Timestamp;
 
 #[derive(Serialize, Deserialize)]
 pub struct GuildScheduledEvent {
 	/// The ID of the scheduled event
-	pub id: Snowflake,
+	pub id: ScheduledEventId,
 	/// The ID of the guild the scheduled event belongs to
-	pub guild_id: Snowflake,
+	pub guild_id: GuildId,
 	/// The ID of the channel in which the scheduled event will be hosted
-	pub channel_id: Option<Snowflake>,
+	pub channel_id: Option<ChannelId>,
 	/// The ID of the user that created the scheduled event
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub creator_id: Option<Option<Snowflake>>,
+	pub creator_id: Option<Option<UserId>>,
 	/// The user that created the scheduled event
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub creator: Option<PartialUser>,
@@ -36,12 +41,12 @@ pub struct GuildScheduledEvent {
 	/// The type of scheduled event
 	pub entity_type: GuildScheduledEventEntityType,
 	/// The ID of an entity associated with the scheduled event
-	pub entity_id: Option<Snowflake>,
+	pub entity_id: Option<EntityId>,
 	/// Additional metadata for the scheduled event
 	pub entity_metadata: Option<GuildScheduledEventEntityMetadata>,
 	/// The number of users subscribed to the scheduled event
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub user_count: Option<i64>,
+	pub user_count: Option<u32>,
 	/// The cover image hash for the scheduled event
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub image: Option<Option<String>>,
@@ -85,23 +90,23 @@ pub enum GuildScheduledEventEntityType {
 	PRIME_TIME = 4,
 }
 
-/// The current system limitations are present due to how reoccurring event data needs to be displayed in the client.
+/// The current system limitations are present due to how reccurring event data needs to be displayed in the client.
 /// In the future, we would like to open the system up to have fewer / none of these restrictions.
-/// 
+///
 /// #### The following fields cannot be set by the client
-/// 
+///
 /// - `count`
 /// - `end`
 /// - `by_year_day`
-/// 
+///
 /// #### The following combinations are mutually exclusive
-/// 
+///
 /// - `by_weekday`
 /// - `by_n_weekday`
 /// - `by_month` + `by_month_day`
-/// 
+///
 /// #### `by_weekday`
-/// 
+///
 /// - Only valid for daily and weekly events (`frequency` of `DAILY` or `WEEKLY`)
 /// - when used in a daily event (`frequency` is `DAILY`)
 ///   - The values present in the `by_weekday` event must be a "known set" of weekdays.
@@ -117,53 +122,53 @@ pub enum GuildScheduledEventEntityType {
 ///     - i.e: You can only select a single day within a week to have a recurring event on
 ///     - If you wish to have multiple days within a week have a recurring event, please use a `frequency` of `DAILY`
 ///   - Also, see `interval` below for "every-other" week information
-/// 
+///
 /// #### `by_n_weekday`
-/// 
+///
 /// - Only valid for monthly events (`frequency` of `MONTHLY`)
 /// - `by_n_weekday` array currently can only have a length of `1`
 ///   - i.e: You can only select a single day within a month to have a recurring event on
-/// 
+///
 /// #### `by_month` and `by_month_day`
-/// 
+///
 /// - Only valid for annual event (`frequency` is `YEARLY`)
 /// - both `by_month` and `by_month_day` must be provided
 /// - both `by_month` and `by_month_day` arrays must have a length of `1`
 ///   - (i.e. you can only set a single date for annual events)
-/// 
+///
 /// #### `interval` can only be set to a value other than `1` when `frequency` is set to `WEEKLY`
-/// 
+///
 /// - In this situation, interval can be set to `2`
 /// - This allowance enables "every-other week" events
 /// - Due to the limitations placed on `by_weekday` this means that if you wish to use "every-other week" functionality
 ///   you can only do so for a single day.
-/// 
+///
 /// #### Every weekday
-/// 
+///
 /// ```rs
 /// let frequency = 3; // Frequency.DAILY
 /// let interval = 1;
 /// let by_weekday = vec![0, 1, 2, 3, 4]; // [Weekday::MONDAY, ..., Weekday::FRIDAY]
 /// ```
-/// 
+///
 /// #### Every Wednesday
-/// 
+///
 /// ```rs
 /// let frequency = 2; // Frequency::WEEKLY
 /// let interval = 1;
 /// let by_weekday = vec![2]; // [Weekday::WEDNESDAY]
 /// ```
-/// 
+///
 /// #### Every other Wednesday
-/// 
+///
 /// ```rs
 /// let frequency = 2; // Frequency::WEEKLY
 /// let interval = 2;
 /// let by_weekday = vec![2]; // [Weekday::WEDNESDAY]
 /// ```
-/// 
+///
 /// #### Monthly on the fourth Wednesday
-/// 
+///
 /// ```rs
 /// let frequency = 1; // Frequency::MONTHLY
 /// let interval = 1;
@@ -174,9 +179,9 @@ pub enum GuildScheduledEventEntityType {
 ///   },
 /// ];
 /// ```
-/// 
+///
 /// #### Annually on July 24
-/// 
+///
 /// ```rs
 /// let frequency = 0; // Frequency::YEARLY
 /// let interval = 1;
@@ -190,21 +195,21 @@ pub struct GuildScheduledEventRecurrenceRule {
 	/// Ending time of the recurrence interval
 	pub end: Option<Timestamp>,
 	/// How often the event occurs
-	pub frequency: i64,
+	pub frequency: GuildScheduledEventRecurrenceRuleFrequency,
 	/// The spacing between the events, defined by frequency ; for example, frequency of WEEKLY and an interval of 2 would be "every other week"
-	pub interval: i64,
+	pub interval: u8,
 	/// Specific days within a week for the event to recur on
-	pub by_weekday: Option<Vec<i64>>,
+	pub by_weekday: Option<Vec<GuildScheduledEventRecurrenceRuleWeekday>>,
 	/// Specific days within a specific week (1-5) to recur on
 	pub by_n_weekday: Option<Vec<GuildScheduledEventRecurrenceRuleNWeekday>>,
 	/// Specific months to recur on
-	pub by_month: Option<Vec<i64>>,
+	pub by_month: Option<Vec<GuildScheduledEventRecurrenceRuleMonth>>,
 	/// Specific dates within a month to recur on
-	pub by_month_day: Option<Vec<i64>>,
+	pub by_month_day: Option<Vec<u8>>,
 	/// Specific days within a year to recur on (1-364)
-	pub by_year_day: Option<Vec<i64>>,
+	pub by_year_day: Option<Vec<NonZeroU16>>,
 	/// The total amount of times that the event is allowed to recur before stopping
-	pub count: Option<i64>,
+	pub count: Option<u32>,
 }
 
 #[derive(Serialize_repr, Deserialize_repr)]
@@ -230,12 +235,11 @@ pub enum GuildScheduledEventRecurrenceRuleWeekday {
 
 #[derive(Serialize, Deserialize)]
 pub struct GuildScheduledEventRecurrenceRuleNWeekday {
-	/// The week to reoccur on (1-5)
-	pub n: i64,
-	/// The day within the week to reoccur on
-	pub day: i64,
+	/// The week to reccur on (1-5)
+	pub n: u8,
+	/// The day within the week to reccur on
+	pub day: u8,
 }
-
 
 #[derive(Serialize_repr, Deserialize_repr)]
 #[repr(u8)]
@@ -257,9 +261,9 @@ pub enum GuildScheduledEventRecurrenceRuleMonth {
 #[derive(Serialize, Deserialize)]
 pub struct GuildScheduledEventException {
 	/// The ID of the scheduled event the exception is for
-	pub event_id: Snowflake,
+	pub event_id: ScheduledEventId,
 	/// A snowflake representing when the scheduled event would have started without the exception
-	pub event_exception_id: Snowflake,
+	pub event_exception_id: GenericSnowflake,
 	/// Whether the scheduled event will be skipped on this recurrence
 	pub is_canceled: bool,
 	/// The scheduled event's modified start time for this recurrence
@@ -271,14 +275,14 @@ pub struct GuildScheduledEventException {
 #[derive(Serialize, Deserialize)]
 pub struct GuildScheduledEventUser {
 	/// The ID of the scheduled event the user subscribed to
-	pub guild_scheduled_event_id: Snowflake,
+	pub guild_scheduled_event_id: ScheduledEventId,
 	/// The ID of the specific exception this subscription is for, if any
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub guild_scheduled_event_exception_id: Option<Snowflake>,
+	pub guild_scheduled_event_exception_id: Option<ScheduledEventId>,
 	/// The user's response to the scheduled event
 	pub response: GuildScheduledEventUserResponse,
 	/// The ID of the user that subscribed to the scheduled event
-	pub user_id: Snowflake,
+	pub user_id: UserId,
 	/// The user that subscribed to the scheduled event
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub user: Option<PartialUser>,
@@ -295,4 +299,3 @@ pub enum GuildScheduledEventUserResponse {
 	/// User is interested in the event or occurrence
 	INTERESTED = 1,
 }
-

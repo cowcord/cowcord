@@ -4,12 +4,13 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use crate::models::types::Timestamp;
+use crate::common::id::{ApplicationId, QuestId, SkuId, UserId};
+use crate::common::timestamp::Timestamp;
 
 #[derive(Serialize, Deserialize)]
 pub struct Quest {
 	/// The ID of the quest
-	pub id: Snowflake,
+	pub id: QuestId,
 	/// The configuration and metadata for the quest
 	pub config: QuestConfig,
 	/// The user's quest progress, if it has been accepted
@@ -24,14 +25,14 @@ pub struct Quest {
 #[derive(Serialize, Deserialize)]
 pub struct PartialQuest {
 	/// The ID of the quest
-	pub id: Snowflake,
+	pub id: QuestId,
 }
 
 /// The config structure has multiple distinct versions with different field sets. Only actively used versions are kept documented. As of now, only the latest version is available.
 #[derive(Serialize, Deserialize)]
 pub struct QuestConfig {
 	/// The ID of the quest
-	pub id: Snowflake,
+	pub id: QuestId,
 	/// Quest configuration version
 	pub config_version: u8,
 	/// When the quest period starts
@@ -63,7 +64,7 @@ pub struct QuestConfig {
 #[derive(Serialize, Deserialize)]
 pub struct QuestApplication {
 	/// The ID of the application
-	pub id: Snowflake,
+	pub id: ApplicationId,
 	/// The name of the application
 	pub name: String,
 	/// The link to the game's page
@@ -119,7 +120,7 @@ pub struct QuestTaskConfig {
 	pub enrollment_url: Option<String>,
 	/// The ID of the embedded activity for the third-party task
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub developer_application_id: Option<Snowflake>,
+	pub developer_application_id: Option<ApplicationId>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -127,7 +128,7 @@ pub struct QuestTask {
 	/// The type of task event
 	pub event_name: QuestTaskEventName,
 	/// The required value
-	pub target: i64,
+	pub target: u32,
 	/// IDs of the target game on console platforms
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub external_ids: Option<Vec<String>>,
@@ -148,7 +149,7 @@ pub enum QuestTaskConfigType {
 	THIRD_PARTY = 2,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub enum QuestTaskEventName {
 	/// The user must play and stream the game on desktop to at least one other user for a certain duration (see Update Activity Session )
 	STREAM_ON_DESKTOP,
@@ -191,7 +192,7 @@ pub struct QuestReward {
 	/// The reward's type
 	pub r#type: QuestRewardType,
 	/// The ID of the SKU awarded
-	pub sku_id: Snowflake,
+	pub sku_id: SkuId,
 	/// The reward's media asset
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub asset: Option<Option<String>>,
@@ -202,7 +203,7 @@ pub struct QuestReward {
 	pub messages: QuestRewardMessages,
 	/// An approximate count of how many users can claim the reward
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub approximate_count: Option<Option<i64>>,
+	pub approximate_count: Option<Option<u32>>,
 	/// The link to redeem the reward
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub redemption_link: Option<Option<String>>,
@@ -217,10 +218,10 @@ pub struct QuestReward {
 	pub expiration_mode: Option<QuestRewardExpirationMode>,
 	/// The amount of Discord Orbs awarded
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub orb_quantity: Option<i64>,
+	pub orb_quantity: Option<u32>,
 	/// The days of fractional premium awarded
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub quantity: Option<i64>,
+	pub quantity: Option<u8>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -387,7 +388,7 @@ pub enum QuestContentType {
 }
 
 /// Specifies the platforms that the quest reward can be redeemed on.
-#[derive(Serialize_repr, Deserialize_repr)]
+#[derive(Serialize_repr, Deserialize_repr, PartialEq, Eq, Hash)]
 #[repr(u8)]
 pub enum QuestPlatformType {
 	/// This reward can be redeemed on all platforms
@@ -445,7 +446,7 @@ pub enum QuestFeatures {
 #[derive(Serialize, Deserialize)]
 pub struct ClaimedQuest {
 	/// The ID of the quest
-	pub id: Snowflake,
+	pub id: QuestId,
 	/// The configuration and metadata for the quest
 	pub config: ClaimedQuestConfig,
 	/// The user's quest progress
@@ -455,7 +456,7 @@ pub struct ClaimedQuest {
 #[derive(Serialize, Deserialize)]
 pub struct ClaimedQuestConfig {
 	/// The ID of the quest
-	pub id: Snowflake,
+	pub id: QuestId,
 	/// When the quest period starts
 	pub starts_at: Timestamp,
 	/// When the quest period ends
@@ -477,7 +478,7 @@ pub struct ClaimedQuestReward {
 	/// The reward's type
 	pub r#type: QuestRewardType,
 	/// The ID of the SKU awarded
-	pub sku_id: Snowflake,
+	pub sku_id: SkuId,
 	/// The reward's name
 	pub name: String,
 	/// The article variant of the name (e.g. a Cybernetic Headgear Decoration)
@@ -487,7 +488,7 @@ pub struct ClaimedQuestReward {
 	/// The reward's video asset
 	pub asset_video: Option<String>,
 	/// The amount of Discord Orbs awarded
-	pub orb_quantity: Option<i64>,
+	pub orb_quantity: Option<u32>,
 	/// The collectible product awarded
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub collectible_product: Option<Value>,
@@ -496,10 +497,10 @@ pub struct ClaimedQuestReward {
 #[derive(Serialize, Deserialize)]
 pub struct QuestUserStatus {
 	/// The ID of the user
-	pub user_id: Snowflake,
+	pub user_id: UserId,
 	/// The ID of the quest
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub quest_id: Option<Snowflake>,
+	pub quest_id: Option<QuestId>,
 	/// When the user accepted the quest
 	pub enrolled_at: Option<Timestamp>,
 	/// When the user completed the quest
@@ -508,7 +509,7 @@ pub struct QuestUserStatus {
 	pub claimed_at: Option<Timestamp>,
 	/// Which reward tier the user has claimed, if the quest's assignment_method is TIERED
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub claimed_tier: Option<Option<i64>>,
+	pub claimed_tier: Option<Option<u8>>,
 	/// When the last heartbeat was received
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub last_stream_heartbeat_at: Option<Option<Timestamp>>,
@@ -527,7 +528,7 @@ pub struct QuestTaskProgress {
 	/// The type of task event
 	pub event_name: String,
 	/// The current task value
-	pub value: i64,
+	pub value: u32,
 	/// When the task was last updated
 	pub updated_at: Timestamp,
 	/// When the task was completed
@@ -546,7 +547,7 @@ pub struct QuestTaskHeartbeat {
 }
 
 bitflags! {
-    /// Dismissed [quest content areas](https://docs.discord.food/resources/quests#quest-content-type).
+	/// Dismissed [quest content areas](https://docs.discord.food/resources/quests#quest-content-type).
 	pub struct DismissibleQuestContentFlags: u64 {
 		/// User has dismissed the quest from User Settings
 		const GIFT_INVENTORY_SETTINGS_BADGE = 1 << 0;
@@ -562,16 +563,15 @@ bitflags! {
 #[derive(Serialize, Deserialize)]
 pub struct QuestRewardCode {
 	/// The ID of the quest
-	pub quest_id: Snowflake,
+	pub quest_id: QuestId,
 	/// The redeem code
 	pub code: String,
 	/// The platform this redeem code applies to
 	pub platform: QuestPlatformType,
 	/// The ID of the user who this code belongs to
-	pub user_id: Snowflake,
+	pub user_id: UserId,
 	/// When the user claimed the quest's reward
 	pub claimed_at: Timestamp,
 	/// Which reward tier the code belongs to, if the quest's assignment_method is set to TIERED
-	pub tier: Option<i64>,
+	pub tier: Option<u8>,
 }
-

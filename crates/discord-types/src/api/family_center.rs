@@ -2,7 +2,10 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
-use crate::{api::{guild::Guild, users::PartialUser}, common::Timestamp};
+use crate::api::guild::Guild;
+use crate::api::users::PartialUser;
+use crate::common::id::{EntityId, FamilyEventActionId, GenericSnowflake, UserId};
+use crate::common::timestamp::Timestamp;
 
 #[derive(Serialize, Deserialize)]
 pub struct FamilyCenter {
@@ -21,13 +24,13 @@ pub struct LinkedUser {
 	/// When the link status was last updated
 	pub updated_at: Timestamp,
 	/// The link status of the linked user
-	pub link_status: i64,
+	pub link_status: LinkStatus,
 	/// The link type
-	pub link_type: i64,
+	pub link_type: LinkType,
 	/// The ID of the account the linked user is connected to
-	pub requestor_id: Snowflake,
+	pub requestor_id: UserId,
 	/// The ID of the linked user
-	pub user_id: Snowflake,
+	pub user_id: UserId,
 }
 
 /// Represents the current state of the link.
@@ -63,9 +66,9 @@ pub struct LinkedUsers {
 #[derive(Serialize, Deserialize)]
 pub struct TeenAuditLog {
 	/// The ID of the linked user
-	pub teen_user_id: Option<Snowflake>,
+	pub teen_user_id: Option<UserId>,
 	/// A snowflake representing the start time of the current 7-day track range
-	pub range_start_id: Option<Snowflake>,
+	pub range_start_id: Option<GenericSnowflake>,
 	/// List of actions the linked user has done
 	pub actions: Vec<Action>,
 	/// Users referenced in the audit log
@@ -73,23 +76,23 @@ pub struct TeenAuditLog {
 	/// Guilds referenced in the audit log
 	pub guilds: Vec<Guild>,
 	/// Object keyed by action types with their totals
-	pub totals: HashMap<i64, ActionType>,
+	pub totals: HashMap<ActionType, u32>,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct Action {
 	/// The ID of the event action
-	pub event_id: Snowflake,
+	pub event_id: FamilyEventActionId,
 	/// The ID of the linked user
-	pub user_id: Snowflake,
+	pub user_id: UserId,
 	/// The ID of the entity the action relates to (user, guild, or group DM) based off the action type
-	pub entity_id: Snowflake,
+	pub entity_id: EntityId,
 	/// The type of the action of the action, detailing what this action involved
-	pub display_type: i64,
+	pub display_type: ActionType,
 }
 
 /// Represents what kind of action the linked user engaged in.
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub enum ActionType {
 	/// Users added within the last 7 days
 	USERS_ADDED = 1,
@@ -102,5 +105,3 @@ pub enum ActionType {
 	/// Users called within the last 7 days
 	USERS_CALLED = 5,
 }
-
-

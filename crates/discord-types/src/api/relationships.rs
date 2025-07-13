@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use crate::{api::{connected_accounts::ConnectionType, users::PartialUser}, common::Timestamp};
+use crate::{api::{connected_accounts::ConnectionType, users::PartialUser}, common::{id::{ApplicationId, UserId}, timestamp::Timestamp}};
 
 #[derive(Serialize, Deserialize)]
 pub struct Relationship {
@@ -24,7 +24,7 @@ pub struct Relationship {
 	pub user_ignored: bool,
 	/// The ID of the application that created the relationship
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub origin_application_id: Option<Option<Snowflake>>,
+	pub origin_application_id: Option<Option<ApplicationId>>,
 	/// When the user requested a relationship
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub since: Option<Timestamp>,
@@ -52,7 +52,7 @@ pub struct GameRelationship {
 	/// The ID of the target user
 	pub id: String,
 	/// The ID of the application whose game the relationship originated from
-	pub application_id: Snowflake,
+	pub application_id: ApplicationId,
 	/// The type of relationship
 	pub r#type: RelationshipType,
 	/// The target user
@@ -62,7 +62,7 @@ pub struct GameRelationship {
 	/// The DM access level for the relationship
 	pub dm_access_type: Value,
 	/// The ID of the current user
-	pub user_id: Snowflake,
+	pub user_id: UserId,
 }
 
 #[derive(Serialize, Deserialize)]

@@ -18,7 +18,7 @@ use crate::api::channel::{
 };
 use crate::api::message::Message;
 use crate::api::user_settings::MuteConfig;
-use crate::api::types::{CdnUri, Snowflake, Timestamp};
+use crate::api::types::{CdnUri, Snowflake, timestamp::Timestamp};
 use crate::utils::request::{API_VERSION, to_string_query};
 
 /// Type: get
@@ -27,7 +27,6 @@ pub const GET_PRIVATE_CHANNELS_ENDPOINT: &str = "/users/@me/channels";
 pub type GetPrivateChannelsResponse = Vec<Channel>;
 
 /// Type: get
-///
 /// supports OAuth2 for auth
 pub fn GET_DM_CHANNEL_ENDPOINT(user_id: Snowflake) -> String {
 	format!("/users/@me/dms/{}", user_id)
@@ -36,7 +35,6 @@ pub fn GET_DM_CHANNEL_ENDPOINT(user_id: Snowflake) -> String {
 pub type GetDmChannelResponse = Channel;
 
 /// Type: post
-///
 /// supports OAuth2 for auth
 pub const CREATE_PRIVATE_CHANNEL_ENDPOINT: &str = "/users/@me/channels";
 
@@ -72,9 +70,7 @@ pub fn GET_GUILD_TOP_READ_CHANNELS_ENDPOINT(guild_id: Snowflake) -> String {
 pub type GetGuildTopReadChannelsResponse = Vec<Snowflake>;
 
 /// Type: post
-///
 /// supports the X-Audit-Log-Reason header
-///
 /// requires MANAGE_CHANNELS permission
 pub fn CREATE_GUILD_CHANNEL_ENDPOINT(guild_id: Snowflake) -> String {
 	format!("/guilds/{}/channels", guild_id)
@@ -174,19 +170,16 @@ pub struct ModifyGuildChannelPositionsRequest {
 }
 
 /// Type: get
-///
 /// requires VIEW_CHANNEL permission
 pub fn GET_CHANNEL_ENDPOINT(channel_id: Snowflake) -> String {
 	format!("/channels/{}", channel_id)
 }
 
 /// "If the channel is a thread, a thread member object is included in the returned result."
-///
 /// tf does this mean
 pub type GetChannelResponse = Channel;
 
 /// Type: patch
-///
 /// supports the X-Audit-Log-Reason header
 pub fn MODIFY_CHANNEL_ENDPOINT(channel_id: Snowflake) -> String {
 	format!("/channels/{}", channel_id)
@@ -302,11 +295,8 @@ pub struct ModifyChannelRequest {
 pub type ModifyChannelResponse = Channel;
 
 /// Type: delete
-///
 /// supports the X-Audit-Log-Reason header
-///
 /// for guilds, requires MANAGE_CHANNELS or MANAGE_THREADS (if its a thread) permission
-///
 /// guild channels are permanently deleted and cannnot be undeleted.
 /// private dms however can be reopened by just messaging the person again
 pub fn DELETE_CHANNEL_ENDPOINT(
@@ -333,9 +323,7 @@ pub struct DeleteReadStateRequest {
 }
 
 /// Type: put
-///
 /// supports the X-Audit-Log-Reason header
-///
 /// requires SET_VOICE_CHANNEL_STATUS permission if connected and MANAGE_CHANNELS if not
 pub fn MODIFY_CHANNEL_STATUS_ENDPOINT(channel_id: Snowflake) -> String {
 	format!("/channels/{}/voice-status", channel_id)
@@ -349,9 +337,7 @@ pub struct ModifyChannelStatusRequest {
 }
 
 /// Type: put
-///
 /// supports the X-Audit-Log-Reason header
-///
 /// requires MANAGE_ROLES permission
 pub fn MODIFY_CHANNEL_PERMISSIONS_ENDPOINT(
 	channel_id: Snowflake,
@@ -372,9 +358,7 @@ pub struct ModifyChannelPermissionsRequest {
 }
 
 /// Type: delete
-///
 /// supports the X-Audit-Log-Reason header
-///
 /// requires MANAGE_ROLES permission
 pub fn DELETE_CHANNEL_PERMISSION_ENDPOINT(
 	channel_id: Snowflake,
@@ -384,7 +368,6 @@ pub fn DELETE_CHANNEL_PERMISSION_ENDPOINT(
 }
 
 /// Type: post
-///
 /// requires MANAGE_WEBHOOKS permission in the target channel for the updates
 pub fn FOLLOW_CHANNEL_ENDPOINT(channel_id: Snowflake) -> String {
 	format!("/channels/{}/followers", channel_id)
@@ -410,7 +393,6 @@ pub struct TriggerTypingIndicatorResponse {
 }
 
 /// Type: get
-///
 /// supports OAuth2 for auth
 pub fn GET_CALL_ELIGIBILITY_ENDPOINT(channel_id: Snowflake) -> String {
 	format!("/channels/{}/call", channel_id)
@@ -422,7 +404,6 @@ pub struct GetCallEligibilityResponse {
 }
 
 /// Type: patch
-///
 /// requires an active call to do anything
 pub fn MODIFY_CALL_ENDPOINT(channel_id: Snowflake) -> String {
 	format!("/channels/{}/call", channel_id)
@@ -436,9 +417,7 @@ pub struct ModifyCallRequest {
 }
 
 /// Type: post
-///
 /// supports OAuth2 for auth
-///
 /// requires an active call to do anything
 pub fn RING_CHANNEL_RECIPIENTS_ENDPOINT(channel_id: Snowflake) -> String {
 	format!("/channels/{}/call/ring", channel_id)
@@ -452,9 +431,7 @@ pub struct RingChannelRecipientsRequest {
 }
 
 /// Type: post
-///
 /// supports OAuth2 for auth
-///
 /// requires an active call to do anything
 pub fn STOP_RINGING_CHANNEL_RECIPIENTS_ENDPOINT(channel_id: Snowflake) -> String {
 	format!("/channels/{}/call/stop-ringing", channel_id)
@@ -554,7 +531,6 @@ pub struct AcknowledgeSafetyWarningsRequest {
 }
 
 /// Type: post
-///
 /// only usable by discord employees
 pub fn ADD_SAFETY_WARNING_ENDPOINT(channel_id: Snowflake) -> String {
 	format!("/channels/{}/add-safety-warning", channel_id)
@@ -567,14 +543,12 @@ pub struct AddSafetyWarningRequest {
 }
 
 /// Type: delete
-///
 /// only usable by discord employees
 pub fn DELETE_SAFETY_WARNINGS_ENDPOINT(channel_id: Snowflake) -> String {
 	format!("/channels/{}/safety-warnings", channel_id)
 }
 
 /// Type: post
-///
 /// only usable by discord employees
 pub fn REPORT_SAFETY_WARNING_FALSE_POSITIVE_ENDPOINT(channel_id: Snowflake) -> String {
 	format!(
@@ -584,7 +558,6 @@ pub fn REPORT_SAFETY_WARNING_FALSE_POSITIVE_ENDPOINT(channel_id: Snowflake) -> S
 }
 
 /// Type: get
-///
 /// not usable by user accounts
 pub fn GET_GUILD_ACTIVE_THREADS_ENDPOINT(guild_id: Snowflake) -> String {
 	format!("/guilds/{}/threads/active", guild_id)
@@ -597,9 +570,7 @@ pub struct GetGuildActiveThreadsResponse {
 }
 
 /// Type: get
-///
 /// not usable by user accounts
-///
 /// removed in api v10
 #[deprecated]
 pub fn GET_ACTIVE_THREADS_ENDPOINT(channel_id: Snowflake) -> String {
@@ -616,7 +587,6 @@ pub struct GetActiveThreadsResponse {
 }
 
 /// Type: get
-///
 /// requires READ_MESSAGE_HISTORY permission
 #[deprecated]
 pub fn GET_PUBLIC_ARCHIVED_THREADS_ENDPOINT(
@@ -645,7 +615,6 @@ pub struct GetPublicArchivedThreadsResponse {
 }
 
 /// Type: get
-///
 /// requires READ_MESSAGE_HISTORY permission
 #[deprecated]
 pub fn GET_JOINED_PRIVATE_ARCHIVED_THREADS_ENDPOINT(
@@ -674,7 +643,6 @@ pub struct GetJoinedPrivateArchivedThreadsResponse {
 }
 
 /// Type: get
-///
 /// requires READ_MESSAGE_HISTORY permission
 #[deprecated]
 pub fn SEARCH_THREADS_ENDPOINT(
@@ -717,7 +685,6 @@ pub struct SearchThreadsResponse {
 }
 
 /// Type: post
-///
 /// supports the X-Audit-Log-Reason header
 pub fn CREATE_THREAD_FROM_MESSAGE_ENDPOINT(
 	channel_id: Snowflake,
@@ -737,9 +704,7 @@ pub struct CreateThreadFromMessageRequest {
 pub type CreateThreadFromMessageResponse = Channel;
 
 /// Type: post
-///
 /// supports the X-Audit-Log-Reason header
-///
 /// requires CREATE_PUBLIC_THREADS or CREATE_PRIVATE_THREADS permission depending on the type created
 pub fn CREATE_THREAD_ENDPOINT(channel_id: Snowflake) -> String {
 	format!("/channels/{}/threads", channel_id)
@@ -764,7 +729,6 @@ pub struct CreateThreadRequest {
 pub type CreateThreadResponse = Channel;
 
 /// Type: post (what are you on discord)
-///
 /// requires READ_MESSAGE_HISTORY permission
 pub fn GET_CHANNEL_POST_DATA_ENDPOINT(channel_id: Snowflake) -> String {
 	format!("/channels/{}/post-data", channel_id)
@@ -781,11 +745,8 @@ pub struct GetChannelPostDataResponse {
 }
 
 /// Type: get
-///
 /// requires VIEW_CHANNEL permission
-///
 /// not usable by user accounts, and bot accounts also need GUILD_MEMBERS intent
-///
 /// in api v11 this will always return paginated results
 /// before that though paginated results can be returned by setting with_member to true
 pub fn GET_THREAD_MEMBERS_ENDPOINT(
@@ -810,9 +771,7 @@ pub struct GetThreadMembersRequest {
 pub type GetThreadMembersResponse = Vec<ThreadMember>;
 
 /// Type: get
-///
 /// requires VIEW_CHANNEL permission
-///
 /// not usable by user accounts
 pub fn GET_THREAD_MEMBER_ENDPOINT(
 	channel_id: Snowflake,
@@ -834,14 +793,12 @@ pub struct GetThreadMemberRequest {
 }
 
 /// Type: put
-///
 /// requires VIEW_CHANNEL permission
 pub fn JOIN_THREAD_ENDPOINT(channeL_id: Snowflake) -> String {
 	format!("/channels/{}/thread-members/@me", channeL_id)
 }
 
 /// Type: put
-///
 /// requires SEND_MESSAGES permission
 pub fn ADD_THREAD_MEMBER_ENDPOINT(
 	channeL_id: Snowflake,
@@ -867,14 +824,12 @@ pub struct ModifyThreadSettingsRequest {
 }
 
 /// Type: delete
-///
 /// requires VIEW_CHANNEL permission
 pub fn LEAVE_THREAD_ENDPOINT(channeL_id: Snowflake) -> String {
 	format!("/channels/{}/thread-members/@me", channeL_id)
 }
 
 /// Type: delete
-///
 /// requires MANAGE_THREADS permission
 pub fn REMOVE_THREAD_MEMBER_ENDPOINT(
 	channeL_id: Snowflake,
@@ -884,9 +839,7 @@ pub fn REMOVE_THREAD_MEMBER_ENDPOINT(
 }
 
 /// Type: post
-///
 /// supports the X-Audit-Log-Reason header
-///
 /// requires MANAGE_CHANNELS permission
 pub fn CREATE_CHANNEL_TAG_ENDPOINT(channeL_id: Snowflake) -> String {
 	format!("/channels/{}/tags", channeL_id)
@@ -904,9 +857,7 @@ pub struct CreateChannelTagRequest {
 pub type CreateChannelTagResponse = Channel;
 
 /// Type: put
-///
 /// supports the X-Audit-Log-Reason header
-///
 /// requires MANAGE_CHANNELS permission
 pub fn MODIFY_CHANNEL_TAG_ENDPOINT(
 	channeL_id: Snowflake,
@@ -927,9 +878,7 @@ pub struct ModifyChannelTagRequest {
 pub type ModifyChannelTagResponse = Channel;
 
 /// Type: delete
-///
 /// supports the X-Audit-Log-Reason header
-///
 /// requires MANAGE_CHANNELS permission
 pub fn DELETE_CHANNEL_TAG_ENDPOINT(
 	channeL_id: Snowflake,

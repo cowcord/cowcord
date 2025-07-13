@@ -1,15 +1,15 @@
 use serde::{Deserialize, Serialize};
 
-use crate::api::guild::PrivacyLevel;
+use crate::{api::guild::PrivacyLevel, common::id::{ChannelId, GuildId, ScheduledEventId, StageInstanceId}};
 
 #[derive(Serialize, Deserialize)]
 pub struct StageInstance {
 	/// The ID of the stage instance
-	pub id: Snowflake,
+	pub id: StageInstanceId,
 	/// The guild ID of the associated stage channel
-	pub guild_id: Snowflake,
+	pub guild_id: GuildId,
 	/// The ID of the associated stage channel
-	pub channel_id: Snowflake,
+	pub channel_id: ChannelId,
 	/// The topic of the stage instance (1-120 characters)
 	pub topic: String,
 	/// The privacy level of the stage instance
@@ -20,5 +20,5 @@ pub struct StageInstance {
 	#[deprecated]
 	pub discoverable_disabled: bool,
 	/// The ID of the scheduled event for this stage instance
-	pub guild_scheduled_event_id: Option<Snowflake>,
+	pub guild_scheduled_event_id: Option<ScheduledEventId>,
 }

@@ -14,11 +14,10 @@ use crate::api::data::guild::{
 	UserGuild,
 	WelcomeScreen,
 };
-use crate::api::types::{CdnUri, Snowflake, Timestamp};
+use crate::api::types::{CdnUri, Snowflake, timestamp::Timestamp};
 use crate::utils::request::to_string_query;
 
 /// Type: get
-///
 /// support OAuth2 for auth
 pub fn GET_USER_GUILDS_ENDPOINT(query: GetUserGuildsRequest) -> String {
 	format!("/users/@me/guilds{}", to_string_query(&query))
@@ -42,7 +41,6 @@ pub const GET_JOIN_REQUEST_GUILDS_ENDPOINT: &str = "/users/@me/join-request-guil
 pub type GetJoinRequestGuildsResponse = Vec<Guild>;
 
 /// Type: delete
-///
 /// support OAuth2 for auth
 pub fn LEAVE_GUILD_ENDPOINT(guild_id: Snowflake) -> String {
 	format!("/users/@me/guilds/{}", guild_id)
@@ -115,11 +113,8 @@ pub fn GET_GUILD_PREVIW_ENDPOINT(guild_id: Snowflake) -> String {
 pub type GetGuildPreviewResponse = Guild;
 
 /// Type: patch
-///
 /// requires mfa
-///
 /// supports the X-Audit-Log-Reason header
-///
 /// requires MANAGE_GUILD permission
 pub fn MODIFY_GUILD_ENDPOINT(guild_id: Snowflake) -> String { format!("/guilds/{}", guild_id) }
 
@@ -161,9 +156,7 @@ pub struct ModifyGuildRequest {
 pub type ModifyGuildResponse = Guild;
 
 /// Type: post
-///
 /// requires mfa
-///
 /// supports the X-Audit-Log-Reason header
 pub fn MODIFY_GUILD_MFA_LEVEL_ENDPOINT(guild_id: Snowflake) -> String {
 	format!("/guilds/{}/mfa", guild_id)
@@ -182,19 +175,16 @@ pub struct ModifyGuildMfaLevelResponse {
 }
 
 /// Type: put
-///
 /// if owner doesnt have an accosiaed email or has mfa enabled then this code isnt needed
 pub fn GET_GUILD_OWNERSHIP_TRANFER_CODE_ENDPOINT(guild_id: Snowflake) -> String {
 	format!("/guilds/{}/pincode", guild_id)
 }
 
 /// Type: delete
-///
 /// requires mfa
 pub fn DELET_GUILD_ENDPOINT(guild_id: Snowflake) -> String { format!("/guilds/{}", guild_id) }
 
 /// Type: get
-///
 /// not usable by user accounts
 pub fn GET_GUILD_MEMBERS_ENDPOINT(
 	guild_id: Snowflake,
@@ -213,9 +203,7 @@ pub struct GetGuildMembersRequest {
 pub type GetGuildMembersResponse = Vec<GuildMember>;
 
 /// Type: get
-///
 /// basically identical to the Request Guild Members Gateway Opcode
-///
 /// not usable by user accounts
 pub fn QUERY_GUILD_MEMBERS_ENDPOINT(
 	guild_id: Snowflake,
@@ -238,7 +226,6 @@ pub struct QueryGuildMembersRequest {
 pub type QueryGuildMembersResponse = Vec<GuildMember>;
 
 /// Type: post
-///
 /// requires MANAGE_GUILD permission
 pub fn SEARCH_GUILD_MEMBERS_ENDPOINT(guild_id: Snowflake) -> String {
 	format!("/guilds/{}/members-search", guild_id)
@@ -264,7 +251,6 @@ pub struct SearchGuildMembersResponse {
 }
 
 /// Type: post
-///
 /// requires MANAGE_GUILD permission
 pub fn GET_GUILD_MEMBERS_SUPPLEMENTAL_ENDPOINT(guild_id: Snowflake) -> String {
 	format!("/guilds/{}/members/supplemental", guild_id)
@@ -335,7 +321,6 @@ pub struct JoinGuildResponse {
 }
 
 /// Type: put
-///
 /// supports OAuth2 of auth
 pub fn ADD_GUILD_MEMBER_ENDPOINT(
 	guild_id: Snowflake,

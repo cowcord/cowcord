@@ -1,16 +1,16 @@
 use serde::{Deserialize, Serialize};
 
-use crate::api::users::PartialUser;
+use crate::{api::users::PartialUser, common::id::{EmojiId, RoleId}};
 
 #[derive(Serialize, Deserialize)]
 pub struct Emoji {
 	/// The ID of the emoji
-	pub id: Option<Snowflake>,
+	pub id: Option<EmojiId>,
 	/// The name of the emoji (2-32 characters)
 	pub name: String,
 	/// The roles allowed to use the emoji
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub roles: Option<Vec<Snowflake>>,
+	pub roles: Option<Vec<RoleId>>,
 	/// The user that uploaded the emoji
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub user: Option<PartialUser>,

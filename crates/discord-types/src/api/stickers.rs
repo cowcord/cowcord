@@ -1,35 +1,35 @@
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use crate::api::users::PartialUser;
+use crate::{api::users::PartialUser, common::id::{GuildId, SkuId, StickerId, StickerPackBannerId, StickerPackId}};
 
 #[derive(Serialize, Deserialize)]
 pub struct StickerPack {
 	/// The ID of the sticker pack
-	pub id: Snowflake,
+	pub id: StickerPackId,
 	/// The stickers in the pack
 	pub stickers: Vec<Sticker>,
 	/// The name of the sticker pack
 	pub name: String,
 	/// The ID of the pack's SKU
-	pub sku_id: Snowflake,
+	pub sku_id: SkuId,
 	/// The ID of a sticker in the pack which is shown as the pack's icon
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub cover_sticker_id: Option<Snowflake>,
+	pub cover_sticker_id: Option<StickerId>,
 	/// The description for the sticker pack
 	pub description: String,
 	/// The ID of the sticker pack's banner image
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub banner_asset_id: Option<Snowflake>,
+	pub banner_asset_id: Option<StickerPackBannerId>,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct Sticker {
 	/// The ID of the sticker
-	pub id: Snowflake,
+	pub id: StickerId,
 	/// For standard stickers, ID of the pack the sticker is from
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub pack_id: Option<Snowflake>,
+	pub pack_id: Option<StickerPackId>,
 	/// The name of the sticker (2-30 characters)
 	pub name: String,
 	/// The description for the sticker (max 100 characters)
@@ -47,7 +47,7 @@ pub struct Sticker {
 	pub available: Option<bool>,
 	/// The ID of the guild the sticker is attached to
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub guild_id: Option<Snowflake>,
+	pub guild_id: Option<GuildId>,
 	/// The user that uploaded the guild sticker
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub user: Option<PartialUser>,
@@ -84,7 +84,7 @@ pub enum StickerFormatTypes {
 #[derive(Serialize, Deserialize)]
 pub struct StickerItem {
 	/// The ID of the sticker
-	pub id: Snowflake,
+	pub id: StickerId,
 	/// The name of the sticker
 	pub name: String,
 	/// The type of format for the sticker

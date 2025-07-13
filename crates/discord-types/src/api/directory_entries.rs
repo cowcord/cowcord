@@ -1,25 +1,27 @@
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use crate::api::{guild::PartialGuild, guild_scheduled_event::GuildScheduledEvent};
+use crate::api::guild::PartialGuild;
+use crate::api::guild_scheduled_event::GuildScheduledEvent;
+use crate::common::id::{ChannelId, EntityId, UserId};
 
 #[derive(Serialize, Deserialize)]
 pub struct DirectoryEntry {
 	/// The type of directory entry
 	pub r#type: DirectoryEntryType,
 	/// The ID of the directory channel that the entry is in
-	pub directory_channel_id: Snowflake,
+	pub directory_channel_id: ChannelId,
 	/// The ID of the guild or scheduled event
-	pub entity_id: Snowflake,
+	pub entity_id: EntityId,
 	/// When the entry was createdw
 	pub created_at: String,
 	/// The primary category of the entry
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub primary_category_id: Option<i64>,
+	pub primary_category_id: Option<DirectoryCategory>,
 	/// The description of the entry
 	pub description: Option<String>,
 	/// The ID of the user that created the entry
-	pub author_id: Snowflake,
+	pub author_id: UserId,
 	/// The guild entry
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub guild: Option<Box<DirectoryGuild>>,
@@ -30,16 +32,16 @@ pub struct DirectoryEntry {
 
 #[derive(Serialize, Deserialize)]
 pub struct DirectoryGuild {
-    #[serde(flatten)]
-    pub entry: Box<DirectoryEntry>,
+	#[serde(flatten)]
+	pub entry: Box<DirectoryEntry>,
 	/// Whether the guild is eligible to be featured in the directory
 	pub featurable_in_directory: bool,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct DirectoryGuildScheduledEvent {
-    #[serde(flatten)]
-    pub event: GuildScheduledEvent,
+	#[serde(flatten)]
+	pub event: GuildScheduledEvent,
 	/// The guild that the event is for
 	pub guild: PartialGuild,
 	/// Whether the user has RSVP'd to the event
@@ -70,4 +72,3 @@ pub enum DirectoryCategory {
 	/// Miscellaneous entry
 	MISC = 5,
 }
-

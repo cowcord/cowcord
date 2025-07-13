@@ -74,7 +74,6 @@ pub fn GET_APPLICATION_BY_ID_ENDPOINT(application_id: Snowflake) -> String {
 pub type GetApplicationByIdResponse = Application;
 
 /// Type: get
-///
 /// Not usable by user accounts
 pub const GET_CURRENT_APPLICATION_ENDPOINT: &str = "/applications/@me";
 
@@ -144,7 +143,6 @@ pub struct ModifyApplicationRequest {
 pub type ModifyApplicationResponse = Application;
 
 /// Type: patch
-///
 /// Not usable by user accounts
 pub const MODIFY_CURRENT_APPLICATION_ENDPOINT: &str = "/applications/@me";
 
@@ -183,14 +181,12 @@ pub struct ModifyCurrentApplicationRequest {
 pub type ModifyCurrentApplicationResponse = Application;
 
 /// Type: post
-///
 /// requires mfa
 pub fn DELETE_APPLICATION_ENDPOINT(application_id: Snowflake) -> String {
 	format!("/applications/{}/delete", application_id)
 }
 
 /// Type: post
-///
 /// requires mfa
 pub fn TRANSFER_APPLICATION_ENDPOINT(application_id: Snowflake) -> String {
 	format!("/applications/{}/transfer", application_id)
@@ -204,7 +200,6 @@ pub struct TransferApplicationRequest {
 pub type TransferApplicationResponse = Application;
 
 /// Type: post
-///
 /// requires mfa
 pub fn RESET_APPLICATION_SECRET_ENDPOINT(application_id: Snowflake) -> String {
 	format!("/applications/{}/reset", application_id)
@@ -216,7 +211,6 @@ pub struct ResetApplicationSecretResponse {
 }
 
 /// Type: post
-///
 /// requires mfa
 #[deprecated]
 pub fn CREATE_APPLICATION_BOT_ENDPOINT(application_id: Snowflake) -> String {
@@ -246,7 +240,6 @@ pub struct ModifyApplicationBotRequest {
 pub type ModifyApplicationBotResponse = User;
 
 /// Type: post
-///
 /// requires mfa
 pub fn RESET_APPLICATION_BOT_TOKEN_ENDPOINT(application_id: Snowflake) -> String {
 	format!("/applications/{}/bot/reset", application_id)
@@ -407,7 +400,6 @@ pub struct ModifyApplicationProxyConfigRequest {
 pub type ModifyApplicationProxyConfigResponse = ApplicationProxyConfig;
 
 /// Type: get
-///
 /// doesnt need Authentication header
 pub fn GET_APPLICATION_ASSETS_ENDPOINT(
 	application_id: Snowflake,
@@ -460,11 +452,8 @@ pub struct ProxyApplicationAssetsRequest {
 pub type ProxyApplicationAssetsResponse = ExternalAsset;
 
 /// Type: post
-///
 /// supports OAuth2 for auth
-///
 /// multipart/form-data NOT json
-///
 /// let form = reqwest::multipart::Form::new().file("file name", "path to file")?;
 pub fn CREATE_APPLICATION_ATTATCHMENT_ENDPOINT(application_id: Snowflake) -> String {
 	format!("/applications/{}/external-assets", application_id)
@@ -476,7 +465,6 @@ pub struct CreateApplicationAttatchmentResponse {
 }
 
 /// Type: get
-///
 /// doesnt require Authentication header
 pub const GET_DETECTABLE_APPLICATIONS_ENDPOINT: &str = "/applications/detectable";
 
@@ -490,7 +478,6 @@ pub fn GET_PARTIAL_APPLICATIONS_ENDPOINT(application_ids: Vec<Snowflake>) -> Str
 pub type GetPartialApplicationsResponse = Vec<Application>;
 
 /// Type: get
-///
 /// supports OAuth2 for auth
 pub fn GET_PARTIAL_APPLICATION_ENDPOINT(
 	application_id: Snowflake,
@@ -505,7 +492,6 @@ pub fn GET_PARTIAL_APPLICATION_ENDPOINT(
 pub type GetPartialApplicationResponse = Application;
 
 /// Type: get
-///
 /// doesnt require Authentication header
 pub fn GET_RICH_PRESENCE_APPLICATION_ENDPOINT(application_id: Snowflake) -> String {
 	format!("/applications/{}/rpc", application_id)
@@ -605,7 +591,6 @@ pub const GET_USER_APPLICATION_ROLE_CONNECTIONS_ENDPOINT: &str =
 pub type GetUserApplicationRoleConnections = Vec<ApplicationRoleConnection>;
 
 /// Type: get
-///
 /// only available via OAuth2 with role_connections.write scope
 /// for the application specified in the path
 pub fn GET_USER_APPLICATION_ROLE_CONNECTION_ENDPOINT(application_id: Snowflake) -> String {
@@ -615,7 +600,6 @@ pub fn GET_USER_APPLICATION_ROLE_CONNECTION_ENDPOINT(application_id: Snowflake) 
 pub type GetUserApplicationRoleConnection = ApplicationRoleConnection;
 
 /// Type: patch
-///
 /// only available via OAuth2 with role_connections.write scope
 /// for the application specified in the path
 pub fn MODIFY_USER_APPLICATION_ROLE_CONNECTION_ENDPOINT(application_id: Snowflake) -> String {

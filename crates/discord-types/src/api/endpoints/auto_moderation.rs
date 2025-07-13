@@ -3,10 +3,9 @@
 use serde::{Deserialize, Serialize};
 
 use crate::api::auto_moderation::{AutomodAction, AutomodRule, AutomodTriggerMetadata};
-use crate::api::types::{Snowflake, Timestamp};
+use crate::api::types::{Snowflake, timestamp::Timestamp};
 
 /// Type: get
-///
 /// requires MANAGE_GUILD permission
 pub fn GET_GUILD_AUTOMOD_RULES_ENDPOINT(guild_id: Snowflake) -> String {
 	format!("/guilds/{}/auto-moderation/rules", guild_id)
@@ -15,7 +14,6 @@ pub fn GET_GUILD_AUTOMOD_RULES_ENDPOINT(guild_id: Snowflake) -> String {
 pub type GetGuildAutomodRulesResponse = Vec<AutomodRule>;
 
 /// Type: get
-///
 /// supports the X-Audit-Log-Reason header
 pub fn GET_GUILD_AUTOMOD_RULE_ENDPOINT(
 	guild_id: Snowflake,
@@ -27,9 +25,7 @@ pub fn GET_GUILD_AUTOMOD_RULE_ENDPOINT(
 pub type GetGuildAutomodRuleResponse = AutomodRule;
 
 /// Type: post
-///
 /// requires MANAGE_GUILD permission
-///
 /// requires MANAGE_GUILD permission
 pub fn CREATE_GUILD_AUTOMOD_RULE_ENDPOINT(guild_id: Snowflake) -> String {
 	format!("/guilds/{}/auto-moderation/rules", guild_id)
@@ -53,9 +49,7 @@ pub struct CreateGuildAutomodRuleRequest {
 pub type CreateGuildAutomodRuleResponse = AutomodRule;
 
 /// Type: patch
-///
 /// requires MANAGE_GUILD permission
-///
 /// supports the X-Audit-Log-Reason header
 pub fn MODIFY_GUILD_AUTOMOD_RULE_ENDPOINT(
 	guild_id: Snowflake,
@@ -69,9 +63,7 @@ pub type ModifyGuildAutomodRuleRequest = CreateGuildAutomodRuleRequest;
 pub type ModifyGuildAutomodRuleResponse = AutomodRule;
 
 /// Type: delete
-///
 /// requires MANAGE_GUILD permission
-///
 /// supports the X-Audit-Log-Reason header
 pub fn DELETE_GUILD_AUTOMOD_RULE_ENDPOINT(
 	guild_id: Snowflake,
@@ -81,7 +73,6 @@ pub fn DELETE_GUILD_AUTOMOD_RULE_ENDPOINT(
 }
 
 /// Type: post
-///
 /// requires MANAGE_GUILD permission
 pub fn VALIDATE_GUILD_AUTOMOD_RULE_ENDPOINT(guild_id: Snowflake) -> String {
 	format!("/guilds/{}/auto-moderation/rules/validate", guild_id)
@@ -99,7 +90,6 @@ pub struct ValidateGuildAutomodRuleResponse {
 }
 
 /// Type: post
-///
 /// requires MANAGE_GUILD permission
 pub fn EXECUTE_AUTOMOD_ALERT_ACTION_ENDPOINT(guild_id: Snowflake) -> String {
 	format!("/guilds/{}/auto-moderation/alert-action", guild_id)
@@ -114,7 +104,6 @@ pub struct ExecuteAutomodAlertActionRequest {
 }
 
 /// Type: put
-///
 /// requires MANAGE_GUILD permission
 pub fn MODIFY_AUTOMOD_INCIDENTS_ENDPOINT(guild_id: Snowflake) -> String {
 	format!("/guilds/{}/incident-actions", guild_id)
@@ -133,7 +122,6 @@ pub struct ModifyGuildAutomodIncidentsResponse {
 }
 
 /// Type: post
-///
 /// requires MANAGE_GUILD permission
 pub fn RESOLVE_AUTOMOD_INCIDENT_ENDPOINT(guild_id: Snowflake) -> String {
 	format!("/guilds/{}/auto-moderation/false-alarm", guild_id)
@@ -146,14 +134,12 @@ pub struct ResolveAutomodIncidentRequest {
 }
 
 /// Type: post
-///
 /// requires MANAGE_GUILD permission
 pub fn REPORT_AUTOMOD_INCIDENT_ENDPOINT(guild_id: Snowflake) -> String {
 	format!("/guilds/{}/auto-moderation/report-raid", guild_id)
 }
 
 /// Type: post
-///
 /// requires MANAGE_GUILD permission
 pub fn CLEAR_MENTION_RAID_ENDPOINT(guild_id: Snowflake) -> String {
 	format!("/guilds/{}/auto-moderation/clear-mention-raid", guild_id)

@@ -1,12 +1,17 @@
+use std::num::NonZeroU8;
+
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use crate::{api::{application::{ApplicationRoleConnectionMetadata, ApplicationSku, ApplicationType}, users::PartialUser}, common::Timestamp};
+use crate::api::application::{ApplicationRoleConnectionMetadata, ApplicationSku, ApplicationType};
+use crate::api::users::PartialUser;
+use crate::common::id::{ApplicationId, GuildId, IntegrationId, RoleId, SkuId};
+use crate::common::timestamp::Timestamp;
 
 #[derive(Serialize, Deserialize)]
 pub struct Integration {
 	/// The ID of the integration
-	pub id: Snowflake,
+	pub id: IntegrationId,
 	/// The name of the integration
 	pub name: String,
 	/// The type of integration
@@ -20,7 +25,7 @@ pub struct Integration {
 	pub syncing: Option<bool>,
 	/// Role ID that this integration uses for subscribers
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub role_id: Option<Snowflake>,
+	pub role_id: Option<RoleId>,
 	/// Whether emoticons should be synced for this integration (Twitch only)
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub enable_emoticons: Option<bool>,
@@ -29,13 +34,13 @@ pub struct Integration {
 	pub expire_behavior: Option<IntegrationExpireBehavior>,
 	/// The grace period before expiring subscribers (one of 1, 3, 7, 14, 30, in days)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub expire_grace_period: Option<i64>,
+	pub expire_grace_period: Option<NonZeroU8>,
 	/// When this integration was last synced
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub synced_at: Option<Timestamp>,
 	/// How many subscribers this integration has
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub subscriber_count: Option<i64>,
+	pub subscriber_count: Option<u32>,
 	/// Whether this integration has been revoked
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub revoked: Option<bool>,
@@ -55,13 +60,13 @@ pub struct Integration {
 #[derive(Serialize_repr, Deserialize_repr)]
 #[repr(u8)]
 pub enum IntegrationType {
-    #[serde(rename = "twitch")]
+	#[serde(rename = "twitch")]
 	Twitch,
-    #[serde(rename = "youtube")]
+	#[serde(rename = "youtube")]
 	YouTube,
-    #[serde(rename = "discord")]
+	#[serde(rename = "discord")]
 	Discord,
-    #[serde(rename = "guild_subscription")]
+	#[serde(rename = "guild_subscription")]
 	Internal,
 }
 
@@ -85,7 +90,7 @@ pub struct IntegrationAccount {
 #[derive(Serialize, Deserialize)]
 pub struct IntegrationApplication {
 	/// The ID of the application
-	pub id: Snowflake,
+	pub id: ApplicationId,
 	/// The name of the application
 	pub name: String,
 	/// The description of the application
@@ -102,7 +107,7 @@ pub struct IntegrationApplication {
 	pub r#type: Option<ApplicationType>,
 	/// The ID of the application's primary SKU (game, application subscription, etc.)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub primary_sku_id: Option<Snowflake>,
+	pub primary_sku_id: Option<SkuId>,
 	/// The bot attached to this application
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub bot: Option<PartialUser>,
@@ -126,7 +131,7 @@ pub struct IntegrationApplication {
 #[derive(Serialize, Deserialize)]
 pub struct IntegrationGuild {
 	/// The ID of the guild
-	pub id: Snowflake,
+	pub id: GuildId,
 	/// The name of the guild (2-100 characters)
 	pub name: String,
 	/// The guild's icon hash
@@ -149,9 +154,9 @@ pub struct Gif {
 	/// A preview image of the GIF
 	pub preview: String,
 	/// Width of image
-	pub width: i64,
+	pub width: u16,
 	/// Height of image
-	pub height: i64,
+	pub height: u16,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -179,4 +184,3 @@ pub enum GifMediaFormat {
 	/// GIF image in a very small size
 	nanogif,
 }
-

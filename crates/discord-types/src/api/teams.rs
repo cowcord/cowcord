@@ -2,18 +2,20 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use crate::{api::users::PartialUser, common::Timestamp};
+use crate::api::users::PartialUser;
+use crate::common::id::{CompanyId, PayoutId, TeamId, UserId};
+use crate::common::timestamp::Timestamp;
 
 #[derive(Serialize, Deserialize)]
 pub struct Team {
 	/// The ID of the team
-	pub id: Snowflake,
+	pub id: TeamId,
 	/// The name of the team
 	pub name: String,
 	/// The team's icon hash
 	pub icon: Option<String>,
 	/// The ID of the team's owner
-	pub owner_user_id: Snowflake,
+	pub owner_user_id: UserId,
 	/// The members in the team
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub members: Option<Vec<TeamMember>>,
@@ -31,7 +33,7 @@ pub struct Team {
 #[derive(Serialize, Deserialize)]
 pub struct TeamPayoutAccount {
 	/// The payout gateway used
-	pub gateway: i64,
+	pub gateway: TeamPayoutGateway,
 	/// The status of the payout account
 	pub status: TeamPayoutAccountStatus,
 }
@@ -69,9 +71,9 @@ pub struct TeamMember {
 	/// The user this team member represents
 	pub user: PartialUser,
 	/// The ID of the team the user is a member of
-	pub team_id: Snowflake,
+	pub team_id: TeamId,
 	/// The user's team membership state
-	pub membership_state: i64,
+	pub membership_state: TeamMembershipState,
 	/// The user's role on the team
 	pub role: String,
 }
@@ -98,13 +100,13 @@ pub enum TeamMemberRoleTypes {
 #[derive(Serialize, Deserialize)]
 pub struct TeamPayout {
 	/// The ID of the payout
-	pub id: Snowflake,
+	pub id: PayoutId,
 	/// The ID of the user who receives the payout
-	pub user_id: Snowflake,
+	pub user_id: UserId,
 	/// The amount of the payout
-	pub amount: i64,
+	pub amount: u32,
 	/// The status of the payout
-	pub status: i64,
+	pub status: TeamPayoutStatus,
 	/// When the payout period started
 	pub period_start: Timestamp,
 	/// When the payout period ended
@@ -150,7 +152,7 @@ pub enum TeamPayoutStatus {
 #[derive(Serialize, Deserialize)]
 pub struct Company {
 	/// The ID of the company
-	pub id: Snowflake,
+	pub id: CompanyId,
 	/// The name of the company
 	pub name: String,
 }

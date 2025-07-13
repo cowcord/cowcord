@@ -4,7 +4,12 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use crate::{api::{guild::{PartialGuild, RoleConnectionOperatorType}, integrations::IntegrationApplication, teams::{Company, Team}, users::PartialUser}, common::Timestamp};
+use crate::api::guild::{PartialGuild, PremiumTier, RoleConnectionOperatorType};
+use crate::api::integrations::IntegrationApplication;
+use crate::api::teams::{Company, Team};
+use crate::api::users::PartialUser;
+use crate::common::id::{ApplicationAssetId, ApplicationId, EulaId, GuildId, SkuId};
+use crate::common::timestamp::Timestamp;
 
 #[derive(Serialize, Deserialize)]
 pub struct Application {
@@ -28,15 +33,15 @@ pub struct Application {
 	pub flags: ApplicationFlags,
 	/// The ID of the application's primary SKU (game, application subscription, etc.)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub primary_sku_id: Option<Snowflake>,
+	pub primary_sku_id: Option<SkuId>,
 	/// The hex encoded client public key for verification in interactions and the GameSDK's GetTicket
 	pub verify_key: String,
 	/// The ID of the guild linked to the application
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub guild_id: Option<Snowflake>,
+	pub guild_id: Option<GuildId>,
 	/// The ID of the EULA required to play the application's game
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub eula_id: Option<Snowflake>,
+	pub eula_id: Option<EulaId>,
 	/// The URL slug that links to the primary store page of the application
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub slug: Option<String>,
@@ -56,7 +61,7 @@ pub struct Application {
 	pub overlay: Option<bool>,
 	/// The methods of overlaying that the application's game supports
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub overlay_methods: Option<i64>,
+	pub overlay_methods: Option<OverlayMethodFlags>,
 	/// Whether the Discord overlay is known to be problematic with this application's game (default false)
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub overlay_warn: Option<bool>,
@@ -105,13 +110,13 @@ pub struct Application {
 	pub bot_quarantined: Option<bool>,
 	/// Approximate count of guilds the application's bot is in
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub approximate_guild_count: Option<i64>,
+	pub approximate_guild_count: Option<u64>,
 	/// Approximate count of users that have authorized the application with the applications.commands scope
-	pub approximate_user_install_count: i64,
+	pub approximate_user_install_count: u64,
 	/// Approximate count of users that have OAuth2 authorizations for the application
-	pub approximate_user_authorization_count: i64,
+	pub approximate_user_authorization_count: u64,
 	/// What guilds the application can be authorized in
-	pub internal_guild_restriction: i64,
+	pub internal_guild_restriction: InternalGuildRestriction,
 	/// The URL to the application's terms of service
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub terms_of_service_url: Option<String>,
@@ -123,20 +128,20 @@ pub struct Application {
 	/// The URL of the application's interactions endpoint
 	pub interactions_endpoint_url: String,
 	/// The version of the application's interactions endpoint implementation
-	pub interactions_version: i64,
+	pub interactions_version: ApplicationInteractionsVersion,
 	/// The enabled event webhook types to send to the interaction endpoint
 	pub interactions_event_types: Vec<String>,
 	/// Whether event webhooks are enabled
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub event_webhooks_status: Option<i64>,
+	pub event_webhooks_status: Option<EventWebhooksStatus>,
 	/// The URL of the application's event webhooks endpoint
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub event_webhooks_url: Option<String>,
 	/// The enabled event webhook types to send to the event webhooks endpoint
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub event_webhooks_types: Option<Vec<String>>,
+	pub event_webhooks_types: Option<Vec<EventWebhooksType>>,
 	/// Whether uploaded media content used in application commands is scanned and deleted for explicit content
-	pub explicit_content_filter: i64,
+	pub explicit_content_filter: ExplicitContentFilterLevel,
 	/// Tags describing the content and functionality of the application (max 20 characters, max 5)
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub tags: Option<Vec<String>>,
@@ -148,17 +153,19 @@ pub struct Application {
 	pub custom_install_url: Option<String>,
 	/// The configuration for each integration type supported by the application
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub integration_types_config: Option<HashMap<i64, Option<ApplicationIntegrationTypeConfiguration>>>,
+	pub integration_types_config: Option<
+		HashMap<ApplicationIntegrationType, Option<ApplicationIntegrationTypeConfiguration>>,
+	>,
 	/// Whether the application is verified
 	pub is_verified: bool,
 	/// The current verification state of the application
-	pub verification_state: i64,
+	pub verification_state: ApplicationVerificationState,
 	/// The current store approval state of the commerce application
-	pub store_application_state: i64,
+	pub store_application_state: StoreApplicationState,
 	/// The current RPC approval state of the application
-	pub rpc_application_state: i64,
+	pub rpc_application_state: RpcApplicationState,
 	/// The current guild creator monetization state of the application
-	pub creator_monetization_state: i64,
+	pub creator_monetization_state: ApplicationMonetizationState,
 	/// Whether the application is discoverable in the application directory
 	pub is_discoverable: bool,
 	/// The current application directory discoverability state of the application
@@ -183,12 +190,11 @@ pub struct Application {
 }
 
 /// Partial applications may have any combination of fields, depending on the context in which they are provided. Certain data may be included or omitted depending on what data is needed for the given operation. Fields [marked as required](https://docs.discord.food/reference#nullable-and-optional-resource-fields) will always be present.
-/// 
 /// Further complicating things, some optional fields may be omitted if their value is null, even if the specific partial does include this data.
 #[derive(Serialize, Deserialize)]
 pub struct PartialApplication {
 	/// The ID of the application
-	pub id: Snowflake,
+	pub id: ApplicationId,
 	/// The name of the application
 	pub name: String,
 	/// The description of the application
@@ -207,18 +213,18 @@ pub struct PartialApplication {
 	pub flags: ApplicationFlags,
 	/// The ID of the application's primary SKU (game, application subscription, etc.)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub primary_sku_id: Option<Snowflake>,
+	pub primary_sku_id: Option<SkuId>,
 	/// The hex encoded client public key for verification in interactions and the GameSDK's GetTicket
 	pub verify_key: String,
 	/// The ID of the guild linked to the application
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub guild_id: Option<Snowflake>,
+	pub guild_id: Option<GuildId>,
 	/// The guild linked to the application
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub guild: Option<PartialGuild>,
 	/// The ID of the EULA required to play the application's game {/ todo: link this here /}
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub eula_id: Option<Snowflake>,
+	pub eula_id: Option<EulaId>,
 	/// The URL slug that links to the primary store page of the application
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub slug: Option<String>,
@@ -238,7 +244,7 @@ pub struct PartialApplication {
 	pub overlay: Option<bool>,
 	/// The methods of overlaying that the application's game supports
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub overlay_methods: Option<i64>,
+	pub overlay_methods: Option<OverlayMethodFlags>,
 	/// Whether the Discord overlay is known to be problematic with this application's game (default false)
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub overlay_warn: Option<bool>,
@@ -294,7 +300,9 @@ pub struct PartialApplication {
 	pub custom_install_url: Option<String>,
 	/// The configuration for each integration type supported by the application
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub integration_types_config: Option<HashMap<i64, Option<ApplicationIntegrationTypeConfiguration>>>,
+	pub integration_types_config: Option<
+		HashMap<ApplicationIntegrationType, Option<ApplicationIntegrationTypeConfiguration>>,
+	>,
 	/// Whether the application is verified
 	pub is_verified: bool,
 	/// Whether the application is discoverable in the application directory
@@ -321,7 +329,6 @@ pub enum ApplicationType {
 	/// A limited application used for creator monetization (e.g. role subscription) SKUs
 	CREATOR_MONETIZATION = 4,
 }
-
 
 bitflags! {
 	pub struct ApplicationFlags: u64 {
@@ -378,14 +385,12 @@ bitflags! {
 	}
 }
 
-
 bitflags! {
 	pub struct OverlayMethodFlags: u64 {
 		/// Overlay can be rendered out of process
 		const OUT_OF_PROCESS = 1 << 0;
 	}
 }
-
 
 #[derive(Serialize_repr, Deserialize_repr)]
 #[repr(u8)]
@@ -416,6 +421,7 @@ pub enum EventWebhooksStatus {
 	ENABLED = 2,
 }
 
+#[derive(Serialize, Deserialize)]
 pub enum EventWebhooksType {
 	/// Sent when a user authorizes the application
 	APPLICATION_AUTHORIZED,
@@ -635,7 +641,7 @@ pub struct ApplicationInstallParams {
 }
 
 /// An application's supported installation contexts.
-#[derive(Serialize_repr, Deserialize_repr)]
+#[derive(Serialize_repr, Deserialize_repr, PartialEq, Eq, Hash)]
 #[repr(u8)]
 pub enum ApplicationIntegrationType {
 	/// Guild installation context
@@ -669,22 +675,22 @@ pub struct ApplicationProxyMapping {
 pub struct EmbeddedActivityConfig {
 	/// The ID of the application this embedded activity is for
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub application_id: Option<Snowflake>,
+	pub application_id: Option<ApplicationId>,
 	/// The ID of the application asset to preview the activity with
-	pub activity_preview_video_asset_id: Option<Snowflake>,
+	pub activity_preview_video_asset_id: Option<ApplicationAssetId>,
 	/// The platforms this activity is supported on
 	pub supported_platforms: Vec<String>,
 	/// The default orientation lock state for the activity on mobile
-	pub default_orientation_lock_state: i64,
+	pub default_orientation_lock_state: EmbeddedActivityOrientationLockStateType,
 	/// The default orientation lock state for the activity on tablets
-	pub tablet_default_orientation_lock_state: i64,
+	pub tablet_default_orientation_lock_state: EmbeddedActivityOrientationLockStateType,
 	/// Whether the activity is age gated
 	pub requires_age_gate: bool,
 	/// Whether the activity uses a responsive aspect ratio instead of a dynamic aspect ratio
 	pub legacy_responsive_aspect_ratio: bool,
 	/// The minimum guild premium tier required to use the activity, if any
 	#[deprecated]
-	pub premium_tier_requirement: Option<i64>,
+	pub premium_tier_requirement: Option<PremiumTier>,
 	/// When the current free period for the activity starts, if any
 	#[deprecated]
 	pub free_period_starts_at: Option<Timestamp>,
@@ -724,7 +730,7 @@ pub enum EmbeddedActivityPlatformType {
 #[derive(Serialize, Deserialize)]
 pub struct EmbeddedActivityPlatformConfig {
 	/// The type of release label for the platform
-	pub label_type: i64,
+	pub label_type: EmbeddedActivityLabelType,
 	/// When the release label expires
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub label_until: Option<Option<Timestamp>>,
@@ -823,7 +829,7 @@ pub struct ApplicationRoleConnectionMetadata {
 #[derive(Serialize, Deserialize)]
 pub struct ActivityLink {
 	/// The application ID
-	pub application_id: Snowflake,
+	pub application_id: ApplicationId,
 	/// The link ID
 	pub link_id: String,
 	/// The hash of the application quick link asset
@@ -831,7 +837,7 @@ pub struct ActivityLink {
 	pub asset_path: Option<String>,
 	/// The ID of the application asset
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub asset_id: Option<Snowflake>,
+	pub asset_id: Option<ApplicationAssetId>,
 	/// The title of the activity link
 	pub title: String,
 	/// The description of the activity link
@@ -853,5 +859,3 @@ pub enum ActivityLinkType {
 	/// Made by the user and last for 30 days
 	QUICK_LINK = 1,
 }
-
-

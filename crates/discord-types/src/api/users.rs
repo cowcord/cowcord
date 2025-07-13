@@ -3,12 +3,24 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use crate::{api::{emoji::Emoji, family_center::LinkedUser}, common::Timestamp};
+use crate::api::emoji::Emoji;
+use crate::api::family_center::LinkedUser;
+use crate::common::id::{
+	GenericSnowflake,
+	GuildId,
+	HarvestId,
+	ProfileEffectId,
+	SkuId,
+	SurveyId,
+	UserId,
+};
+use crate::common::locale::Locale;
+use crate::common::timestamp::Timestamp;
 
 #[derive(Serialize, Deserialize)]
 pub struct User {
 	/// The ID of the user
-	pub id: Snowflake,
+	pub id: UserId,
 	/// The user's username, may be unique across the platform (2-32 characters)
 	pub username: String,
 	/// The user's stringified 4-digit Discord tag
@@ -47,7 +59,7 @@ pub struct User {
 	/// The user's banner hash
 	pub banner: Option<String>,
 	/// The user's banner color encoded as an integer representation of a hexadecimal color code
-	pub accent_color: Option<i64>,
+	pub accent_color: Option<u32>,
 	/// The language option chosen by the user
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub locale: Option<Locale>,
@@ -65,7 +77,7 @@ pub struct User {
 	pub premium_type: PremiumType,
 	/// The ID of the user's personal, non-employee user account
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub personal_connection_id: Option<Snowflake>,
+	pub personal_connection_id: Option<UserId>,
 	/// The flags on a user's account
 	pub flags: UserFlags,
 	/// The public flags on a user's account
@@ -93,7 +105,7 @@ pub struct User {
 #[derive(Serialize, Deserialize)]
 pub struct PartialUser {
 	/// The ID of the user
-	pub id: Snowflake,
+	pub id: UserId,
 	/// The user's username, may be unique across the platform (2-32 characters)
 	pub username: String,
 	/// The user's stringified 4-digit Discord tag
@@ -122,7 +134,7 @@ pub struct PartialUser {
 	pub banner: Option<Option<String>>,
 	/// The user's banner color encoded as an integer representation of a hexadecimal color code
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub accent_color: Option<Option<i64>>,
+	pub accent_color: Option<Option<u32>>,
 	/// The public flags on a user's account
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub public_flags: Option<UserFlags>,
@@ -133,7 +145,7 @@ pub struct PrimaryGuild {
 	/// Whether the user is displaying their guild tag
 	pub identity_enabled: Option<bool>,
 	/// The ID of the guild
-	pub identity_guild_id: Option<Snowflake>,
+	pub identity_guild_id: Option<GuildId>,
 	/// The user's guild tag (max 4 characters)
 	pub tag: Option<String>,
 	/// The guild tag badge hash
@@ -218,7 +230,7 @@ bitflags! {
 }
 
 bitflags! {
-    /// Purchased flags denote what premium items a user has ever purchased. Visit the [Nitro](https://discord.com/nitro) page to learn more about the premium plans currently offered.
+	/// Purchased flags denote what premium items a user has ever purchased. Visit the [Nitro](https://discord.com/nitro) page to learn more about the premium plans currently offered.
 	pub struct PurchasedFlags: u64 {
 		/// User has purchased Nitro classic
 		const NITRO_CLASSIC = 1 << 0;
@@ -299,9 +311,9 @@ pub struct AvatarDecorationData {
 	/// The avatar decoration hash
 	pub asset: String,
 	/// The ID of the avatar decoration's SKU
-	pub sku_id: Snowflake,
+	pub sku_id: SkuId,
 	/// Unix timestamp of when the current avatar decoration expires
-	pub expires_at: Option<i64>,
+	pub expires_at: Option<u32>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -315,13 +327,13 @@ pub struct NameplateData {
 	/// The nameplate asset path
 	pub asset: String,
 	/// The ID of the nameplate's SKU
-	pub sku_id: Snowflake,
+	pub sku_id: SkuId,
 	/// The nameplate's accessibility description
 	pub label: String,
 	/// The nameplate's color palette
 	pub palette: String,
 	/// Unix timestamp of when the current nameplate expires
-	pub expires_at: Option<i64>,
+	pub expires_at: Option<u32>,
 }
 
 #[derive(Serialize_repr, Deserialize_repr)]
@@ -343,7 +355,7 @@ pub enum NameplateColorPalette {
 pub struct ProfileMetadata {
 	/// The guild ID this profile applies to, if it is a guild profile
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub guild_id: Option<Snowflake>,
+	pub guild_id: Option<SkuId>,
 	/// The user's pronouns (max 40 characters)
 	pub pronouns: String,
 	/// The user's bio (max 190 characters)
@@ -354,13 +366,13 @@ pub struct ProfileMetadata {
 	pub banner: Option<Option<String>>,
 	/// The user's banner color encoded as an integer representation of a hexadecimal color code
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub accent_color: Option<Option<i64>>,
+	pub accent_color: Option<Option<u32>>,
 	/// The user's two theme colors encoded as an array of integers representing hexadecimal color codes
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub theme_colors: Option<Option<(i64, i64)>>,
+	pub theme_colors: Option<Option<(u32, u32)>>,
 	/// The user's profile popout animation particle type
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub popout_animation_particle_type: Option<Option<Snowflake>>,
+	pub popout_animation_particle_type: Option<Option<GenericSnowflake>>,
 	/// The user's profile emoji
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub emoji: Option<Option<Emoji>>,
@@ -372,9 +384,9 @@ pub struct ProfileMetadata {
 #[derive(Serialize, Deserialize)]
 pub struct ProfileEffect {
 	/// The ID of the profile effect
-	pub id: Snowflake,
+	pub id: ProfileEffectId,
 	/// Unix timestamp of when the current profile effect expires
-	pub expires_at: Option<i64>,
+	pub expires_at: Option<u32>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -402,7 +414,7 @@ pub enum AuthenticatorType {
 #[derive(Serialize, Deserialize)]
 pub struct BackupCode {
 	/// The ID of the user
-	pub user_id: Snowflake,
+	pub user_id: UserId,
 	/// The backup code
 	pub code: String,
 	/// Whether the backup code has been used
@@ -412,15 +424,15 @@ pub struct BackupCode {
 #[derive(Serialize, Deserialize)]
 pub struct Harvest {
 	/// The ID of the harvest
-	pub harvest_id: Snowflake,
+	pub harvest_id: HarvestId,
 	/// The ID of the user being harvested
-	pub user_id: Snowflake,
+	pub user_id: UserId,
 	/// The email the harvest will be sent to
 	pub email: String,
 	/// The state of the harvest
 	pub state: String,
 	/// The status of the harvest
-	pub status: i64,
+	pub status: HarvestStatus,
 	/// When the harvest was created
 	pub created_at: Timestamp,
 	/// When the harvest was completed
@@ -474,7 +486,7 @@ pub enum HarvestStatus {
 	CANCELLED = 4,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Eq, PartialEq, Hash)]
 pub enum HarvestBackendInternalType {
 	/// All account information
 	users,
@@ -507,9 +519,9 @@ pub enum HarvestBackendState {
 #[derive(Serialize, Deserialize)]
 pub struct UserSurvey {
 	/// The ID of the survey
-	pub id: Snowflake,
+	pub id: SurveyId,
 	/// The ID of the survey
-	pub key: Snowflake,
+	pub key: SurveyId,
 	/// The title of the survey
 	pub prompt: String,
 	/// The call-to-action text
@@ -519,7 +531,7 @@ pub struct UserSurvey {
 	/// User requirements for the survey to be shown
 	pub guild_requirements: Vec<SurveyRequirementType>,
 	/// The guild member count requirements (min, max)
-	pub guild_size: (Option<i64>, Option<i64>),
+	pub guild_size: (Option<u32>, Option<u32>),
 	/// The guild permissions bitwise value requirements
 	pub guild_permissions: Vec<String>,
 }
@@ -543,4 +555,3 @@ pub enum SurveyRequirementType {
 	/// The user must have the given permissions in any guild
 	GUILD_PERMISSIONS,
 }
-

@@ -3,17 +3,44 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use crate::{api::{application::PartialApplication, channel::{Channel, PartialChannel}, components::{Component, SelectMenuResolved}, emoji::Emoji, integrations::IntegrationApplication, presences::ActivityActionType, soundboard::SoundboardSound, stickers::{Sticker, StickerItem}, users::PartialUser}, common::Timestamp};
+use crate::api::application::{ApplicationIntegrationType, PartialApplication};
+use crate::api::channel::{Channel, PartialChannel};
+use crate::api::components::{Component, SelectMenuResolved};
+use crate::api::emoji::Emoji;
+use crate::api::integrations::IntegrationApplication;
+use crate::api::presences::ActivityActionType;
+use crate::api::soundboard::SoundboardSound;
+use crate::api::stickers::{Sticker, StickerItem};
+use crate::api::users::PartialUser;
+use crate::common::id::{
+	AnswerId,
+	ApplicationId,
+	AttachmentId,
+	ChangelogId,
+	ChannelId,
+	EmojiId,
+	GuildId,
+	GuildListingId,
+	InteractionId,
+	LobbyId,
+	MessageId,
+	RoleId,
+	SkuId,
+	SummaryId,
+	UserId,
+	WebhookId,
+};
+use crate::common::timestamp::Timestamp;
 
 #[derive(Serialize, Deserialize)]
 pub struct Message {
 	/// The ID of the message
-	pub id: Snowflake,
+	pub id: MessageId,
 	/// The ID of the channel the message was sent in
-	pub channel_id: Snowflake,
+	pub channel_id: ChannelId,
 	/// The ID of the lobby the message was sent in
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub lobby_id: Option<Snowflake>,
+	pub lobby_id: Option<LobbyId>,
 	/// The author of the message
 	pub author: PartialUser,
 	/// Contents of the message
@@ -29,7 +56,7 @@ pub struct Message {
 	/// Users specifically mentioned in the message
 	pub mentions: Vec<PartialUser>,
 	/// Roles specifically mentioned in this message
-	pub mention_roles: Vec<Snowflake>,
+	pub mention_roles: Vec<RoleId>,
 	/// Channels specifically mentioned in this message
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub mention_channels: Option<Vec<PartialChannel>>,
@@ -42,12 +69,12 @@ pub struct Message {
 	pub reactions: Option<Vec<Reaction>>,
 	/// The message's nonce, used for message deduplication
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub nonce: Option<i64>,
+	pub nonce: Option<u64>,
 	/// Whether this message is pinned
 	pub pinned: bool,
 	/// The ID of the webhook that send the message
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub webhook_id: Option<Snowflake>,
+	pub webhook_id: Option<WebhookId>,
 	/// The type of message
 	pub r#type: MessageType,
 	/// The rich presence activity the author is inviting users to
@@ -58,7 +85,7 @@ pub struct Message {
 	pub application: Option<IntegrationApplication>,
 	/// The ID of the application; only sent for interaction responses and messages created through OAuth2
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub application_id: Option<Snowflake>,
+	pub application_id: Option<ApplicationId>,
 	/// The message's flags
 	pub flags: MessageFlags,
 	/// The source of a crosspost, snapshot, channel follow add, pin, or reply message
@@ -108,7 +135,7 @@ pub struct Message {
 	pub poll: Option<Poll>,
 	/// The ID of the changelog that prompted this message
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub changelog_id: Option<Snowflake>,
+	pub changelog_id: Option<ChangelogId>,
 	/// The message's soundboard sounds
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub soundboard_sounds: Option<Vec<SoundboardSound>>,
@@ -121,12 +148,12 @@ pub struct Message {
 #[derive(Serialize, Deserialize)]
 pub struct PartialMessage {
 	/// The ID of the message
-	pub id: Snowflake,
+	pub id: MessageId,
 	/// The ID of the lobby the message was sent in
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub lobby_id: Option<Snowflake>,
+	pub lobby_id: Option<LobbyId>,
 	/// The ID of the channel the message was sent in
-	pub channel_id: Snowflake,
+	pub channel_id: ChannelId,
 	/// The type of message
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub r#type: Option<MessageType>,
@@ -139,17 +166,16 @@ pub struct PartialMessage {
 	pub flags: Option<MessageFlags>,
 	/// The ID of the application
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub application_id: Option<Snowflake>,
+	pub application_id: Option<ApplicationId>,
 	/// The channel the message was sent in
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub channel: Option<Channel>,
 	/// The ID of the other recipient
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub recipient_id: Option<Snowflake>,
+	pub recipient_id: Option<UserId>,
 }
 
 /// Type `19` and `20` are only available in API v8 and above. In v7 and below, they are represented as type `0`. Additionally, type `21` is only available in API v9 and above.
-/// 
 /// none of that should matter howevere because api v9 is used
 #[derive(Serialize_repr, Deserialize_repr)]
 #[repr(u8)]
@@ -326,7 +352,7 @@ pub struct MessageActivity {
 #[derive(Serialize, Deserialize)]
 pub struct MessageCall {
 	/// The channel recipients that participated in the call
-	pub participants: Vec<Snowflake>,
+	pub participants: Vec<UserId>,
 	/// When the call ended, if it has
 	pub ended_timestamp: Option<Timestamp>,
 }
@@ -334,7 +360,7 @@ pub struct MessageCall {
 #[derive(Serialize, Deserialize)]
 pub struct MessageInteractionMetadata {
 	/// The ID of the interaction
-	pub id: Snowflake,
+	pub id: InteractionId,
 	/// The type of interaction
 	pub r#type: InteractionType,
 	/// The name of the application command executed (including subcommands and subcommand groups), present only on APPLICATION_COMMAND interactions
@@ -342,20 +368,20 @@ pub struct MessageInteractionMetadata {
 	pub name: Option<String>,
 	/// The type of application command executed, present only on APPLICATION_COMMAND interactions
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub command_type: Option<i64>,
+	pub command_type: Option<ApplicationCommandType>,
 	/// The reason this interaction is ephemeral
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub ephemerality_reason: Option<i64>,
+	pub ephemerality_reason: Option<EphemeralityReason>,
 	/// The user that initiated the interaction
 	pub user: PartialUser,
 	/// IDs for each installation context related to an interaction
-	pub authorizing_integration_owners: HashMap<i64, Snowflake>,
+	pub authorizing_integration_owners: HashMap<ApplicationIntegrationType, InteractionId>,
 	/// The ID of the original response message, present only on follow-up messages
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub original_response_message_id: Option<Snowflake>,
+	pub original_response_message_id: Option<MessageId>,
 	/// ID of the message that contained interactive component, present only on messages created from component interactions
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub interacted_message_id: Option<Snowflake>,
+	pub interacted_message_id: Option<MessageId>,
 	/// Metadata for the interaction that was used to open the modal, present only on MODAL_SUBMIT interactions
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub triggering_interaction_metadata: Option<Box<MessageInteractionMetadata>>,
@@ -364,7 +390,7 @@ pub struct MessageInteractionMetadata {
 	pub target_user: Option<PartialUser>,
 	/// The ID of the message that was targeted by the interaction, present only on MESSAGE_COMMAND interactions
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub target_message_id: Option<Snowflake>,
+	pub target_message_id: Option<MessageId>,
 }
 
 #[derive(Serialize_repr, Deserialize_repr)]
@@ -413,11 +439,11 @@ pub enum EphemeralityReason {
 #[derive(Serialize, Deserialize)]
 pub struct MessageRoleSubscription {
 	/// The ID of the sku and listing that the user is subscribed to
-	pub role_subscription_listing_id: Snowflake,
+	pub role_subscription_listing_id: SkuId,
 	/// The name of the tier that the user is subscribed to
 	pub tier_name: String,
 	/// The cumulative number of months that the user has been subscribed for
-	pub total_months_subscribed: i64,
+	pub total_months_subscribed: u16,
 	/// Whether this notification is for a renewal rather than a new purchase
 	pub is_renewal: bool,
 }
@@ -425,7 +451,7 @@ pub struct MessageRoleSubscription {
 #[derive(Serialize, Deserialize)]
 pub struct MessagePurchaseNotification {
 	/// The type of purchase
-	pub r#type: i64,
+	pub r#type: MessagePurchaseNotificationType,
 	/// The guild product purchase that prompted this message
 	pub guild_product_purchase: Option<GuildProductPurchase>,
 }
@@ -441,7 +467,7 @@ pub enum MessagePurchaseNotificationType {
 #[derive(Serialize, Deserialize)]
 pub struct GuildProductPurchase {
 	/// The ID of the product listing that was purchased
-	pub listing_id: Snowflake,
+	pub listing_id: GuildListingId,
 	/// The name of the product that was purchased
 	pub product_name: String,
 }
@@ -469,12 +495,12 @@ pub struct MessageReference {
 	pub r#type: Option<MessageReferenceType>,
 	/// The ID of the originating message
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub message_id: Option<Snowflake>,
+	pub message_id: Option<MessageId>,
 	/// The ID of the originating channel
-	pub channel_id: Snowflake,
+	pub channel_id: ChannelId,
 	/// The ID of the originating channel's guild
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub guild_id: Option<Snowflake>,
+	pub guild_id: Option<GuildId>,
 	/// Whether to error if the referenced message doesn't exist instead of sending as a normal (non-reply) message (default true)
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub fail_if_not_exists: Option<bool>,
@@ -490,7 +516,7 @@ pub struct MessageForwardOnly {
 	pub embed_indices: Option<Vec<i64>>,
 	/// The IDs of the attachments from the original message to include
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub attachment_ids: Option<Vec<Snowflake>>,
+	pub attachment_ids: Option<Vec<AttachmentId>>,
 }
 
 /// Determines how associated data is populated.
@@ -520,7 +546,7 @@ pub struct SnapshotMessage {
 	/// Users specifically mentioned in the message
 	pub mentions: Vec<PartialUser>,
 	/// Roles specifically mentioned in this message
-	pub mention_roles: Vec<Snowflake>,
+	pub mention_roles: Vec<RoleId>,
 	/// The attached files
 	pub attachments: Vec<Attachment>,
 	/// Content embedded in the message
@@ -546,7 +572,7 @@ pub struct SnapshotMessage {
 #[derive(Serialize, Deserialize)]
 pub struct Reaction {
 	/// Total amount of times this emoji has been used to react
-	pub count: i64,
+	pub count: u32,
 	/// Details about the number of times this emoji has been used to react
 	pub count_details: ReactionCountDetails,
 	/// Whether the current user reacted using this emoji
@@ -562,9 +588,9 @@ pub struct Reaction {
 #[derive(Serialize, Deserialize)]
 pub struct ReactionCountDetails {
 	/// Amount of times this emoji has been used to react normally
-	pub normal: i64,
+	pub normal: u32,
 	/// Amount of times this emoji has been used to burst-react
-	pub burst: i64,
+	pub burst: u32,
 }
 
 #[derive(Serialize_repr, Deserialize_repr)]
@@ -595,7 +621,7 @@ pub struct Embed {
 	pub timestamp: Option<Timestamp>,
 	/// The color of the embed encoded as an integer representation of a hexadecimal color code
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub color: Option<i64>,
+	pub color: Option<u32>,
 	/// Embed footer information
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub footer: Option<EmbedFooter>,
@@ -619,10 +645,10 @@ pub struct Embed {
 	pub fields: Option<Vec<EmbedField>>,
 	/// The ID of the message this embed was generated from
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub reference_id: Option<Snowflake>,
+	pub reference_id: Option<MessageId>,
 	/// The version of the explicit content scan filter this embed was scanned with
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub content_scan_version: Option<i64>,
+	pub content_scan_version: Option<u8>,
 	/// The embed's flags
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub flags: Option<EmbedFlags>,
@@ -631,31 +657,31 @@ pub struct Embed {
 /// Most embed types are "loosely defined" and, for the most part, are not used by our clients for rendering. Embed attributes power what is rendered.
 #[derive(Serialize, Deserialize)]
 pub enum EmbedType {
-    /// Application news embed
-    #[deprecated]
-    application_news,
-    /// Article embed
-    article,
-    /// AutoMod alert
-    auto_moderation_message,
-    /// AutoMod incident notification
-    auto_moderation_notification,
-    /// Gift embed
-    gift,
-    /// Animated GIF image rendered as a video embed
-    gifv,
-    /// Image embed
-    image,
-    /// Link embed
-    link,
-    /// Poll result embed
-    poll_result,
-    /// Media channel post preview embed
-    post_preview,
-    /// Generic embed rendered from embed attributes
-    rich,
-    /// Video embed
-    video,
+	/// Application news embed
+	#[deprecated]
+	application_news,
+	/// Article embed
+	article,
+	/// AutoMod alert
+	auto_moderation_message,
+	/// AutoMod incident notification
+	auto_moderation_notification,
+	/// Gift embed
+	gift,
+	/// Animated GIF image rendered as a video embed
+	gifv,
+	/// Image embed
+	image,
+	/// Link embed
+	link,
+	/// Poll result embed
+	poll_result,
+	/// Media channel post preview embed
+	post_preview,
+	/// Generic embed rendered from embed attributes
+	rich,
+	/// Video embed
+	video,
 }
 
 bitflags! {
@@ -676,10 +702,10 @@ pub struct EmbedMedia {
 	pub proxy_url: Option<String>,
 	/// Height of media
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub height: Option<i64>,
+	pub height: Option<u16>,
 	/// Width of media
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub width: Option<i64>,
+	pub width: Option<u16>,
 	/// The media's attachment flags
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub flags: Option<AttachmentFlags>,
@@ -694,7 +720,7 @@ pub struct EmbedMedia {
 	pub content_scan_metadata: Option<ContentScanMetadata>,
 	/// The attachment placeholder protocol version (currently 1)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub placeholder_version: Option<i64>,
+	pub placeholder_version: Option<u8>,
 	/// A low-resolution thumbhash of the media, to display before it is loaded
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub placeholder: Option<String>,
@@ -751,9 +777,9 @@ pub struct EmbedField {
 #[derive(Serialize, Deserialize)]
 pub struct ContentScanMetadata {
 	/// The content scan flags of the media
-	pub flags: i64,
+	pub flags: ContentScanFlags,
 	/// The version of the explicit content scan filter this media was scanned with
-	pub version: i64,
+	pub version: u8,
 }
 
 bitflags! {
@@ -765,12 +791,11 @@ bitflags! {
 	}
 }
 
-///
 /// When sending/editing messages, only id is required. filename is also required when [uploading to Google Cloud](https://docs.discord.food/reference#uploading-to-google-cloud).
 #[derive(Serialize, Deserialize)]
 pub struct Attachment {
 	/// The attachment ID
-	pub id: Snowflake,
+	pub id: AttachmentId,
 	/// The name of file attached (max 1024 characters)
 	pub filename: String,
 	/// The name of the file without the extension or title of the clip (max 1024 characters, automatically provided when the filename is normalized or randomly generated due to invalid characters)
@@ -786,23 +811,23 @@ pub struct Attachment {
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub content_type: Option<String>,
 	/// The size of file in bytes
-	pub size: i64,
+	pub size: u64,
 	/// Source URL of the file
 	pub url: String,
 	/// A proxied url of the file
 	pub proxy_url: String,
 	/// Height of image
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub height: Option<Option<i64>>,
+	pub height: Option<Option<u16>>,
 	/// Width of image
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub width: Option<Option<i64>>,
+	pub width: Option<Option<u16>>,
 	/// The version of the explicit content scan filter this attachment was scanned with
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub content_scan_version: Option<i64>,
+	pub content_scan_version: Option<u8>,
 	/// The attachment placeholder protocol version (currently 1)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub placeholder_version: Option<i64>,
+	pub placeholder_version: Option<u8>,
 	/// A low-resolution thumbhash of the attachment, to display before it is loaded
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub placeholder: Option<String>,
@@ -835,13 +860,13 @@ pub struct Attachment {
 	pub clip_created_at: Option<Timestamp>,
 	/// The IDs of the participants in the clip (max 100)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub clip_participant_ids: Option<Vec<Snowflake>>,
+	pub clip_participant_ids: Option<Vec<UserId>>,
 	/// The participants in the clip (max 100)
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub clip_participants: Option<Vec<PartialUser>>,
 	/// The ID of the application the clip was taken in
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub application_id: Option<Snowflake>,
+	pub application_id: Option<ApplicationId>,
 	/// The application the clip was taken in
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub application: Option<PartialApplication>,
@@ -883,10 +908,10 @@ pub struct AllowedMentions {
 	pub parse: Option<Vec<String>>,
 	/// The role IDs to mention (max 100)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub roles: Option<Vec<Snowflake>>,
+	pub roles: Option<Vec<RoleId>>,
 	/// The user IDs to mention (max 100)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub users: Option<Vec<Snowflake>>,
+	pub users: Option<Vec<UserId>>,
 	/// For replies, whether to mention the author of the message being replied to (default false)
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub replied_user: Option<bool>,
@@ -917,7 +942,7 @@ pub struct PollCreate {
 	/// Each of the answers available in the poll (max 10)
 	pub answers: Vec<PollAnswer>,
 	/// Number of hours the poll should be open for (max 32 days, default 1)
-	pub duration: i64,
+	pub duration: u8,
 	/// Whether a user can select multiple answers (default false)
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub allow_multiselect: Option<bool>,
@@ -950,7 +975,7 @@ pub struct PollMedia {
 #[derive(Serialize, Deserialize)]
 pub struct PollAnswer {
 	/// The ID of the answer
-	pub answer_id: i64,
+	pub answer_id: AnswerId,
 	/// The data of the answer
 	pub poll_media: PollMedia,
 }
@@ -967,9 +992,9 @@ pub struct PollResults {
 #[derive(Serialize, Deserialize)]
 pub struct PollAnswerCount {
 	/// The ID of the answer
-	pub id: i64,
+	pub id: AnswerId,
 	/// The number of votes for this answer
-	pub count: i64,
+	pub count: u32,
 	/// Whether the current user voted for this answer
 	pub me_voted: bool,
 }
@@ -979,16 +1004,16 @@ pub struct PollResultEmbed {
 	/// The text of the poll question
 	pub poll_question_text: String,
 	/// The total number of votes on the poll
-	pub total_votes: i64,
+	pub total_votes: u32,
 	/// The ID of the winning answer
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub victor_answer_id: Option<i64>,
+	pub victor_answer_id: Option<AnswerId>,
 	/// The text of the winning answer
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub victor_answer_text: Option<String>,
 	/// The ID of the emoji of the winning answer
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub victor_answer_emoji_id: Option<Snowflake>,
+	pub victor_answer_emoji_id: Option<EmojiId>,
 	/// The name of the emoji of the winning answer
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub victor_answer_emoji_name: Option<String>,
@@ -996,13 +1021,13 @@ pub struct PollResultEmbed {
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub victor_answer_emoji_animated: Option<bool>,
 	/// The number of votes on the winning answer
-	pub victor_answer_votes: i64,
+	pub victor_answer_votes: u32,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct Potion {
 	/// The ID of the user who applied the potion
-	pub used_by: Snowflake,
+	pub used_by: UserId,
 	/// The type of the potion
 	pub r#type: PotionType,
 	/// The emoji associated with the potion
@@ -1027,23 +1052,23 @@ pub struct ConfettiPotion {
 #[derive(Serialize, Deserialize)]
 pub struct ConversationSummary {
 	/// The ID of the summary
-	pub id: Snowflake,
+	pub id: SummaryId,
 	/// A short description of the topic of the conversation
 	pub topic: String,
 	/// A brief summary of the conversation
 	pub summ_short: String,
 	/// The IDs of the messages included in the summary
-	pub message_ids: Vec<Snowflake>,
+	pub message_ids: Vec<MessageId>,
 	/// The IDs of the users included in the summary
-	pub people: Vec<Snowflake>,
+	pub people: Vec<UserId>,
 	/// Whether the summary contains potentially unsafe content
 	pub r#unsafe: bool,
 	/// The ID of the first message in the conversation
-	pub start_id: Snowflake,
+	pub start_id: MessageId,
 	/// The ID of the last message in the conversation
-	pub end_id: Snowflake,
+	pub end_id: MessageId,
 	/// The number of messages included in the summary
-	pub count: i64,
+	pub count: u16,
 	/// The source of the summary
 	pub source: SummarySource,
 	/// The type of summary
@@ -1081,4 +1106,3 @@ pub struct MessagePin {
 	/// The pinned message, without reactions key
 	pub message: Message,
 }
-

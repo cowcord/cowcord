@@ -2,26 +2,42 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use crate::{api::{quests::QuestRewardCode, users::PartialUser}, common::Timestamp};
+use crate::api::quests::{QuestRewardCode, QuestRewardType};
+use crate::api::users::PartialUser;
+use crate::common::id::{
+	ApplicationBranchId,
+	ApplicationId,
+	EntitlementId,
+	GiftCodeBatchId,
+	GuildId,
+	PromotionId,
+	SkuId,
+	SubscriptionId,
+	UserId,
+};
+use crate::common::timestamp::Timestamp;
 
+/// Entitlements in Discord represent a user or guild's access to a specific SKU.
+///
+/// Entitlements can represent purchases, subscriptions, or gifts, and are used to power many different features in Discord.
 #[derive(Serialize, Deserialize)]
 pub struct Entitlement {
 	/// The ID of the entitlement
-	pub id: Snowflake,
+	pub id: EntitlementId,
 	/// The type of entitlement
 	pub r#type: EntitlementType,
 	/// The ID of the SKU granted
-	pub sku_id: Snowflake,
+	pub sku_id: SkuId,
 	/// The ID of the application that owns the SKU
-	pub application_id: Snowflake,
+	pub application_id: ApplicationId,
 	/// The ID of the user that is granted access to the SKU
-	pub user_id: Snowflake,
+	pub user_id: UserId,
 	/// The ID of the guild that is granted access to the SKU
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub guild_id: Option<Snowflake>,
+	pub guild_id: Option<GuildId>,
 	/// The ID of the parent entitlement
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub parent_id: Option<Snowflake>,
+	pub parent_id: Option<EntitlementId>,
 	/// Whether the entitlement is deleted
 	pub deleted: bool,
 	/// For consumable items, whether the entitlement has been consumed
@@ -29,24 +45,24 @@ pub struct Entitlement {
 	pub consumed: Option<bool>,
 	/// The IDs of the application branches granted
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub branches: Option<Vec<Snowflake>>,
+	pub branches: Option<Vec<ApplicationBranchId>>,
 	/// When the entitlement validity period starts
 	pub starts_at: Option<Timestamp>,
 	/// When the entitlement validity period ends
 	pub ends_at: Option<Timestamp>,
 	/// The ID of the promotion the entitlement is from
-	pub promotion_id: Option<Snowflake>,
+	pub promotion_id: Option<PromotionId>,
 	/// The ID of the subscription the entitlement is from
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub subscription_id: Option<Snowflake>,
+	pub subscription_id: Option<SubscriptionId>,
 	/// The flags for the gift code the entitlement is attached to
 	pub gift_code_flags: GiftCodeFlags,
 	/// The ID of the batch the gift code attached to the entitlement is from
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub gift_code_batch_id: Option<Snowflake>,
+	pub gift_code_batch_id: Option<GiftCodeBatchId>,
 	/// The ID of the user that gifted the entitlement
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub gifter_user_id: Option<Snowflake>,
+	pub gifter_user_id: Option<UserId>,
 	/// The style of the gift attached to the entitlement
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub gift_style: Option<GiftStyle>,
@@ -79,7 +95,7 @@ pub struct TenantMetadata {
 #[derive(Serialize, Deserialize)]
 pub struct QuestRewardsMetadata {
 	/// The reward type of the entitlement
-	pub tag: i64,
+	pub tag: QuestRewardType,
 	/// The reward granted by the entitlement
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub reward_code: Option<QuestRewardCode>,
@@ -163,26 +179,26 @@ pub struct GiftCode {
 	/// The gift code
 	pub code: String,
 	/// The ID of the SKU that the gift code grants
-	pub sku_id: Snowflake,
+	pub sku_id: SkuId,
 	/// The ID of the application that owns the SKU
-	pub application_id: Snowflake,
+	pub application_id: ApplicationId,
 	/// The flags for the gift code
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub flags: Option<GiftCodeFlags>,
 	/// The number of times the gift code has been used
-	pub uses: i64,
+	pub uses: u16,
 	/// The maximum number of times the gift code can be used
-	pub max_uses: i64,
+	pub max_uses: u16,
 	/// Whether the gift code has been redeemed by the current user
 	pub redeemed: bool,
 	/// When the gift code expires
 	pub expires_at: Option<Timestamp>,
 	/// The ID of the batch the gift code is from
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub batch_id: Option<Snowflake>,
+	pub batch_id: Option<GiftCodeBatchId>,
 	/// The IDs of the application branches granted by the gift code
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub entitlement_branches: Option<Vec<Snowflake>>,
+	pub entitlement_branches: Option<Vec<ApplicationBranchId>>,
 	/// The style of the gift code
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub gift_style: Option<Option<GiftStyle>>,
@@ -194,7 +210,7 @@ pub struct GiftCode {
 	pub store_listing: Option<Value>,
 	/// The ID of the subscription plan the gift code grants
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub subscription_plan_id: Option<Snowflake>,
+	pub subscription_plan_id: Option<SubscriptionId>,
 	/// The subscription plan the gift code grants
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub subscription_plan: Option<Value>,

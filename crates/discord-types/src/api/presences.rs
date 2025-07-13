@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
+use crate::common::id::{ApplicationId, EmojiId};
+
 #[derive(Serialize, Deserialize)]
 pub struct Session {
 	/// The ID of the session
@@ -25,7 +27,7 @@ pub struct ClientInfo {
 	/// The operating system of the client
 	pub os: OperatingSystemType,
 	/// The version of the client type (e.g. 5 for the PS5)
-	pub version: i64,
+	pub version: u16,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -105,7 +107,7 @@ pub struct Activity {
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub url: Option<Option<String>>,
 	/// Unix timestamp (in milliseconds) of when the activity was added to the user's session
-	pub created_at: i64,
+	pub created_at: u32,
 	/// The ID of the session associated with the activity
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub session_id: Option<Option<String>>,
@@ -120,7 +122,7 @@ pub struct Activity {
 	pub timestamps: Option<ActivityTimestamps>,
 	/// The ID of the application representing the game the user is playing
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub application_id: Option<Snowflake>,
+	pub application_id: Option<ApplicationId>,
 	/// What the user is currently doing (max 128 characters)
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub details: Option<Option<String>>,
@@ -236,12 +238,11 @@ pub struct ActivityEmoji {
 	pub name: String,
 	/// The ID of the emoji
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub id: Option<Snowflake>,
+	pub id: Option<EmojiId>,
 	/// Whether this emoji is animated
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub animated: Option<bool>,
 }
-
 
 #[derive(Serialize, Deserialize)]
 pub struct ActivityParty {
@@ -250,7 +251,7 @@ pub struct ActivityParty {
 	pub id: Option<String>,
 	/// The party's current and maximum size (current_size, max_size)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub size: Option<(i64, i64)>,
+	pub size: Option<(u32, u32)>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -320,6 +321,6 @@ pub struct ActivityMetadata {
 
 #[derive(Serialize, Deserialize)]
 pub enum ActivityMetadataType {
-    track,
-    episode,
+	track,
+	episode,
 }
