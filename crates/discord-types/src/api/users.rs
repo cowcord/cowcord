@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use arrayvec::ArrayString;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
@@ -22,11 +23,11 @@ pub struct User {
 	/// The ID of the user
 	pub id: UserId,
 	/// The user's username, may be unique across the platform (2-32 characters)
-	pub username: String,
+	pub username: ArrayString<32>,
 	/// The user's stringified 4-digit Discord tag
 	pub discriminator: String,
 	/// The user's display name (1-32 characters)
-	pub global_name: Option<String>,
+	pub global_name: Option<ArrayString<32>>,
 	/// The user's avatar hash
 	pub avatar: Option<String>,
 	/// The user's avatar decoration
@@ -55,7 +56,7 @@ pub struct User {
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub pronouns: Option<String>,
 	/// The user's bio (max 190 characters)
-	pub bio: String,
+	pub bio: ArrayString<190>,
 	/// The user's banner hash
 	pub banner: Option<String>,
 	/// The user's banner color encoded as an integer representation of a hexadecimal color code
@@ -107,7 +108,7 @@ pub struct PartialUser {
 	/// The ID of the user
 	pub id: UserId,
 	/// The user's username, may be unique across the platform (2-32 characters)
-	pub username: String,
+	pub username: ArrayString<32>,
 	/// The user's stringified 4-digit Discord tag
 	pub discriminator: String,
 	/// The user's display name (1-32 characters)
@@ -147,7 +148,7 @@ pub struct PrimaryGuild {
 	/// The ID of the guild
 	pub identity_guild_id: Option<GuildId>,
 	/// The user's guild tag (max 4 characters)
-	pub tag: Option<String>,
+	pub tag: Option<ArrayString<4>>,
 	/// The guild tag badge hash
 	pub badge: Option<String>,
 }
@@ -357,7 +358,7 @@ pub struct ProfileMetadata {
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub guild_id: Option<SkuId>,
 	/// The user's pronouns (max 40 characters)
-	pub pronouns: String,
+	pub pronouns: ArrayString<40>,
 	/// The user's bio (max 190 characters)
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub bio: Option<String>,

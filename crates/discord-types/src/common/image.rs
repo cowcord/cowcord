@@ -13,6 +13,12 @@
 //! TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
 //! THIS SOFTWARE.
 
+use std::fmt;
+use std::fmt::Write;
+use std::str::FromStr;
+
+use arrayvec::ArrayString;
+
 /// Hides the implementation detail of ImageHash as an enum.
 #[cfg_attr(feature = "typesize", derive(typesize::derive::TypeSize))]
 #[derive(Clone, Copy, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -144,7 +150,7 @@ impl std::fmt::Display for ImageHashParseError {
 impl std::str::FromStr for ImageHash {
 	type Err = ImageHashParseError;
 
-	fn from_str(s: &str) -> StdResult<Self, Self::Err> {
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		let (hex, is_animated) = if s.len() == 34 && s.starts_with("a_") {
 			(&s[2..], true)
 		} else if s.len() == 32 {
@@ -158,10 +164,7 @@ impl std::str::FromStr for ImageHash {
 		let mut hash = [0u8; 16];
 		for i in (0..hex.len()).step_by(2) {
 			let hex_byte = &hex[i..i + 2];
-			hash[i / 2] = u8::from_str_radix(hex_byte, 16).unwrap_or_else(|err| {
-				tracing::warn!("Invalid byte in ImageHash ({s}): {err}");
-				0
-			});
+			hash[i / 2] = u8::from_str_radix(hex_byte, 16).unwrap_or_else(|err| 0);
 		}
 
 		Ok(Self(ImageHashInner::Normal {

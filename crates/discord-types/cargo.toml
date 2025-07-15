@@ -29,6 +29,7 @@ time = { version = "0.3.41", features = [
     "serde-well-known",
 ] }
 chrono = { version = "0.4.41", optional = true, features = ["serde"] }
+arrayvec = { version = "0.7.6", features = ["serde"] }
 
 [features]
 default = ["chrono"]

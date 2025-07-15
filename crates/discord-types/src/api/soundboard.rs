@@ -1,13 +1,15 @@
+use arrayvec::ArrayString;
 use serde::{Deserialize, Serialize};
 
-use crate::{api::users::PartialUser, common::id::{EmojiId, GuildId, UserId, SoundboardSoundId}};
+use crate::api::users::PartialUser;
+use crate::common::id::{EmojiId, GuildId, SoundboardSoundId, UserId};
 
 #[derive(Serialize, Deserialize)]
 pub struct SoundboardSound {
 	/// The ID of the soundboard sound
 	pub sound_id: SoundboardSoundId,
 	/// The name of the soundboard sound (2-32 characters)
-	pub name: String,
+	pub name: ArrayString<32>,
 	/// The volume of the soundboard sound (represented as a float from 0 to 1)
 	pub volume: f64,
 	/// The ID of the sound's custom emoji

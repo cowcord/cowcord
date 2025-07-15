@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use arrayvec::{ArrayString, ArrayVec};
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
@@ -696,7 +697,7 @@ bitflags! {
 #[derive(Serialize, Deserialize)]
 pub struct EmbedMedia {
 	/// Source URL of media (only supports http(s) and attachments) (max 2048 characters)
-	pub url: String,
+	pub url: ArrayString<2048>,
 	/// A proxied URL of the media
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub proxy_url: Option<String>,
@@ -739,7 +740,7 @@ pub struct EmbedProvider {
 #[derive(Serialize, Deserialize)]
 pub struct EmbedAuthor {
 	/// The name of the author (max 256 characters)
-	pub name: String,
+	pub name: ArrayString<256>,
 	/// URL of the author (only supports http(s)) (max 2048 characters)
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub url: Option<String>,
@@ -754,7 +755,7 @@ pub struct EmbedAuthor {
 #[derive(Serialize, Deserialize)]
 pub struct EmbedFooter {
 	/// The footer text (max 2048 characters)
-	pub text: String,
+	pub text: ArrayString<2048>,
 	/// Source URL of the footer icon (only supports http(s) and attachments) (max 2048 characters)
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub icon_url: Option<String>,
@@ -766,9 +767,9 @@ pub struct EmbedFooter {
 #[derive(Serialize, Deserialize)]
 pub struct EmbedField {
 	/// The name of the field (max 256 characters)
-	pub name: String,
+	pub name: ArrayString<256>,
 	/// The value of the field (max 1024 characters)
-	pub value: String,
+	pub value: ArrayString<1024>,
 	/// Whether this field should display inline (default false)
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub inline: Option<bool>,
@@ -797,7 +798,7 @@ pub struct Attachment {
 	/// The attachment ID
 	pub id: AttachmentId,
 	/// The name of file attached (max 1024 characters)
-	pub filename: String,
+	pub filename: ArrayString<1024>,
 	/// The name of the file without the extension or title of the clip (max 1024 characters, automatically provided when the filename is normalized or randomly generated due to invalid characters)
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub title: Option<String>,
@@ -940,7 +941,7 @@ pub struct PollCreate {
 	/// The question of the poll
 	pub question: PollMedia,
 	/// Each of the answers available in the poll (max 10)
-	pub answers: Vec<PollAnswer>,
+	pub answers: ArrayVec<PollAnswer, 10>,
 	/// Number of hours the poll should be open for (max 32 days, default 1)
 	pub duration: u8,
 	/// Whether a user can select multiple answers (default false)

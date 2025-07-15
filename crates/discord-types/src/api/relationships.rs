@@ -1,8 +1,12 @@
+use arrayvec::ArrayString;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use crate::{api::{connected_accounts::ConnectionType, users::PartialUser}, common::{id::{ApplicationId, UserId}, timestamp::Timestamp}};
+use crate::api::connected_accounts::ConnectionType;
+use crate::api::users::PartialUser;
+use crate::common::id::{ApplicationId, UserId};
+use crate::common::timestamp::Timestamp;
 
 #[derive(Serialize, Deserialize)]
 pub struct Relationship {
@@ -13,7 +17,7 @@ pub struct Relationship {
 	/// The target user
 	pub user: PartialUser,
 	/// The nickname of the user in this relationship (1-32 characters)
-	pub nickname: Option<String>,
+	pub nickname: Option<ArrayString<32>>,
 	/// Whether the friend request was flagged as spam (default false)
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub is_spam_request: Option<bool>,
@@ -92,4 +96,3 @@ pub enum FriendSuggestionReasonType {
 	/// The user is a friend on another platform
 	EXTERNAL_FRIEND = 1,
 }
-

@@ -1,5 +1,6 @@
 use std::num::NonZeroU16;
 
+use arrayvec::{ArrayString, ArrayVec};
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
@@ -23,7 +24,7 @@ pub struct GuildScheduledEvent {
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub creator: Option<PartialUser>,
 	/// The name of the scheduled event (1-100 characters)
-	pub name: String,
+	pub name: ArrayString<100>,
 	/// The description for the scheduled event (1-1000 characters)
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub description: Option<Option<String>>,
@@ -205,9 +206,9 @@ pub struct GuildScheduledEventRecurrenceRule {
 	/// Specific months to recur on
 	pub by_month: Option<Vec<GuildScheduledEventRecurrenceRuleMonth>>,
 	/// Specific dates within a month to recur on
-	pub by_month_day: Option<Vec<u8>>,
+	pub by_month_day: Option<ArrayVec<u8, 31>>,
 	/// Specific days within a year to recur on (1-364)
-	pub by_year_day: Option<Vec<NonZeroU16>>,
+	pub by_year_day: Option<ArrayVec<NonZeroU16, 364>>,
 	/// The total amount of times that the event is allowed to recur before stopping
 	pub count: Option<u32>,
 }

@@ -1,3 +1,4 @@
+use arrayvec::ArrayString;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
@@ -100,7 +101,7 @@ pub struct Activity {
 	/// The ID of the activity; only unique across a single user's activities
 	pub id: String,
 	/// The name of the activity (2-128 characters)
-	pub name: String,
+	pub name: ArrayString<128>,
 	/// The activity type
 	pub r#type: ActivityType,
 	/// The stream URL (max 512 characters)

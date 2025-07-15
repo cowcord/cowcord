@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use arrayvec::{ArrayString, ArrayVec};
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
@@ -15,11 +16,11 @@ pub struct DiscoverableGuild {
 	/// The ID of the guild
 	pub id: GuildId,
 	/// The name of the guild (2-100 characters)
-	pub name: String,
+	pub name: ArrayString<100>,
 	/// The guild's icon hash
 	pub icon: Option<String>,
 	/// The description for the guild (max 300 characters)
-	pub description: Option<String>,
+	pub description: Option<ArrayString<300>>,
 	/// The guild's banner hash
 	pub banner: Option<String>,
 	/// The guild's splash hash
@@ -58,7 +59,7 @@ pub struct DiscoverableGuild {
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub primary_category: Option<DiscoveryCategory>,
 	/// The discovery search keywords for the guild (max 30 characters, max 10)
-	pub keywords: Option<Vec<String>>,
+	pub keywords: Option<ArrayVec<ArrayString<30>, 10>>,
 	/// Whether the guild's landing web page is currently published
 	pub is_published: bool,
 	/// The reasons to join the guild shown in the discovery web page (max 4)
@@ -176,7 +177,7 @@ pub struct DiscoveryMetadata {
 	/// The ID of the primary discovery category set for the guild
 	pub primary_category_id: DiscoveryCategoryId,
 	/// The discovery search keywords for the guild (max 30 characters, max 10)
-	pub keywords: Option<Vec<String>>,
+	pub keywords: Option<ArrayVec<ArrayString<30>, 10>>,
 	/// Whether the guild is shown as a source through custom guild expressions
 	pub emoji_discoverability_enabled: bool,
 	/// When the guild's partner application was actioned by an employee
@@ -186,13 +187,13 @@ pub struct DiscoveryMetadata {
 	/// Whether the guild's landing web page is currently published
 	pub is_published: bool,
 	/// The reasons to join the guild shown in the discovery web page (max 4)
-	pub reasons_to_join: Vec<DiscoveryReason>,
+	pub reasons_to_join: ArrayVec<DiscoveryReason, 4>,
 	/// The guild's social media links shown in the discovery web page (max 256 characters, max 9)
-	pub social_links: Option<Vec<String>>,
+	pub social_links: Option<ArrayVec<ArrayString<256>, 9>>,
 	/// The guild's long description shown in the discovery web page (max 2400 characters)
-	pub about: Option<String>,
+	pub about: Option<ArrayString<2400>>,
 	/// The IDs of discovery subcategories set for the guild (max 5)
-	pub category_ids: Vec<DiscoveryCategoryId>,
+	pub category_ids: ArrayVec<DiscoveryCategoryId, 5>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -220,7 +221,7 @@ pub struct GuildProfile {
 	/// The ID of the guild
 	pub id: GuildId,
 	/// The name of the guild (2-100 characters)
-	pub name: String,
+	pub name: ArrayString<100>,
 	/// The guild's icon hash
 	pub icon_hash: Option<String>,
 	/// Approximate count of total members in the guild
@@ -228,18 +229,18 @@ pub struct GuildProfile {
 	/// Approximate count of non-offline members in the guild
 	pub online_count: u32,
 	/// The description for the guild (max 300 characters)
-	pub description: String,
+	pub description: ArrayString<300>,
 	/// The guild's accent color as a hexadecimal color string
 	pub brand_color_primary: String,
 	/// The guild's clan banner hash
 	#[deprecated]
 	pub banner_hash: Option<String>,
 	/// The IDs of the applications representing the games the guild plays (max 20)
-	pub game_application_ids: Vec<ApplicationId>,
+	pub game_application_ids: ArrayVec<ApplicationId, 20>,
 	/// The activity of the guild in each game
 	pub game_activity: HashMap<ApplicationId, GameActivity>,
 	/// The tag of the guild (2-4 characters)
-	pub tag: Option<String>,
+	pub tag: Option<ArrayString<4>>,
 	/// The badge shown on the guild's tag
 	pub badge: GuildBadgeType,
 	/// The primary color of the badge as a hexadecimal color string
@@ -249,7 +250,7 @@ pub struct GuildProfile {
 	/// The guild tag badge hash
 	pub badge_hash: String,
 	/// Terms used to describe the guild's interest and personality (max 5)
-	pub traits: Vec<GuildTrait>,
+	pub traits: ArrayVec<GuildTrait, 5>,
 	/// Enabled guild features
 	pub features: Vec<String>,
 	/// The visibility level of the guild

@@ -1,7 +1,9 @@
+use arrayvec::ArrayString;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use crate::{api::users::PartialUser, common::id::{GuildId, SkuId, StickerId, StickerPackBannerId, StickerPackId}};
+use crate::api::users::PartialUser;
+use crate::common::id::{GuildId, SkuId, StickerId, StickerPackBannerId, StickerPackId};
 
 #[derive(Serialize, Deserialize)]
 pub struct StickerPack {
@@ -31,12 +33,12 @@ pub struct Sticker {
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub pack_id: Option<StickerPackId>,
 	/// The name of the sticker (2-30 characters)
-	pub name: String,
+	pub name: ArrayString<30>,
 	/// The description for the sticker (max 100 characters)
-	pub description: Option<String>,
+	pub description: Option<ArrayString<100>>,
 	/// Autocomplete/suggestion tags for the sticker (1-200 characters)
-    /// 
-    /// comma seperated list
+	///
+	/// comma seperated list
 	pub tags: String,
 	/// The type of sticker
 	pub r#type: StickerType,
@@ -76,8 +78,8 @@ pub enum StickerFormatTypes {
 	/// A lottie animation; requires the VERIFIED and/or PARTNERED  guild feature
 	LOTTIE = 3,
 	/// An animated GIF image
-    /// 
-    /// not available through the CDN, and must be accessed at https://media.discordapp.net/stickers/{sticker_id}.gif
+	///
+	/// not available through the CDN, and must be accessed at https://media.discordapp.net/stickers/{sticker_id}.gif
 	GIF = 4,
 }
 
@@ -90,4 +92,3 @@ pub struct StickerItem {
 	/// The type of format for the sticker
 	pub format_type: StickerFormatTypes,
 }
-

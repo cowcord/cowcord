@@ -1,3 +1,4 @@
+use arrayvec::{ArrayString, ArrayVec};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_repr::{Deserialize_repr, Serialize_repr};
@@ -29,7 +30,7 @@ pub struct Guild {
 	/// The ID of the guild
 	pub id: GuildId,
 	/// The name of the guild (2-100 characters)
-	pub name: String,
+	pub name: ArrayString<100>,
 	/// The guild's icon hash
 	pub icon: Option<String>,
 	/// The guild's banner hash
@@ -45,7 +46,7 @@ pub struct Guild {
 	/// The application ID of the guild's owner, if bot-created
 	pub application_id: Option<ApplicationId>,
 	/// The description for the guild (max 300 characters)
-	pub description: Option<String>,
+	pub description: Option<ArrayString<300>>,
 	/// The main voice region ID of the guild
 	#[deprecated]
 	#[serde(skip_serializing_if = "Option::is_none")]
@@ -139,11 +140,11 @@ pub struct PartialGuild {
 	/// The ID of the guild
 	pub id: GuildId,
 	/// The name of the guild (2-100 characters)
-	pub name: String,
+	pub name: ArrayString<100>,
 	/// The guild's icon hash
 	pub icon: Option<String>,
 	/// The description for the guild (max 300 characters)
-	pub description: Option<String>,
+	pub description: Option<ArrayString<300>>,
 	/// The guild's splash hash
 	pub splash: Option<String>,
 	/// The guild's discovery splash hash
@@ -169,7 +170,7 @@ pub struct PartialGuild {
 #[derive(Serialize, Deserialize)]
 pub struct GuildIdentity {
 	/// The tag of the guild (2-4 characters)
-	pub tag: String,
+	pub tag: ArrayString<4>,
 	/// The guild badge hash
 	pub badge: String,
 }
@@ -535,7 +536,7 @@ pub struct UserGuild {
 	/// The ID of the guild
 	pub id: GuildId,
 	/// The name of the guild (2-100 characters)
-	pub name: String,
+	pub name: ArrayString<100>,
 	/// The guild's icon hash
 	pub icon: Option<String>,
 	/// The guild's banner hash
@@ -567,7 +568,7 @@ pub struct GuildWidget {
 	/// The public voice and stage channels in the guild
 	pub channels: Vec<GuildWidgetChannel>,
 	/// The non-offline guild members (max 100)
-	pub members: Vec<GuildWidgetMember>,
+	pub members: ArrayVec<GuildWidgetMember, 100>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -575,7 +576,7 @@ pub struct GuildWidgetChannel {
 	/// The ID of the channel
 	pub id: ChannelId,
 	/// The name of the channel (1-100 characters)
-	pub name: String,
+	pub name: ArrayString<100>,
 	/// Sorting position of the channel
 	pub position: i64,
 }
@@ -633,9 +634,9 @@ pub struct Role {
 	/// The ID of the role
 	pub id: RoleId,
 	/// The name of the role (max 100 characters)
-	pub name: String,
+	pub name: ArrayString<100>>,
 	/// The description for the role (max 90 characters)
-	pub description: Option<String>,
+	pub description: Option<ArrayString<90>>,
 	/// The color of the role represented as an integer representation of a hexadecimal color code
 	#[deprecated]
 	pub color: u32,
@@ -877,9 +878,9 @@ pub struct Ban {
 #[derive(Serialize, Deserialize)]
 pub struct WelcomeScreen {
 	/// The welcome message shown in the welcome screen (max 140 characters)
-	pub description: Option<String>,
+	pub description: Option<ArrayString<140>>,
 	/// The channels shown in the welcome screen (max 5)
-	pub welcome_channels: Vec<WelcomeScreenChannel>,
+	pub welcome_channels: ArrayVec<WelcomeScreenChannel, 5>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -887,7 +888,7 @@ pub struct WelcomeScreenChannel {
 	/// The ID of the channel
 	pub channel_id: ChannelId,
 	/// The description shown for the channel (1-50 characters)
-	pub description: String,
+	pub description: ArrayString<50>,
 	/// The emoji ID , if the emoji is custom
 	pub emoji_id: Option<Emoji>,
 	/// The emoji name if custom, the unicode character if standard, or null if no emoji is set
@@ -899,9 +900,9 @@ pub struct MemberVerification {
 	/// When the member verification was last modified
 	pub version: Option<Timestamp>,
 	/// Questions for applicants to answer (max 5)
-	pub form_fields: Vec<MemberVerificationFormField>,
+	pub form_fields: ArrayVec<MemberVerificationFormField, 5>,
 	/// A description of what the guild is about; this can be different than the guild's description (max 300 characters)
-	pub description: Option<String>,
+	pub description: Option<ArrayString<300>>,
 	/// The guild this member verification is for
 	pub guild: Option<MemberVerificationGuild>,
 	/// The profile of the guild this member verification is for
@@ -913,7 +914,7 @@ pub struct MemberVerificationFormField {
 	/// The type of question
 	pub field_type: String,
 	/// The label for the form field (max 300 characters)
-	pub label: String,
+	pub label: ArrayString<300>,
 	/// Multiple choice answers (1-8, max 150 characters)
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub choices: Option<Vec<String>>,
@@ -928,7 +929,7 @@ pub struct MemberVerificationFormField {
 	/// The subtext of the form field
 	pub description: Option<String>,
 	/// Unknown (max 300 characters, max 10)
-	pub automations: Option<Vec<String>>,
+	pub automations: Option<ArrayVec<ArrayString<300>, 10>>,
 	/// Placeholder text for the field's response area
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub placeholder: Option<Option<String>>,
@@ -958,11 +959,11 @@ pub struct MemberVerificationGuild {
 	/// The ID of the guild
 	pub id: GuildId,
 	/// The name of the guild (2-100 characters)
-	pub name: String,
+	pub name: ArrayString<100>,
 	/// The guild's icon hash
 	pub icon: Option<String>,
 	/// The description for the guild (max 300 characters)
-	pub description: Option<String>,
+	pub description: Option<ArrayString<300>>,
 	/// The guild's splash hash
 	pub splash: Option<String>,
 	/// The guild's discovery splash hash

@@ -1,3 +1,4 @@
+use arrayvec::ArrayString;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
@@ -180,7 +181,7 @@ pub struct PartialChannel {
 	/// The type of channel
 	pub r#type: ChannelType,
 	/// The name of the channel (1-100 characters)
-	pub name: Option<String>,
+	pub name: Option<ArrayString<100>>,
 	/// The recipients of the DM; only the username field is present
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub recipients: Option<Vec<PartialUser>>,
@@ -443,7 +444,7 @@ pub struct ForumTag {
 	/// The ID of the tag
 	pub id: ForumTagId,
 	/// The name of the tag (max 50 characters)
-	pub name: String,
+	pub name: ArrayString<50>,
 	/// Whether this tag can only be added to or removed from threads by members with the MANAGE_THREADS permission
 	pub moderated: bool,
 	/// The ID of a guild's custom emoji

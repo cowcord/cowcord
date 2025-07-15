@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use arrayvec::{ArrayString, ArrayVec};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_repr::{Deserialize_repr, Serialize_repr};
@@ -86,7 +87,7 @@ pub struct Application {
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub rpc_origins: Option<Vec<String>>,
 	/// The whitelisted URLs for redirecting to during OAuth2 authorization (max 10)
-	pub redirect_uris: Vec<String>,
+	pub redirect_uris: ArrayVec<String, 10>,
 	/// The URL used for deep linking during OAuth2 authorization on mobile devices
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub deeplink_uri: Option<String>,
@@ -795,9 +796,9 @@ pub enum ApplicationAssetType {
 #[derive(Serialize, Deserialize)]
 pub struct ApplicationRoleConnection {
 	/// The vanity name of the platform a bot has connected (max 50 characters)
-	pub platform_name: Option<String>,
+	pub platform_name: Option<ArrayString<50>>,
 	/// The username on the platform a bot has connected (max 100 characters)
-	pub platform_username: Option<String>,
+	pub platform_username: Option<ArrayString<100>>,
 	/// Object mapping application role connection metadata keys to their string-ified value (max 100 characters) for the user on the platform a bot has connected
 	pub metadata: Value,
 	/// The application that owns the role connection
@@ -813,14 +814,14 @@ pub struct ApplicationRoleConnectionMetadata {
 	/// The type of metadata value
 	pub r#type: RoleConnectionOperatorType,
 	/// Key for the metadata field (1-50 characters, must be a-z , 0-9 , or _ )
-	pub key: String,
+	pub key: ArrayString<50>,
 	/// The name of the metadata field (1-100 characters)
-	pub name: String,
+	pub name: ArrayString<100>,
 	/// Translations of the name with keys in available locales
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub name_localizations: Option<HashMap<String, String>>,
 	/// The description of the metadata field (1-200 characters)
-	pub description: String,
+	pub description: ArrayString<200>,
 	/// Translations of the description with keys in available locales
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub description_localizations: Option<HashMap<String, String>>,

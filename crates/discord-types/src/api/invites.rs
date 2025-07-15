@@ -1,3 +1,4 @@
+use arrayvec::ArrayString;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
@@ -124,11 +125,11 @@ pub struct InviteGuild {
 	/// The ID of the guild
 	pub id: GuildId,
 	/// The name of the guild (2-100 characters)
-	pub name: String,
+	pub name: ArrayString<100>,
 	/// The guild's icon hash
 	pub icon: Option<String>,
 	/// The description for the guild (max 300 characters)
-	pub description: Option<String>,
+	pub description: Option<ArrayString<300>>,
 	/// The guild's banner hash
 	pub banner: Option<String>,
 	/// The guild's splash hash

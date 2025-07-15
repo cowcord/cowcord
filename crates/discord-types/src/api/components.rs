@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use arrayvec::{ArrayString, ArrayVec};
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
@@ -87,7 +88,7 @@ pub struct Button {
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub emoji: Option<Emoji>,
 	/// Developer-defined identifier for the button (max 100 characters)
-	pub custom_id: String,
+	pub custom_id: ArrayString<100>,
 	/// Identifier for a purchasable SKU, only available when using premium-style buttons
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub sku_id: Option<SkuId>,
@@ -113,9 +114,9 @@ pub enum ButtonStyle {
 #[derive(Serialize, Deserialize)]
 pub struct StringSelect {
 	/// Developer-defined identifier for the select menu (max 100 characters)
-	pub custom_id: String,
+	pub custom_id: ArrayString<100>,
 	/// Specified choices in a select menu (max 25)
-	pub options: Vec<SelectOption>,
+	pub options: ArrayVec<SelectOption, 25>,
 	/// Placeholder text if nothing is selected (max 150 characters)
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub placeholder: Option<String>,
@@ -133,9 +134,9 @@ pub struct StringSelect {
 #[derive(Serialize, Deserialize)]
 pub struct SelectOption {
 	/// User-facing name of the option (max 100 characters)
-	pub label: String,
+	pub label: ArrayString<100>,
 	/// Developer-defined value of the option (max 100 characters)
-	pub value: String,
+	pub value: ArrayString<100>,
 	/// Additional description of the option (max 100 characters)
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub description: Option<String>,
@@ -168,11 +169,11 @@ pub struct SelectMenuResolved {
 #[derive(Serialize, Deserialize)]
 pub struct TextInput {
 	/// Developer-defined identifier for the input (max 100 characters)
-	pub custom_id: String,
+	pub custom_id: ArrayString<100>,
 	/// The text input style
 	pub style: TextInputStyle,
 	/// Label for this component (max 45 characters)
-	pub label: String,
+	pub label: ArrayString<45>,
 	/// Minimum input length for a text input (max 4000)
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub min_length: Option<u16>,
@@ -202,7 +203,7 @@ pub enum TextInputStyle {
 #[derive(Serialize, Deserialize)]
 pub struct UserSelect {
 	/// Developer-defined identifier for the select menu (max 100 characters)
-	pub custom_id: String,
+	pub custom_id: ArrayString<100>,
 	/// Placeholder text if nothing is selected (max 150 characters)
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub placeholder: Option<String>,
@@ -238,13 +239,13 @@ enum UserRoleChannelId {
 #[derive(Serialize, Deserialize)]
 pub struct RoleSelect {
 	/// Developer-defined identifier for the select menu (max 100 characters)
-	pub custom_id: String,
+	pub custom_id: ArrayString<100>,
 	/// Placeholder text if nothing is selected (max 150 characters)
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub placeholder: Option<String>,
 	/// Default values for auto-populated select menu components (max 25)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub default_values: Option<Vec<SelectDefaultValue>>,
+	pub default_values: Option<ArrayVec<SelectDefaultValue, 25>>,
 	/// Minimum number of items that must be chosen (max 25, default 1)
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub min_values: Option<u8>,
@@ -259,13 +260,13 @@ pub struct RoleSelect {
 #[derive(Serialize, Deserialize)]
 pub struct MentionableSelect {
 	/// Developer-defined identifier for the select menu (max 100 characters)
-	pub custom_id: String,
+	pub custom_id: ArrayString<100>,
 	/// Placeholder text if nothing is selected (max 150 characters)
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub placeholder: Option<String>,
 	/// Default values for auto-populated select menu components (max 25)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub default_values: Option<Vec<SelectDefaultValue>>,
+	pub default_values: Option<ArrayVec<SelectDefaultValue, 25>>,
 	/// Minimum number of items that must be chosen (max 25, default 1)
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub min_values: Option<u8>,
@@ -280,7 +281,7 @@ pub struct MentionableSelect {
 #[derive(Serialize, Deserialize)]
 pub struct ChannelSelect {
 	/// Developer-defined identifier for the select menu (max 100 characters)
-	pub custom_id: String,
+	pub custom_id: ArrayString<100>,
 	/// Channel types to include in the channel select component
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub channel_types: Option<Vec<ChannelType>>,
@@ -289,7 +290,7 @@ pub struct ChannelSelect {
 	pub placeholder: Option<String>,
 	/// Default values for auto-populated select menu components (max 25)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub default_values: Option<Vec<SelectDefaultValue>>,
+	pub default_values: Option<ArrayVec<SelectDefaultValue, 25>>,
 	/// Minimum number of items that must be chosen (max 25, default 1)
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub min_values: Option<u8>,
@@ -318,7 +319,7 @@ enum SectionAccessory {
 #[derive(Serialize, Deserialize)]
 pub struct TextDisplay {
 	/// Text that will be displayed similar to a message (1-4000 characters)
-	pub content: String,
+	pub content: ArrayString<4000>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -722,7 +723,7 @@ pub struct Container {
 #[derive(Serialize, Deserialize)]
 pub struct UnfurledMediaItem {
 	/// The URL of the media, supports arbitrary URLs and attachment://<filename> references (max 2048 characters)
-	pub url: String,
+	pub url: ArrayString<2048>,
 	/// The proxied URL of the media item
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub proxy_url: Option<String>,

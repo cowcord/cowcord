@@ -1,5 +1,6 @@
 use std::num::NonZeroU8;
 
+use arrayvec::ArrayString;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
@@ -133,7 +134,7 @@ pub struct IntegrationGuild {
 	/// The ID of the guild
 	pub id: GuildId,
 	/// The name of the guild (2-100 characters)
-	pub name: String,
+	pub name: ArrayString<100>,
 	/// The guild's icon hash
 	pub icon: Option<String>,
 }

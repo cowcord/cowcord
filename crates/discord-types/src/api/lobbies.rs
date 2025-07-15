@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use arrayvec::{ArrayString, ArrayVec};
 use serde::{Deserialize, Serialize};
 
 use crate::api::channel::Channel;
@@ -12,9 +13,9 @@ pub struct Lobby {
 	/// The ID of the application that created the lobby
 	pub application_id: ApplicationId,
 	/// The metadata of the lobby (max 25 keys, 1024 characters per key and value)
-	pub metadata: Option<HashMap<String, String>>,
+	pub metadata: Option<HashMap<ArrayString<1024>, ArrayString<1024>>>,
 	/// The members of the lobby (max 1000)
-	pub members: Vec<LobbyMember>,
+	pub members: ArrayVec<LobbyMember, 1000>,
 	/// The guild channel linked to the lobby
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub linked_channel: Option<Channel>,

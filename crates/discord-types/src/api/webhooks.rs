@@ -1,7 +1,10 @@
+use arrayvec::ArrayString;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use crate::{api::{integrations::IntegrationGuild, users::PartialUser}, common::id::{ApplicationId, ChannelId, GuildId, WebhookId}};
+use crate::api::integrations::IntegrationGuild;
+use crate::api::users::PartialUser;
+use crate::common::id::{ApplicationId, ChannelId, GuildId, WebhookId};
 
 #[derive(Serialize, Deserialize)]
 pub struct Webhook {
@@ -18,7 +21,7 @@ pub struct Webhook {
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub user: Option<Option<PartialUser>>,
 	/// The default name of the webhook (1-80 characters)
-	pub name: Option<String>,
+	pub name: Option<ArrayString<80>>,
 	/// The default avatar hash of the webhook
 	pub avatar: Option<String>,
 	/// The secure token of the webhook (returned for INCOMING webhooks)
@@ -53,6 +56,5 @@ pub struct WebhookChannel {
 	/// The ID of the channel
 	pub id: ChannelId,
 	/// The name of the channel (1-100 characters)
-	pub name: String,
+	pub name: ArrayString<100>,
 }
-

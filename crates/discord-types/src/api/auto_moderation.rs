@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use arrayvec::{ArrayString, ArrayVec};
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
@@ -216,9 +217,9 @@ pub struct AutomodRule {
 	/// Whether the rule is enabled
 	pub enabled: bool,
 	/// The IDs of the roles that won't be affected by the rule (max 20)
-	pub exempt_roles: Vec<RoleId>,
+	pub exempt_roles: ArrayVec<RoleId, 20>,
 	/// The IDs of the channels that won't be affected by the rule (max 50)
-	pub exempt_channels: Vec<ChannelId>,
+	pub exempt_channels: ArrayVec<ChannelId, 50>,
 }
 
 /// Characterizes the type of content which can trigger the rule.
@@ -243,13 +244,13 @@ pub enum AutomodTriggerType {
 #[derive(Serialize, Deserialize)]
 pub struct AutomodTriggerMetadata {
 	/// Substrings which will be searched for in content (1-60 characters, max 1000)
-	pub keyword_filter: Vec<String>,
+	pub keyword_filter: ArrayVec<ArrayString<60>, 1000>,
 	/// Regular expression patterns which will be matched against content (1-260 characters, max 10)
-	pub regex_patterns: Vec<String>,
+	pub regex_patterns: ArrayVec<ArrayString<260>, 10>,
 	/// The internally predefined wordsets which will be searched for in content
 	pub presets: Vec<AutomodKeywordPresetType>,
 	/// Substrings which should not trigger the rule (1-60 characters, max 100 or 1000 respectively)
-	pub allow_list: Vec<String>,
+	pub allow_list: ArrayVec<ArrayString<60>, 1000>,
 	/// Number of unique role and user mentions allowed per message (max 50)
 	pub mention_total_limit: u8,
 	/// Whether to automatically detect mention raids

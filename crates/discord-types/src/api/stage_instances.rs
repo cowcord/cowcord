@@ -1,6 +1,8 @@
+use arrayvec::ArrayString;
 use serde::{Deserialize, Serialize};
 
-use crate::{api::guild::PrivacyLevel, common::id::{ChannelId, GuildId, ScheduledEventId, StageInstanceId}};
+use crate::api::guild::PrivacyLevel;
+use crate::common::id::{ChannelId, GuildId, ScheduledEventId, StageInstanceId};
 
 #[derive(Serialize, Deserialize)]
 pub struct StageInstance {
@@ -11,7 +13,7 @@ pub struct StageInstance {
 	/// The ID of the associated stage channel
 	pub channel_id: ChannelId,
 	/// The topic of the stage instance (1-120 characters)
-	pub topic: String,
+	pub topic: ArrayString<120>,
 	/// The privacy level of the stage instance
 	pub privacy_level: PrivacyLevel,
 	/// The invite code that can be used to join the stage channel, if the stage instance is public
