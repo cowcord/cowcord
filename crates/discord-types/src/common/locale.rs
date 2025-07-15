@@ -7,38 +7,71 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum Locale {
+	/// Arabic
 	ar,
+	/// Bulgarian
 	bg,
+	/// Czech
 	cs,
+	/// Danish
 	da,
+	/// German
 	de,
+	/// Greek
 	el,
+	/// English
 	en_GB,
+	/// English
 	en_US,
+	/// Spanish
 	es_ES,
+	/// Spanish
 	es_419,
+	/// Finnish
 	fi,
+	/// French
 	fr,
+	/// Hindi
 	hi,
+	/// Croatian
 	hr,
+	/// Hungarian
 	hu,
+	/// Indonesian
 	id,
+	/// Italian
 	it,
+	/// Japanese
 	ja,
+	/// Korean
 	ko,
+	/// Lithuanian
 	lt,
+	/// Dutch
 	nl,
+	/// Norwegian
 	no,
+	/// Polish
 	pl,
+	/// Portuguese
 	pt_BR,
+	/// Romanian
 	ro,
+	/// Russian
 	ru,
+	/// Swedish
 	sv_SE,
+	/// Thai
 	th,
+	/// Turkish
 	tr,
+	/// Ukrainian
 	uk,
+	/// Vietnamese
 	vi,
+	/// Chinese
 	zh_CN,
+	/// Chinese
 	zh_TW,
 }
 

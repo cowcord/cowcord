@@ -56,6 +56,7 @@ fn App() -> Element {
 }
 
 fn start_websocket(token: &str) {
+	// todo: change encoding to zlib
 	let gateway_url = "wss://gateway.discord.gg/?encoding=json&v=9";
 
 	let ws = WebSocket::new(gateway_url).expect("Failed to create WebSocket");
