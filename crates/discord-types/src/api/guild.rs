@@ -578,7 +578,7 @@ pub struct GuildWidgetChannel {
 	/// The name of the channel (1-100 characters)
 	pub name: ArrayString<100>,
 	/// Sorting position of the channel
-	pub position: i64,
+	pub position: i16,
 }
 
 /// Due to privacy concerns, `id`, `discriminator`, and `avatar` are anonymized. `id` is replaced with an incrementing integer, `discriminator` is always 0000, and `avatar` is always null (replaced with an encrypted `avatar_url` field).

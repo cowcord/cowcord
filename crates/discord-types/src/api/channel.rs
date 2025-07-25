@@ -29,7 +29,7 @@ pub struct Channel {
 	pub guild_id: Option<GuildId>,
 	/// Sorting position of the channel
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub position: Option<i64>,
+	pub position: Option<i16>,
 	/// Explicit permission overwrites for members and roles
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub permission_overwrites: Option<Vec<PermissionOverwrite>>,
@@ -173,7 +173,7 @@ pub struct Channel {
 	pub linked_lobby: Option<Option<LinkedLobby>>,
 }
 
-/// A channel referenced in an [invite](https://5f57c28f.discord-userdoccers.pages.dev/resources/invite#invite-object) or [message](https://5f57c28f.discord-userdoccers.pages.dev/resources/message#message-object).
+/// A channel referenced in an [invite](https://docs.discord.food/resources/invite#invite-object) or [message](https://docs.discord.food/resources/message#message-object).
 #[derive(Serialize, Deserialize)]
 pub struct PartialChannel {
 	/// The ID of the channel

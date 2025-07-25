@@ -1,924 +1,366 @@
-#![allow(non_snake_case)]
-
 use std::collections::HashMap;
 
+use arrayvec::{ArrayString, ArrayVec};
 use serde::{Deserialize, Serialize};
 
 use crate::api::channel::{
+	AutoArchiveDuration,
 	Channel,
+	ChannelFlags,
+	ChannelType,
 	DefaultReaction,
-	FollowedChannel,
-	ForumTag,
+	ForumLayoutType,
 	IconEmoji,
+	PartialForumTag,
 	PermissionOverwrite,
-	SupplementalMessageRequest,
-	ThreadMember,
-	ThreadOnlyChannelMessageParams,
-	ThreadPostData,
+	SearchTagSetting,
+	SortOrderType,
+	VideoQualityMode,
 };
-use crate::api::message::Message;
-use crate::api::user_settings::MuteConfig;
-use crate::api::types::{CdnUri, Snowflake, timestamp::Timestamp};
-use crate::utils::request::{API_VERSION, to_string_query};
+use crate::common::id::{ChannelId, ForumTagId, GuildId, SkuId, UserId};
+use crate::common::image::ImageHash;
 
-/// Type: get
-pub const GET_PRIVATE_CHANNELS_ENDPOINT: &str = "/users/@me/channels";
+/// Method: `GET`
+///
+/// Returns a list of active [private channel](https://docs.discord.food/resources/channel#channel-object) objects the user is participating in.
+pub const GET_PRIVATE_CHANNELS: &str = "/users/@me/channels";
 
 pub type GetPrivateChannelsResponse = Vec<Channel>;
 
-/// Type: get
+/// Method: `GET`
 ///
-/// supports OAuth2 for auth
-pub fn GET_DM_CHANNEL_ENDPOINT(user_id: Snowflake) -> String {
+/// Supports OAuth2 for authentication with the `dm_channels.read` scope
+///
+/// Returns an existing [DM channel](https://docs.discord.food/resources/channel#channel-object) object with a user.
+pub fn GET_DM_CHANNEL(user_id: &UserId) -> String {
 	format!("/users/@me/dms/{}", user_id)
 }
 
 pub type GetDmChannelResponse = Channel;
 
-/// Type: post
+/// Method: `POST`
 ///
-/// supports OAuth2 for auth
-pub const CREATE_PRIVATE_CHANNEL_ENDPOINT: &str = "/users/@me/channels";
+/// Supports OAuth2 for authentication with the `gdm.join` scope
+///
+/// One recipient creates or returns an existing [DM channel](https://docs.discord.food/resources/channel#channel-object), none or multiple recipients create a [group DM channel](https://docs.discord.food/resources/channel#channel-object).
+///
+/// If multiple channels with a single recipient exist, the most recent channel is returned.
+///
+/// Clients should not use this endpoint to create multiple new DMs in a short period of time. A DM is only counted as created if the user sends the first message in the DM and the channel did not have existing message history. Users may only create 10 new DMs to non-bot users in a 10-minute window. Suspicious DM activity may be flagged by Discord and require [additional verification steps](https://docs.discord.food/resources/user#required-action-type) or lead to **immediate account termination**.
+///
+/// One of `recipient_id`, `recipients` or `access_tokens` is required. Bots cannot DM other bots or create group DMs without `access_tokens`.
+///
+/// Returns a [private channel](https://docs.discord.food/resources/channel#channel-object) object. Fires a [Channel Create](https://docs.discord.food/topics/gateway-events#channel-create) Gateway event.
+pub const CREATE_PRIVATE_CHANNEL: &str = "/users/@me/channels";
 
-/// One of recipient_id, recipients or access_tokens is required
-#[derive(Serialize)]
-#[serde(default)]
+#[derive(Serialize, Deserialize)]
 pub struct CreatePrivateChannelRequest {
+	/// The recipient to DM
 	#[deprecated]
-	pub recipient_id:  Snowflake,
-	pub recipients:    Vec<Snowflake>,
-	pub access_tokens: Vec<String>,
-	pub nicks:         HashMap<Snowflake, String>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub recipient_id: Option<UserId>,
+	/// The users to include in the private channel
+	///
+	/// By including only the client user id in this you can create a group dm with only 1 other person
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub recipients: Option<Vec<UserId>>,
+	/// The access tokens of users that have granted your app the `gdm.join` scope
+	///
+	/// Requires access_tokens to be provided.
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub access_tokens: Option<Vec<String>>,
+	/// A mapping of user IDs to their respective nicknames
+	///
+	/// Requires access_tokens to be provided.
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub nicks: Option<HashMap<UserId, String>>,
 }
 
 pub type CreatePrivateChannelResponse = Channel;
 
-/// Type: get
-pub fn GET_GUILD_CHANNELS_ENDPOINT(
-	guild_id: Snowflake,
-	permissions: bool,
+/// Method: `GET`
+///
+/// Does not include threads.
+///
+/// If the user is not in the guild, the guild must be discoverable.
+///
+/// Returns a list of [guild channel](https://docs.discord.food/resources/channel#channel-object) objects for the guild.
+pub fn GET_GUILD_CHANNELS(
+	query: &GetGuildChannelsQueryParams,
+	guild_id: &GuildId,
 ) -> String {
-	format!("/guilds/{}/channels?permissions={}", guild_id, permissions)
+	format!(
+		"/guilds/{}/channels?{}",
+		guild_id,
+		serde_urlencoded::to_string(query).unwrap_or_default()
+	)
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct GetGuildChannelsQueryParams {
+	/// Whether to return calculated permissions for the invoking user in each channel (default false)
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub permissions: Option<bool>,
 }
 
 pub type GetGuildChannelsResponse = Vec<Channel>;
 
-/// Type: get
+/// Method: `GET`
+///
+/// If the user is not in the guild, the guild must be discoverable.
+///
+/// Returns a list of snowflakes representing up to 10 of the top read channels in the guild.
 #[deprecated]
-pub fn GET_GUILD_TOP_READ_CHANNELS_ENDPOINT(guild_id: Snowflake) -> String {
+pub fn GET_GUILD_TOP_READ_CHANNELS(guild_id: &GuildId) -> String {
 	format!("/guilds/{}/top-read-channels", guild_id)
 }
 
-pub type GetGuildTopReadChannelsResponse = Vec<Snowflake>;
+pub type GetGuildTopReadChannels = Vec<ChannelId>;
 
-/// Type: post
+/// Method: `POST`
 ///
-/// supports the X-Audit-Log-Reason header
-/// requires MANAGE_CHANNELS permission
-pub fn CREATE_GUILD_CHANNEL_ENDPOINT(guild_id: Snowflake) -> String {
+/// Supports the `X-Audit-Log-Reason header`
+///
+/// Creates a new channel in the guild. Requires the `MANAGE_CHANNELS` permission.
+///
+/// If setting permission overwrites, only permissions you have in the guild can be allowed/denied.
+///
+/// Setting `MANAGE_ROLES` permission in channels is only possible for guild administrators.
+///
+/// Fires a [Channel Create](https://docs.discord.food/topics/gateway-events#channel-create) Gateway event.
+///
+/// Returns the new [channel](https://docs.discord.food/resources/channel#channel-object) object on success.
+pub fn CREATE_GUILD_CHANNEL(guild_id: &GuildId) -> String {
 	format!("/guilds/{}/channels", guild_id)
 }
 
-#[derive(Serialize)]
-#[serde(default)]
+#[derive(Serialize, Deserialize)]
 pub struct CreateGuildChannelRequest {
-	pub name:                               String,
+	/// The name of the channel (1-100 characters)
+	pub name: String,
+	/// Sorting position of the channel
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub position:                           Option<u8>,
-	/// https://docs.discord.food/resources/channel#channel-type
+	pub position: Option<Option<i16>>,
+	/// The type of channel (default GUILD_TEXT )
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub r#type:                             Option<u8>,
-	/// Only for: Text, News, Stage, Forum, Media
+	pub r#type: Option<Option<ChannelType>>,
+	/// The channel topic (max 1024 characters)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub topic:                              Option<String>,
-	/// Only for: Text, News, Voice, Stage, Forum, Media
+	pub topic: Option<Option<ArrayString<1024>>>,
+	/// Whether the channel is NSFW
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub nsfw:                               Option<bool>,
-	/// Only for: Text, News, Voice, Stage, Forum, Media
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub rate_limit_per_user:                Option<u16>,
-	/// for stages the max bitrate is 64 kbps
+	pub nsfw: Option<Option<bool>>,
+	/// Duration in seconds a user has to wait before sending another message (max 21600)
 	///
-	/// but for voice channels it depends on the guild boost tier
+	/// Bots and users with the permission `MANAGE_MESSAGES` or `MANAGE_CHANNELS` are unaffected
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub rate_limit_per_user: Option<Option<u16>>,
+	/// The bitrate (in bits) of the voice channel
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub bitrate: Option<Option<u32>>,
+	/// The user limit of the voice channel (max 99, 0 refers to no limit)
 	///
-	/// no tier: 96 kbps
+	/// The maximum user limit for stage channels is always 10000 and cannot be set to 0.
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub user_limit: Option<Option<u8>>,
+	/// Explicit permission overwrites for members and roles
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub permission_overwrites: Option<Option<Vec<PermissionOverwrite>>>,
+	/// The ID of the parent category for the guild channel
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub parent_id: Option<Option<ChannelId>>,
+	/// The voice region ID for the voice channel (automatic when null )
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub rtc_region: Option<Option<String>>,
+	/// The camera video quality mode of the voice channel
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub video_quality_mode: Option<Option<VideoQualityMode>>,
+	/// The ID of the SKU showcased by the store channel
+	pub sku_id: SkuId,
+	/// The ID of the special branch granted by the store channel
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub branch_id: Option<Option<BranchId>>,
+	/// Default duration in minutes for newly created threads to stop showing in the channel list after inactivity (one of 60, 1440, 4320, 10080)
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub default_auto_archive_duration: Option<Option<AutoArchiveDuration>>,
+	/// Default duration in seconds a user has to wait before sending another message in newly created threads; this field is copied to the thread at creation time and does not live update
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub default_thread_rate_limit_per_user: Option<Option<i64>>,
+	/// The tags that can be used in a thread-only channel (max 20)
 	///
-	/// tier 1: 128 kbps
-	///
-	/// tier 2: 256 kbps
-	///
-	/// tier 3: 384 kbps
-	///
-	/// Only for: Voice, Stage
+	/// Only the `name` field is required.
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub bitrate:                            Option<u32>,
-	/// Only for: Voice, Stage
+	pub available_tags: Option<Option<Vec<PartialForumTag>>>,
+	/// The emoji to show in the add reaction button on a thread in a thread-only channel
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub user_limit:                         Option<u16>,
-	/// Only for: Text, News, Voice, Category, Stage, Forum, Media
+	pub default_reaction_emoji: Option<Option<DefaultReaction>>,
+	/// The default layout of a forum channel
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub permission_overwrites:              Option<Vec<PermissionOverwrite>>,
-	/// Only for: Text, News, Voice, Stage, Forum, Media
+	pub default_forum_layout: Option<Option<ForumLayoutType>>,
+	/// The default sort order of a thread-only channel's threads
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub parent_id:                          Option<Snowflake>,
-	/// Only for: Voice, Stage
+	pub default_sort_order: Option<Option<SortOrderType>>,
+	/// The default tag setting of a thread-only channel (default `match_some`)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub rtc_region:                         Option<String>,
-	/// https://docs.discord.food/resources/channel#video-quality-mode
-	///
-	/// Only for: Voice, Stage
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub video_quality_mode:                 Option<u8>,
-	/// Only for: Text, News, Forum, Media
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub default_auto_archive_duration:      Option<u16>,
-	/// Only for: Text, News, Forum, Media
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub default_thread_rate_limit_per_user: Option<u16>,
-	/// Only for: Forum, Media
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub available_tags:                     Option<Vec<ForumTag>>,
-	/// Only for: Forum, Media
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub default_reaction_emoji:             Option<DefaultReaction>,
-	/// https://docs.discord.food/resources/channel#forum-layout-type
-	///
-	/// Only for: Forum
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub default_forum_layout:               Option<u8>,
-	/// https://docs.discord.food/resources/channel#sort-order-type
-	///
-	/// Only for: Forum, Media
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub default_sort_order:                 Option<u8>,
+	pub default_tag_setting: Option<Option<SearchTagSetting>>,
 }
 
 pub type CreateGuildChannelResponse = Channel;
 
-/// Type: patch
-pub fn MODIFY_GUILD_CHANNEL_POSITIONS_ENDPOINT(guild_id: Snowflake) -> String {
+/// Method: `PATCH`
+///
+/// Modifies the positions of a set of [channel](https://docs.discord.food/resources/channel#channel-object) objects for the guild.
+///
+/// Requires the MANAGE_CHANNELS permission.
+///
+/// Only channels to be modified are required.
+///
+/// This endpoint takes a JSON array of parameters in the following format:
+///
+/// Fires multiple [Channel Update](https://docs.discord.food/topics/gateway-events#channel-update) Gateway events.
+///
+/// Returns a 204 empty response on success.
+pub fn MODIFY_GUILD_CHANNEL_POSITIONS(guild_id: &GuildId) -> String {
 	format!("/guilds/{}/channels", guild_id)
 }
 
-#[derive(Serialize)]
-#[serde(default)]
-pub struct ModifyGuildChannelPositionsRequest {
-	pub id:               Snowflake,
+#[derive(Serialize, Deserialize)]
+pub struct ModifyGuildChannelPositionsRequestInner {
+	/// The ID of the channel
+	pub id: ChannelId,
+	/// Sorting position of the channel
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub position:         Option<u16>,
+	pub position: Option<Option<i16>>,
+	/// Syncs the permission overwrites with the new parent, if moving to a new category
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub lock_permissions: Option<bool>,
+	pub lock_permissions: Option<Option<bool>>,
+	/// The ID of the parent category for the channel
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub parent_id:        Option<bool>,
+	pub parent_id: Option<Option<ChannelId>>,
 }
 
-/// Type: get
+pub type ModifyGuildChannelPositionsRequest = Vec<ModifyGuildChannelPositionsRequestInner>;
+
+/// Method: `GET`
 ///
-/// requires VIEW_CHANNEL permission
-pub fn GET_CHANNEL_ENDPOINT(channel_id: Snowflake) -> String {
+/// Requires the `VIEW_CHANNEL` permission for the guild.
+///
+/// If the channel is a thread, a [thread member](https://docs.discord.food/resources/channel#thread-member-object) object is included in the returned result.
+///
+/// Returns a [channel](https://docs.discord.food/resources/channel#channel-object) object for a given channel ID.
+pub fn GET_CHANNEL(channel_id: &ChannelId) -> String {
 	format!("/channels/{}", channel_id)
 }
 
-/// "If the channel is a thread, a thread member object is included in the returned result."
-/// tf does this mean
 pub type GetChannelResponse = Channel;
 
-/// Type: patch
+/// Method: `PATCH`
 ///
-/// supports the X-Audit-Log-Reason header
-pub fn MODIFY_CHANNEL_ENDPOINT(channel_id: Snowflake) -> String {
+/// Supports the `X-Audit-Log-Reason header`
+///
+/// Updates a channel's settings.
+///
+/// Fires a [Channel Update](https://bc099d90.discord-userdoccers.pages.dev/topics/gateway-events#channel-update) or [Thread Update](https://bc099d90.discord-userdoccers.pages.dev/topics/gateway-events#channel-update) Gateway event.
+///
+/// Returns a [channel](https://bc099d90.discord-userdoccers.pages.dev/resources/channel#channel-object) on success.
+pub fn MODIFY_CHANNEL(channel_id: &ChannelId) -> String {
 	format!("/channels/{}", channel_id)
 }
 
-#[derive(Serialize)]
-#[serde(default)]
+///
+/// If modifying a thread and setting archived to false, when locked is also false, only the SEND_MESSAGES permission is required. Otherwise, requires the MANAGE_THREADS permission. Requires the thread to have archived set to false or be set to false in the request. Fires a [Thread Update](https://bc099d90.discord-userdoccers.pages.dev/topics/gateway-events#thread-update) Gateway event.
+/// If modifying a guild channel, requires the MANAGE_CHANNELS permission for the guild. If modifying permission overwrites, the MANAGE_ROLES permission is required. Only permissions you have in the guild or parent channel (if applicable) can be allowed/denied (unless you have a MANAGE_ROLES overwrite in the channel). Fires a [Channel Update](https://bc099d90.discord-userdoccers.pages.dev/topics/gateway-events#channel-update) Gateway event. If modifying a category, individual [Channel Update](https://bc099d90.discord-userdoccers.pages.dev/topics/gateway-events#channel-update) events will fire for each child channel that also changes.
+#[derive(Serialize, Deserialize)]
 pub struct ModifyChannelRequest {
-	/// Only for: Text, News, Voice, Category, Stage, Forum, Media, Thread, Group DM
-	pub name:                               String,
-	/// https://docs.discord.food/resources/channel#channel-type
+	/// The name of the channel (1-100 characters)
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub name: Option<ArrayString<100>>,
+	/// The type of channel
 	///
-	/// Only for: Text, News
-	pub r#type:                             u8,
-	/// Only for: Text, News, Voice, Category, Stage, Forum, Media
+	/// Only conversion between text and news is supported and only in guilds with the "NEWS" feature
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub position:                           Option<u16>,
-	/// Only for: Text, News, Stage, Forum, Media
+	pub r#type: Option<ChannelType>,
+	/// Sorting position of the channel
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub topic:                              Option<String>,
-	/// Only for: Group DM
-	///
-	/// probably Option<CdnUri>
-	pub icon:                               CdnUri,
-	/// Only for: Text, News, Voice, Stage, Forum
+	pub position: Option<Option<i16>>,
+	/// The channel topic (max 1024 characters)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub nsfw:                               Option<bool>,
-	/// Only for: Text, News, Voice, Stage, Forum, Media, Thread
+	pub topic: Option<Option<ArrayString<1024>>>,
+	/// The group DM's icon
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub rate_limit_per_user:                Option<u16>,
-	/// for stages the max bitrate is 64 kbps
-	///
-	/// but for voice channels it depends on the guild boost tier
-	///
-	/// no tier: 96 kbps
-	///
-	/// tier 1: 128 kbps
-	///
-	/// tier 2: 256 kbps
-	///
-	/// tier 3: 384 kbps
-	///
-	/// Only for: Voice, Stage
+	pub icon: Option<ImageHash>,
+	/// Whether the channel is NSFW
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub bitrate:                            Option<u32>,
-	/// Only for: Voice, Stage
+	pub nsfw: Option<Option<bool>>,
+	/// Duration in seconds a user has to wait before sending another message (max 21600); bots, as well as users with the permission MANAGE_MESSAGES or MANAGE_CHANNELS , are unaffected
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub user_limit:                         Option<u16>,
-	/// Only for: Text, News, Voice, Category, Stage, Forum, Media
+	pub rate_limit_per_user: Option<Option<u16>>,
+	/// The bitrate (in bits) of the voice channel
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub permission_overwrites:              Option<Vec<PermissionOverwrite>>,
-	/// Only for: Text, News, Voice, Stage, Forum, Media
+	pub bitrate: Option<Option<u32>>,
+	/// the user limit of the voice channel (max 99, 0 refers to no limit)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub parent_id:                          Option<Snowflake>,
-	/// Only for: Group DM
+	pub user_limit: Option<Option<u8>>,
+	/// Explicit permission overwrites for members and roles
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub owner:                              Option<Snowflake>,
-	/// Only for: Voice, Stage
+	pub permission_overwrites: Option<Option<Vec<PermissionOverwrite>>>,
+	/// The ID of the parent category for the guild channel
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub rtc_region:                         Option<String>,
-	/// https://docs.discord.food/resources/channel#video-quality-mode
-	///
-	/// Only for: Voice, Stage
+	pub parent_id: Option<Option<ChannelId>>,
+	/// The ID of the owner for the group DM
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub video_quality_mode:                 Option<u8>,
-	/// Only for: Text, News, Forum, Media
+	pub owner: Option<Option<UserId>>,
+	/// The voice region ID for the voice channel (automatic when null)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub default_auto_archive_duration:      Option<u16>,
-	/// Only for: Text, News, Forum, Media
-	///
-	/// might be Option<u16>
-	pub default_thread_rate_limit_per_user: u16,
-	/// Only for: Thread
-	pub auto_archive_duration:              u16,
-	/// Only for: Thread
+	pub rtc_region: Option<Option<VideoQualityMode>>,
+	/// The camera video quality mode of the voice channel
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub archived:                           Option<bool>,
-	/// Only for: Thread
+	pub video_quality_mode: Option<Option<VideoQualityMode>>,
+	/// Default duration in minutes for newly created threads to stop showing in the channel list after inactivity (one of 60, 1440, 4320, 10080)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub locked:                             Option<bool>,
-	/// Only for: Private Thread
+	pub default_auto_archive_duration: Option<Option<AutoArchiveDuration>>,
+	/// Default duration in seconds a user has to wait before sending another message in newly created threads; this field is copied to the thread at creation time and does not live update
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub invitable:                          Option<bool>,
-	/// https://docs.discord.food/resources/channel#channel-flags
-	///
-	/// only GUILD_FEED_REMOVED, PINNED, ACTIVE_CHANNELS_REMOVED, and REQUIRE_TAG can be set
-	pub flags:                              u64,
-	/// Only for: Forum, Media
-	pub available_tags:                     Vec<ForumTag>,
-	/// Only for: Thread
-	pub applied_tags:                       Vec<Snowflake>,
-	/// Only for: Forum, Media
+	pub default_thread_rate_limit_per_user: Option<u32>,
+	/// Duration in minutes to automatically archive the thread after recent activity (one of 60, 1440, 4320, 10080)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub default_reaction_emoji:             Option<DefaultReaction>,
-	/// https://docs.discord.food/resources/channel#forum-layout-type
-	///
-	/// Only for: Forum
+	pub auto_archive_duration: Option<AutoArchiveDuration>,
+	/// Whether the thread is archived
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub default_forum_layout:               Option<u8>,
-	/// https://docs.discord.food/resources/channel#sort-order-type
-	///
-	/// Only for: Forum, Media
+	pub archived: Option<Option<bool>>,
+	/// Whether the thread is locked; when a thread is locked, only users with `MANAGE_THREADS` can unarchive it
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub default_sort_order:                 Option<u8>,
-	/// Only for: Text, News, Voice, Stage, Forum
+	pub locked: Option<Option<bool>>,
+	/// Whether non-moderators can add other non-moderators to a thread
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub icon_emoji:                         Option<IconEmoji>,
-	/// Only for: Text, News, Voice, Stage, Forum
+	pub invitable: Option<Option<bool>>,
+	/// The channel's flags (only `GUILD_FEED_REMOVED`, `PINNED`, `ACTIVE_CHANNELS_REMOVED`, and `REQUIRE_TAG` can be set)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub theme_color:                        Option<u32>,
+	pub flags: Option<ChannelFlags>,
+	/// The tags that can be used in a thread-only channel (max 20)
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub available_tags: Option<ArrayVec<PartialForumTag, 20>>,
+	/// The IDs of tags that are applied to a thread in a thread-only channel (max 5)
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub applied_tags: Option<ArrayVec<ForumTagId, 5>>,
+	/// The emoji to show in the add reaction button on a thread in a thread-only channel
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub default_reaction_emoji: Option<Option<DefaultReaction>>,
+	/// The default layout of a forum channel
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub default_forum_layout: Option<Option<ForumLayoutType>>,
+	/// The default sort order of a thread-only channel's threads
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub default_sort_order: Option<Option<SortOrderType>>,
+	/// The default tag setting of a thread-only channel (default `match_some`)
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub default_tag_setting: Option<Option<SearchTagSetting>>,
+	/// The emoji to show next to the channel name in channels list
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub icon_emoji: Option<Option<IconEmoji>>,
+	/// The background color of the channel icon emoji encoded as an integer representation of a hexadecimal color code
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub theme_color: Option<Option<u32>>,
 }
 
 pub type ModifyChannelResponse = Channel;
-
-/// Type: delete
-///
-/// supports the X-Audit-Log-Reason header
-/// for guilds, requires MANAGE_CHANNELS or MANAGE_THREADS (if its a thread) permission
-/// guild channels are permanently deleted and cannnot be undeleted.
-/// private dms however can be reopened by just messaging the person again
-pub fn DELETE_CHANNEL_ENDPOINT(
-	channel_id: Snowflake,
-	silent: bool,
-) -> String {
-	format!("/channels/{}?silent={}", channel_id, silent)
-}
-
-pub type DeleteChannelResponse = Channel;
-
-/// Type: delete
-pub fn DELETE_READ_STATE_ENDPOINT(channel_id: Snowflake) -> String {
-	format!("/channels/{}/messages/ack", channel_id)
-}
-
-#[derive(Serialize)]
-#[serde(default)]
-pub struct DeleteReadStateRequest {
-	/// The version of the read state feature you are using (default 1, should be 2 to allow the usage of read state types other than CHANNEL)
-	pub version:         u8,
-	/// default is CHANNEL, idk what number cooresponds to what so idk prob just use 1
-	pub read_state_type: u8,
-}
-
-/// Type: put
-///
-/// supports the X-Audit-Log-Reason header
-/// requires SET_VOICE_CHANNEL_STATUS permission if connected and MANAGE_CHANNELS if not
-pub fn MODIFY_CHANNEL_STATUS_ENDPOINT(channel_id: Snowflake) -> String {
-	format!("/channels/{}/voice-status", channel_id)
-}
-
-#[derive(Serialize)]
-#[serde(default)]
-pub struct ModifyChannelStatusRequest {
-	// #[serde(skip_serializing_if = "Option::is_none")]
-	pub status: Option<String>,
-}
-
-/// Type: put
-///
-/// supports the X-Audit-Log-Reason header
-/// requires MANAGE_ROLES permission
-pub fn MODIFY_CHANNEL_PERMISSIONS_ENDPOINT(
-	channel_id: Snowflake,
-	overwrite_id: Snowflake,
-) -> String {
-	format!("/channels/{}/permissions/{}", channel_id, overwrite_id)
-}
-
-#[derive(Serialize)]
-#[serde(default)]
-pub struct ModifyChannelPermissionsRequest {
-	/// role = 0, member = 1
-	pub r#type: u8,
-	/// https://docs.discord.food/topics/permissions#permissions
-	pub allow:  String,
-	/// https://docs.discord.food/topics/permissions#permissions
-	pub deny:   String,
-}
-
-/// Type: delete
-///
-/// supports the X-Audit-Log-Reason header
-/// requires MANAGE_ROLES permission
-pub fn DELETE_CHANNEL_PERMISSION_ENDPOINT(
-	channel_id: Snowflake,
-	overwrite_id: Snowflake,
-) -> String {
-	format!("/channels/{}/permissions/{}", channel_id, overwrite_id)
-}
-
-/// Type: post
-///
-/// requires MANAGE_WEBHOOKS permission in the target channel for the updates
-pub fn FOLLOW_CHANNEL_ENDPOINT(channel_id: Snowflake) -> String {
-	format!("/channels/{}/followers", channel_id)
-}
-
-#[derive(Serialize)]
-#[serde(default)]
-pub struct FollowChannelRequest {
-	pub webhook_channel_id: Snowflake,
-}
-
-pub type FollowChannelResponse = FollowedChannel;
-
-/// Type: post
-pub fn TRIGGER_TYPING_INDICATOR_ENDPOINT(channel_id: Snowflake) -> String {
-	format!("/channels/{}/typing", channel_id)
-}
-
-#[derive(Deserialize)]
-pub struct TriggerTypingIndicatorResponse {
-	pub message_send_cooldown_ms:  u32,
-	pub thread_create_cooldown_ms: u32,
-}
-
-/// Type: get
-///
-/// supports OAuth2 for auth
-pub fn GET_CALL_ELIGIBILITY_ENDPOINT(channel_id: Snowflake) -> String {
-	format!("/channels/{}/call", channel_id)
-}
-
-#[derive(Deserialize)]
-pub struct GetCallEligibilityResponse {
-	pub ringable: bool,
-}
-
-/// Type: patch
-///
-/// requires an active call to do anything
-pub fn MODIFY_CALL_ENDPOINT(channel_id: Snowflake) -> String {
-	format!("/channels/{}/call", channel_id)
-}
-
-#[derive(Serialize)]
-#[serde(default)]
-pub struct ModifyCallRequest {
-	/// https://docs.discord.food/resources/voice#voice-region-object
-	pub region: String,
-}
-
-/// Type: post
-///
-/// supports OAuth2 for auth
-/// requires an active call to do anything
-pub fn RING_CHANNEL_RECIPIENTS_ENDPOINT(channel_id: Snowflake) -> String {
-	format!("/channels/{}/call/ring", channel_id)
-}
-
-#[derive(Serialize)]
-#[serde(default)]
-pub struct RingChannelRecipientsRequest {
-	/// default: all
-	pub recipients: Option<Vec<Snowflake>>,
-}
-
-/// Type: post
-///
-/// supports OAuth2 for auth
-/// requires an active call to do anything
-pub fn STOP_RINGING_CHANNEL_RECIPIENTS_ENDPOINT(channel_id: Snowflake) -> String {
-	format!("/channels/{}/call/stop-ringing", channel_id)
-}
-
-#[derive(Serialize)]
-pub struct StopRingingChannelRecipientsRequest {
-	pub recipients: Option<Vec<Snowflake>>,
-}
-
-/// Type: put
-pub fn ADD_CHANNEL_RECIPIENT_ENDPOINT(
-	channel_id: Snowflake,
-	user_id: Snowflake,
-) -> String {
-	format!("/channels/{}/recipients/{}", channel_id, user_id)
-}
-
-#[derive(Serialize)]
-#[serde(default)]
-pub struct AddChannelRecipientRequest {
-	/// Access token of a user that has granted your app the gdm.join scope
-	///
-	/// Only required for OAuth2 requests.
-	pub access_token: String,
-	/// Not applicable when operating on a DM.
-	pub nick:         String,
-}
-
-/// if operating on a group dm an empty 204 is responded, but if its a private dm then a group dm channel object is returned
-pub type AddChannelRecipientResponse = Option<Channel>;
-
-/// Type: delete
-pub fn REMOVE_CHANNEL_RECIPIENT_ENDPOINT(
-	channel_id: Snowflake,
-	user_id: Snowflake,
-) -> String {
-	format!("/channels/{}/recipients/{}", channel_id, user_id)
-}
-
-/// Type: put
-pub fn UPDATE_MESSAGE_REQUEST_ENDPOINT(channel_id: Snowflake) -> String {
-	format!("/channels/{}/recipients/@me", channel_id)
-}
-
-#[derive(Serialize)]
-// message request request 🔥
-pub struct UpdateMessageRequestRequest {
-	/// https://docs.discord.food/resources/channel#consent-status
-	///
-	/// any consent status other than ACCEPTED is only usable by discord employees
-	pub consent_status: u8,
-}
-
-pub type UpdateMessageRequestResponse = Channel;
-
-/// Type: delete
-pub fn REJECT_MESSAGE_REQUEST_ENDPOINT(channel_id: Snowflake) -> String {
-	format!("/channels/{}/recipients/@me", channel_id)
-}
-
-pub type RejectMessageRequestResponse = Channel;
-
-/// Type: put
-pub const BATCH_REJECT_MESSAGE_REQUESTS_ENDPOINT: &str = "/channels/recipients/@me/batch-reject";
-
-#[derive(Serialize)]
-pub struct BatchRejectMessageRequestsRequest {
-	pub channel_ids: Vec<Snowflake>,
-}
-
-pub type BatchRejectMessageRequestsResponse = Vec<Channel>;
-
-/// Type: get
-pub fn GET_SUPPLEMENTAL_MESSAGE_REQUEST_DATA_ENDPOINT(channel_ids: Vec<Snowflake>) -> String {
-	format!(
-		"/users/@me/message-requests/supplemental-data?channel_ids={:?}",
-		channel_ids
-	)
-}
-
-pub type GetSupplementalMessageRequestDataResponse = Vec<SupplementalMessageRequest>;
-
-/// Type: post
-pub fn ACKNOWLEDGE_BLOCKED_USER_WARNING_ENDPOINT(channel_id: Snowflake) -> String {
-	format!("/channels/{}/blocked-user-warning-dismissal", channel_id)
-}
-
-/// Type: post
-pub fn ACKNOWLEDGE_SAFETY_WARNINGS_ENDPOINT(channel_id: Snowflake) -> String {
-	format!("/channels/{}/safety-warnings/ack", channel_id)
-}
-
-#[derive(Serialize)]
-pub struct AcknowledgeSafetyWarningsRequest {
-	warning_ids: Vec<Snowflake>,
-}
-
-/// Type: post
-///
-/// only usable by discord employees
-pub fn ADD_SAFETY_WARNING_ENDPOINT(channel_id: Snowflake) -> String {
-	format!("/channels/{}/add-safety-warning", channel_id)
-}
-
-#[derive(Serialize)]
-pub struct AddSafetyWarningRequest {
-	/// https://docs.discord.food/resources/channel#safety-warning-type
-	pub safety_warning_type: u8,
-}
-
-/// Type: delete
-///
-/// only usable by discord employees
-pub fn DELETE_SAFETY_WARNINGS_ENDPOINT(channel_id: Snowflake) -> String {
-	format!("/channels/{}/safety-warnings", channel_id)
-}
-
-/// Type: post
-///
-/// only usable by discord employees
-pub fn REPORT_SAFETY_WARNING_FALSE_POSITIVE_ENDPOINT(channel_id: Snowflake) -> String {
-	format!(
-		"/channels/{}/safety-warning/report-false-positive",
-		channel_id
-	)
-}
-
-/// Type: get
-///
-/// not usable by user accounts
-pub fn GET_GUILD_ACTIVE_THREADS_ENDPOINT(guild_id: Snowflake) -> String {
-	format!("/guilds/{}/threads/active", guild_id)
-}
-
-#[derive(Deserialize)]
-pub struct GetGuildActiveThreadsResponse {
-	pub threads: Vec<Channel>,
-	pub members: Vec<ThreadMember>,
-}
-
-/// Type: get
-///
-/// not usable by user accounts
-/// removed in api v10
-#[deprecated]
-pub fn GET_ACTIVE_THREADS_ENDPOINT(channel_id: Snowflake) -> String {
-	if API_VERSION.to_string().parse::<u8>().unwrap() > 9 {
-		panic!("Use of removed endpoint GET_ACTIVE_THREADS_ENDPOINT")
-	}
-	format!("/channels/{}/threads/active", channel_id)
-}
-
-#[derive(Deserialize)]
-pub struct GetActiveThreadsResponse {
-	pub threads: Vec<Channel>,
-	pub members: Vec<ThreadMember>,
-}
-
-/// Type: get
-///
-/// requires READ_MESSAGE_HISTORY permission
-#[deprecated]
-pub fn GET_PUBLIC_ARCHIVED_THREADS_ENDPOINT(
-	channel_id: Snowflake,
-	query: GetPublicArchivedThreadsRequest,
-) -> String {
-	format!(
-		"/channels/{}/threads/archived/public{}",
-		channel_id,
-		to_string_query(&query)
-	)
-}
-
-#[derive(Serialize)]
-#[serde(default)]
-pub struct GetPublicArchivedThreadsRequest {
-	pub before: Timestamp,
-	pub limit:  u8,
-}
-
-#[derive(Deserialize)]
-pub struct GetPublicArchivedThreadsResponse {
-	pub threads:  Vec<Channel>,
-	pub members:  Vec<ThreadMember>,
-	pub has_more: bool,
-}
-
-/// Type: get
-///
-/// requires READ_MESSAGE_HISTORY permission
-#[deprecated]
-pub fn GET_JOINED_PRIVATE_ARCHIVED_THREADS_ENDPOINT(
-	channel_id: Snowflake,
-	query: GetJoinedPrivateArchivedThreadsRequest,
-) -> String {
-	format!(
-		"/channels/{}/users/@me/threads/archived/private{}",
-		channel_id,
-		to_string_query(&query)
-	)
-}
-
-#[derive(Serialize)]
-#[serde(default)]
-pub struct GetJoinedPrivateArchivedThreadsRequest {
-	pub before: Timestamp,
-	pub limit:  u8,
-}
-
-#[derive(Deserialize)]
-pub struct GetJoinedPrivateArchivedThreadsResponse {
-	pub threads:  Vec<Channel>,
-	pub members:  Vec<ThreadMember>,
-	pub has_more: bool,
-}
-
-/// Type: get
-///
-/// requires READ_MESSAGE_HISTORY permission
-#[deprecated]
-pub fn SEARCH_THREADS_ENDPOINT(
-	channel_id: Snowflake,
-	query: SearchThreadsRequest,
-) -> String {
-	format!(
-		"/channels/{}/threads/search{}",
-		channel_id,
-		to_string_query(&query)
-	)
-}
-
-#[derive(Serialize)]
-#[serde(default)]
-pub struct SearchThreadsRequest {
-	pub name:        String,
-	pub slop:        u8,
-	pub tag:         Vec<Snowflake>,
-	/// match_some or match_all, default match_some
-	pub tag_setting: String,
-	pub archived:    bool,
-	/// https://docs.discord.food/resources/channel#thread-sort-type
-	pub sort_by:     String,
-	/// asc or desc, default desc
-	pub sort_order:  String,
-	pub limit:       u8,
-	pub offset:      u16,
-	pub max_id:      Snowflake,
-	pub min_id:      Snowflake,
-}
-
-#[derive(Deserialize)]
-pub struct SearchThreadsResponse {
-	pub threads:        Vec<Channel>,
-	pub members:        Vec<ThreadMember>,
-	pub has_more:       bool,
-	pub total_results:  u16,
-	pub first_messages: Vec<Message>,
-}
-
-/// Type: post
-///
-/// supports the X-Audit-Log-Reason header
-pub fn CREATE_THREAD_FROM_MESSAGE_ENDPOINT(
-	channel_id: Snowflake,
-	message_id: Snowflake,
-) -> String {
-	format!("/channels/{}/messages/{}/threads", channel_id, message_id)
-}
-
-#[derive(Serialize)]
-#[serde(default)]
-pub struct CreateThreadFromMessageRequest {
-	pub name:                  String,
-	pub auto_archive_duration: u16,
-	pub rate_limit_per_user:   u16,
-}
-
-pub type CreateThreadFromMessageResponse = Channel;
-
-/// Type: post
-///
-/// supports the X-Audit-Log-Reason header
-/// requires CREATE_PUBLIC_THREADS or CREATE_PRIVATE_THREADS permission depending on the type created
-pub fn CREATE_THREAD_ENDPOINT(channel_id: Snowflake) -> String {
-	format!("/channels/{}/threads", channel_id)
-}
-
-#[derive(Serialize)]
-#[serde(default)]
-pub struct CreateThreadRequest {
-	pub name:                  String,
-	pub auto_archive_duration: u16,
-	pub rate_limit_per_user:   u16,
-	/// https://docs.discord.food/resources/channel#channel-type
-	///
-	/// required in api v10
-	pub r#type:                u8,
-	pub invitable:             bool,
-	pub applied_tags:          Vec<Snowflake>,
-	/// required in api v10
-	pub message:               ThreadOnlyChannelMessageParams,
-}
-
-pub type CreateThreadResponse = Channel;
-
-/// Type: post (what are you on discord)
-///
-/// requires READ_MESSAGE_HISTORY permission
-pub fn GET_CHANNEL_POST_DATA_ENDPOINT(channel_id: Snowflake) -> String {
-	format!("/channels/{}/post-data", channel_id)
-}
-
-#[derive(Serialize)]
-pub struct GetChannelPostDataRequest {
-	pub thread_ids: Vec<Snowflake>,
-}
-
-#[derive(Deserialize)]
-pub struct GetChannelPostDataResponse {
-	pub threads: HashMap<Snowflake, ThreadPostData>,
-}
-
-/// Type: get
-///
-/// requires VIEW_CHANNEL permission
-/// not usable by user accounts, and bot accounts also need GUILD_MEMBERS intent
-/// in api v11 this will always return paginated results
-/// before that though paginated results can be returned by setting with_member to true
-pub fn GET_THREAD_MEMBERS_ENDPOINT(
-	channel_id: Snowflake,
-	query: GetThreadMembersRequest,
-) -> String {
-	format!(
-		"/channels/{}/post-data{}",
-		channel_id,
-		to_string_query(&query)
-	)
-}
-
-#[derive(Serialize)]
-#[serde(default)]
-pub struct GetThreadMembersRequest {
-	pub with_member: bool,
-	pub after:       Snowflake,
-	pub limit:       u8,
-}
-
-pub type GetThreadMembersResponse = Vec<ThreadMember>;
-
-/// Type: get
-///
-/// requires VIEW_CHANNEL permission
-/// not usable by user accounts
-pub fn GET_THREAD_MEMBER_ENDPOINT(
-	channel_id: Snowflake,
-	user_id: Snowflake,
-	query: GetThreadMemberRequest,
-) -> String {
-	format!(
-		"/channels/{}/thread-members/{}{}",
-		channel_id,
-		user_id,
-		to_string_query(&query)
-	)
-}
-
-#[derive(Serialize)]
-#[serde(default)]
-pub struct GetThreadMemberRequest {
-	pub with_member: bool,
-}
-
-/// Type: put
-///
-/// requires VIEW_CHANNEL permission
-pub fn JOIN_THREAD_ENDPOINT(channeL_id: Snowflake) -> String {
-	format!("/channels/{}/thread-members/@me", channeL_id)
-}
-
-/// Type: put
-///
-/// requires SEND_MESSAGES permission
-pub fn ADD_THREAD_MEMBER_ENDPOINT(
-	channeL_id: Snowflake,
-	user_id: Snowflake,
-) -> String {
-	format!("/channels/{}/thread-members/{}", channeL_id, user_id)
-}
-
-/// Type: patch
-pub fn MODIFY_THREAD_SETTINGS_ENDPOINT(channeL_id: Snowflake) -> String {
-	format!("/channels/{}/thread-members/@me/settings", channeL_id)
-}
-
-#[derive(Serialize)]
-#[serde(default)]
-pub struct ModifyThreadSettingsRequest {
-	/// https://docs.discord.food/resources/channel#thread-member-flags
-	///
-	/// all but the first flag can be set
-	pub flags:       u64,
-	pub muted:       bool,
-	pub mute_config: Option<MuteConfig>,
-}
-
-/// Type: delete
-///
-/// requires VIEW_CHANNEL permission
-pub fn LEAVE_THREAD_ENDPOINT(channeL_id: Snowflake) -> String {
-	format!("/channels/{}/thread-members/@me", channeL_id)
-}
-
-/// Type: delete
-///
-/// requires MANAGE_THREADS permission
-pub fn REMOVE_THREAD_MEMBER_ENDPOINT(
-	channeL_id: Snowflake,
-	user_id: Snowflake,
-) -> String {
-	format!("/channels/{}/thread-members/{}", channeL_id, user_id)
-}
-
-/// Type: post
-///
-/// supports the X-Audit-Log-Reason header
-/// requires MANAGE_CHANNELS permission
-pub fn CREATE_CHANNEL_TAG_ENDPOINT(channeL_id: Snowflake) -> String {
-	format!("/channels/{}/tags", channeL_id)
-}
-
-#[derive(Serialize)]
-#[serde(default)]
-pub struct CreateChannelTagRequest {
-	pub name:       String,
-	pub moderated:  bool,
-	pub emoji_id:   Option<Snowflake>,
-	pub emoji_name: Option<String>,
-}
-
-pub type CreateChannelTagResponse = Channel;
-
-/// Type: put
-///
-/// supports the X-Audit-Log-Reason header
-/// requires MANAGE_CHANNELS permission
-pub fn MODIFY_CHANNEL_TAG_ENDPOINT(
-	channeL_id: Snowflake,
-	tag_id: Snowflake,
-) -> String {
-	format!("/channels/{}/tags/{}", channeL_id, tag_id)
-}
-
-#[derive(Serialize)]
-#[serde(default)]
-pub struct ModifyChannelTagRequest {
-	pub name:       String,
-	pub moderated:  bool,
-	pub emoji_id:   Option<Snowflake>,
-	pub emoji_name: Option<String>,
-}
-
-pub type ModifyChannelTagResponse = Channel;
-
-/// Type: delete
-///
-/// supports the X-Audit-Log-Reason header
-/// requires MANAGE_CHANNELS permission
-pub fn DELETE_CHANNEL_TAG_ENDPOINT(
-	channeL_id: Snowflake,
-	tag_id: Snowflake,
-) -> String {
-	format!("/channels/{}/tags/{}", channeL_id, tag_id)
-}
-
-pub type DeleteChannelTagResponse = Channel;
