@@ -58,7 +58,7 @@ pub struct Integration {
 	pub user: Option<PartialUser>,
 }
 
-#[derive(Serialize_repr, Deserialize_repr)]
+#[derive(Serialize_repr, Deserialize_repr, Eq, PartialEq, Hash)]
 #[repr(u8)]
 pub enum IntegrationType {
 	#[serde(rename = "twitch")]
