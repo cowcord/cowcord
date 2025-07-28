@@ -8,6 +8,7 @@ use crate::api::connected_accounts::VisibilityType;
 use crate::api::emoji::Emoji;
 use crate::api::guild::{GuildFeatures, PremiumTier};
 use crate::api::stickers::Sticker;
+use crate::common::hex::{self, Hex};
 use crate::common::id::{ApplicationId, ChannelId, DiscoveryCategoryId, EmojiId, GuildId};
 use crate::common::timestamp::Timestamp;
 
@@ -231,7 +232,8 @@ pub struct GuildProfile {
 	/// The description for the guild (max 300 characters)
 	pub description: ArrayString<300>,
 	/// The guild's accent color as a hexadecimal color string
-	pub brand_color_primary: String,
+	#[serde(with = "hex::as_str")]
+	pub brand_color_primary: Hex,
 	/// The guild's clan banner hash
 	#[deprecated]
 	pub banner_hash: Option<String>,
@@ -244,9 +246,9 @@ pub struct GuildProfile {
 	/// The badge shown on the guild's tag
 	pub badge: GuildBadgeType,
 	/// The primary color of the badge as a hexadecimal color string
-	pub badge_color_primary: String,
+	pub badge_color_primary: Hex,
 	/// The secondary color of the badge as a hexadecimal color string
-	pub badge_color_secondary: String,
+	pub badge_color_secondary: Hex,
 	/// The guild tag badge hash
 	pub badge_hash: String,
 	/// Terms used to describe the guild's interest and personality (max 5)

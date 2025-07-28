@@ -13,6 +13,7 @@ use crate::api::presences::ActivityActionType;
 use crate::api::soundboard::SoundboardSound;
 use crate::api::stickers::{Sticker, StickerItem};
 use crate::api::users::PartialUser;
+use crate::common::hex::{self, Hex};
 use crate::common::id::{
 	AnswerId,
 	ApplicationId,
@@ -622,7 +623,8 @@ pub struct Embed {
 	pub timestamp: Option<Timestamp>,
 	/// The color of the embed encoded as an integer representation of a hexadecimal color code
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub color: Option<u32>,
+	#[serde(with = "hex::as_num")]
+	pub color: Option<Hex>,
 	/// Embed footer information
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub footer: Option<EmbedFooter>,

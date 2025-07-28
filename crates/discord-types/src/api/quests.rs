@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
+use crate::common::hex::{self, Hex};
 use crate::common::id::{ApplicationId, QuestId, SkuId, UserId};
 use crate::common::timestamp::Timestamp;
 
@@ -92,9 +93,11 @@ pub struct QuestAssets {
 #[derive(Serialize, Deserialize)]
 pub struct QuestGradient {
 	/// The hex-encoded primary color of the gradient
-	pub primary: String,
+	#[serde(with = "hex::as_str")]
+	pub primary: Hex,
 	/// The hex-encoded secondary color of the gradient
-	pub secondary: String,
+	#[serde(with = "hex::as_str")]
+	pub secondary: Hex,
 }
 
 #[derive(Serialize, Deserialize)]
