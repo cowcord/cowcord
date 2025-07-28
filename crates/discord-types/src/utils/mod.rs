@@ -1,5 +1,3 @@
-pub mod clippy;
-
 /// Convert struct to url string query params
 ///
 /// eg.
