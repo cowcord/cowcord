@@ -5,69 +5,38 @@
 - [ ] [git](https://git-scm.com/downloads)
 - [ ] Some non ancient rustc version
 
-## Flags info
-
-### `--profile`
-options:
-1. dev - fastest build times, little optimization, used solely for development
-2. release - smallest binary, made for full releases
-3. beta - best performance, a bit more likely to crash
-
-default: dev
-
-### `--platform`
-options:
-1. web
-2. desktop
-
-default: web
-
-### `--release`
-mainly just removes the built in dioxus debug stuff
-
 ## Testing
 
 1. Clone the repo
+
 ```bash
 git clone https://github.com/not-a-cowfr/cowcord.git
 cd cowcord
 ```
+
 2. Install Dioxus cli
+
 ```bash
 cargo install dioxus-cli
 ```
+
 3. Run
+
 ```bash
+# web builds can be used for development on localhost but do not work when hosted on an actual domain.
 dx serve --platform <web|desktop>
 ```
 
 ## Building
 
-### Web
-
-1. Run this
-```bash
-dx build --release --profile <beta|release|dev> # no needs to specify platform, web is the default
-cp -r ./target/dx/Cowcord/release/web/public ./dist
-cp ./dist/index.html ./dist/404.html
-```
-(yes `--release` is necessary even when using beta profile)
-<!--
-2. Optimize wasm, run this
-```bash
-sudo apt-get update
-sudo apt-get install -y binaryen
-wasm-opt dist/assets/dioxus/Cowcord_bg.wasm -o dist/assets/dioxus/Cowcord_bg.wasm -O4 # O4 for speed OZ for binary size
-```
--->
-2. Done! everything should now be in the `./dist/` directory
-
 ### Desktop
 
 1. Run this
+
 ```bash
 dx build --release --profile <beta|release|dev> --platform desktop
 ```
+
 idk what else to do, ill fix this part later
 
 # Consistency
@@ -77,70 +46,79 @@ idk what else to do, ill fix this part later
 ### 1. Declaring Endpoints
 
 If the endpoint has no changing string query fields or a part of the url is not always the same, then define it as a const, like this:
+
 ```rust
-pub const SUPER_COOL_ENDPOINT: &str = "/super/cool";
+pub const SUPER_COOL: &str = "/super/cool";
 ```
 
 However, with a lot of endpoints they have something that changes, like maybe a part of the url is a guild id, or it needs some string query parameters, in this case you would define it as a function, keeping the upper snake case, example:
+
 ```rust
-pub fn SUPER_COOL_ENDPOINT_ENDPOINT(some_id: Snowflake, query: QueryStringParamsStruct) -> String {
-	format!("/super/{}/cool{}", some_id, to_string_query(&query))
+pub fn SUPER_COOL(some_id: &SomeId, query: &SuperCoolQueryParams) -> String {
+	format!("/super/{}/cool{}", some_id, query.to_string_query())
 }
 ```
 
 Also important, make sure to end the variable/struct/function/type name with what is format
+
 ```rust
-/// notice the ENDPOINT at the end
-pub const SUPER_COOL_ENDPOINT: &str = "/super/cool";
+pub const SUPER_COOL: &str = "/super/cool";
 
 pub struct SuperCoolRequest {}
 
 pub type SuperCoolResponse = SomeOtherThing;
 ```
 
-And finally, make sure to include important info with the endpoint, for example:
-```rust
-/// Type: post
-///
-/// supports Super-Cool-Header header
-///
-/// requires SUPER_COOL permission
-pub const SUPER_COOL_ENDPOINT: &str = "/super/cool";
-```
-
-<!-- ### 2. Keep request and response structs seperate, even if they're the same
-This is because if in the future if one changes its very easy to edit them and it just -->
+Most of these will be already adhered to if copying the endpoint via the copy button from [discord userdoccers].
 
 </details>
 
 <details><summary><h2>Structs</h2></summary>
 
+normal structs
+
 ```rust
+#[derive(Serialize, Deserialize)]
 pub struct MyCoolStruct {
     field_one: FieldOneType,
-    field_two: FieldTwoFlags,
+    field_one: FieldTwoType,
+    field_two: FieldThreeFlags,
 }
 ```
+
+enums with integer as an identifier
+
 ```rust
-enum_number! {
-    #[derive(Deserialize, Serialize)]
-    #[serde(from = "u8", into = "u8")]
-    pub enum FieldOneType {
-        THIS_COOL_TYPE = 1,
-        THIS_OTHER_COOL_TYPE = 2,
-        _ => Unknown(u8),
-    }
+#[derive(Serialize_repr, Deserialize_repr)]
+#[repr(u8)]
+pub enum FieldOneType {
+    THIS_COOL_TYPE = 1,
+    THIS_OTHER_COOL_TYPE = 2,
 }
 ```
+
+enums with the enum name as an identifier
+
+```rust
+#[derive(Serialize, Deserialize)]
+pub enum FieldTwoType {
+    this_thing,
+    this_other_thing,
+}
+```
+
+bitflags
+
 ```rust
 bitflags! {
-    pub struct FieldTwoFlags: u64 {
+    pub struct FieldThreeFlags: u64 {
         const THIS_COOL_FLAG = 1 << 0;
         const THIS_OTHER_COOL_FLAG = 1 << 1;
     }
 }
 ```
-soon these will be used rather than just defining it as an int, and then the docs comment can be removed
+
+Again this will be done automatically for you if copying the code via the copy button on a table from [discord userdoccers].
 
 </details>
 
@@ -150,4 +128,6 @@ This ones pretty easy, all it is is that if theres some ui element thats used mo
 
 </details>
 
-# Troubleshooting
+<!-- # Troubleshooting -->
+
+[discord userdoccers]: https://docs.discord.food
