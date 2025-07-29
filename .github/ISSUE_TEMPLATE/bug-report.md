@@ -1,35 +1,32 @@
 ---
 name: Bug Report
 about: Bug report template
-title: 'Bug: '
+title: "Bug: "
 labels: bug
-assignees: ''
-
+assignees: ""
 ---
 
 ## Bug Report
 
 **Brief Explanation**
+
 <!-- briefly explain the bug you're experiencing -->
 
-**Affected platform(s)**:  
-- [ ] Desktop App  
-- [ ] Website  
+**Environment**:
 
-**Environment**:  
-- OS:  
-- Browser:  <!-- if using web, and make sure to include your browser version -->
-- App Version: <!-- if using desktop client -->  
+- OS:
+- App Version:
 
-**Expected behavior**:  
+**Expected behavior**:
 
 **Actual behavior**:
 
-**Steps to Reproduce**:  
-1.  
-2.  
-3.  
-4. 
+**Steps to Reproduce**:
+
+1.
+2.
+3.
+4.
 
 <!-- Optional -->
 <details><summary><strong>Screenshots</strong></summary>
@@ -39,5 +36,7 @@ assignees: ''
 </details>
 
 <!-- Optional -->
-**Additional Info**:  
+
+**Additional Info**:
+
 <!-- any other details you think to be relevant -->
