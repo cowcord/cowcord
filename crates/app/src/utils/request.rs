@@ -1,6 +1,7 @@
 use std::error::Error;
 
 use dioxus::prelude::use_navigator;
+use discord_types::api::{API_VERSION, DISCORD_URL};
 use reqwest::{Client, RequestBuilder, Response};
 use serde::Serialize;
 use serde::de::DeserializeOwned;
@@ -8,18 +9,15 @@ use serde::de::DeserializeOwned;
 use super::local_storage::get_value;
 
 pub struct RequestClient {
-	client:   Client,
+	client: Client,
 	api_base: String,
 }
-
-pub const DISCORD: &str = "https://discord.com/";
-pub const API_VERSION: &str = "9";
 
 impl RequestClient {
 	pub fn new() -> Self {
 		RequestClient {
-			client:   Client::new(),
-			api_base: format!("/api/v{}", API_VERSION),
+			client: Client::new(),
+			api_base: format!("/api/{:?}", API_VERSION::v10),
 		}
 	}
 
@@ -51,7 +49,7 @@ impl RequestClient {
 		T: Serialize,
 		R: DeserializeOwned,
 	{
-		let url = format!("{}{}{}", DISCORD, self.api_base, endpoint);
+		let url = format!("{}{}{}", DISCORD_URL, self.api_base, endpoint);
 		let mut request = self.client.post(&url).add_headers()?;
 
 		if let Some(body) = body {
@@ -72,7 +70,7 @@ impl RequestClient {
 		T: Serialize,
 		R: DeserializeOwned,
 	{
-		let url = format!("{}{}{}", DISCORD, self.api_base, endpoint);
+		let url = format!("{}{}{}", DISCORD_URL, self.api_base, endpoint);
 		let mut request = self.client.get(&url).add_headers()?;
 
 		if let Some(body) = body {
@@ -93,7 +91,7 @@ impl RequestClient {
 		T: Serialize,
 		R: DeserializeOwned,
 	{
-		let url = format!("{}{}{}", DISCORD, self.api_base, endpoint);
+		let url = format!("{}{}{}", DISCORD_URL, self.api_base, endpoint);
 		let mut request = self.client.delete(&url).add_headers()?;
 
 		if let Some(body) = body {
@@ -114,7 +112,7 @@ impl RequestClient {
 		T: Serialize,
 		R: DeserializeOwned,
 	{
-		let url = format!("{}{}{}", DISCORD, self.api_base, endpoint);
+		let url = format!("{}{}{}", DISCORD_URL, self.api_base, endpoint);
 		let mut request = self.client.put(&url).add_headers()?;
 
 		if let Some(body) = body {
@@ -135,7 +133,7 @@ impl RequestClient {
 		T: Serialize,
 		R: DeserializeOwned,
 	{
-		let url = format!("{}{}{}", DISCORD, self.api_base, endpoint);
+		let url = format!("{}{}{}", DISCORD_URL, self.api_base, endpoint);
 		let mut request = self.client.patch(&url).add_headers()?;
 
 		if let Some(body) = body {
@@ -157,7 +155,7 @@ impl RequestBuilderExt for RequestBuilder {
 		if let Some(token) = get_value("token") {
 			Ok(self
 				.header("Authorization", token)
-				.header("Origin", DISCORD))
+				.header("Origin", DISCORD_URL))
 		} else {
 			use_navigator().replace("/login");
 			Err("Authorization token is missing".into())

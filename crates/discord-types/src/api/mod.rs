@@ -33,3 +33,16 @@ pub mod webhooks;
 pub mod websocket;
 
 pub mod endpoints;
+
+pub enum API_VERSION {
+	v10,
+	v9,
+	#[deprecated]
+	v8,
+	#[deprecated]
+	v7,
+	#[deprecated]
+	v6,
+}
+
+pub const DISCORD_URL: &str = "https://discord.com/";
