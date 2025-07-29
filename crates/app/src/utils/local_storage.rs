@@ -25,7 +25,7 @@ pub fn save_value(
 ) {
 	if let Some(window) = window() {
 		if let Ok(local_storage) = get(&window, &JsValue::from_str("localStorage")) {
-			let _ = set(
+			set(
 				&local_storage,
 				&JsValue::from_str(key),
 				&JsValue::from_str(value),
@@ -40,7 +40,7 @@ pub fn remove_value(key: &str) {
 			let remove_item = JsValue::from_str("removeItem");
 			let token_key = js_sys::Array::new();
 			token_key.push(&JsValue::from_str(key));
-			let _ = js_sys::Function::from(get(&local_storage, &remove_item).unwrap())
+			js_sys::Function::from(get(&local_storage, &remove_item).unwrap())
 				.apply(&local_storage, &token_key);
 		}
 	}
