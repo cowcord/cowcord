@@ -1,8 +1,17 @@
-use arrayvec::ArrayString;
+use arrayvec::{ArrayString, ArrayVec};
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
+use crate::api::components::Component;
 use crate::api::guild::GuildMember;
+use crate::api::messages::{
+	AllowedMentions,
+	Attachment,
+	Embed,
+	Message,
+	MessageActivity,
+	MessageFlags,
+};
 use crate::api::users::PartialUser;
 use crate::common::id::{
 	ApplicationId,
@@ -13,6 +22,7 @@ use crate::common::id::{
 	GuildId,
 	LobbyId,
 	MessageId,
+	StickerId,
 	UserId,
 	WebhookId,
 };
@@ -161,7 +171,7 @@ pub struct Channel {
 	pub theme_color: Option<Option<u32>>,
 	/// The status of the voice channel (max 500 characters)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub status: Option<Option<String>>,
+	pub status: Option<Option<ArrayString<500>>>,
 	/// When the HD streaming entitlement expires for the voice channel
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub hd_streaming_until: Option<Option<Timestamp>>,
@@ -454,6 +464,12 @@ pub struct ForumTag {
 }
 
 #[derive(Serialize, Deserialize)]
+pub struct PartialForumTag {
+	/// The name of the tag (max 50 characters)
+	pub name: ArrayString<50>,
+}
+
+#[derive(Serialize, Deserialize)]
 pub struct LinkedLobby {
 	/// The ID of the application
 	pub application_id: ApplicationId,
@@ -463,4 +479,94 @@ pub struct LinkedLobby {
 	pub linked_by: UserId,
 	/// When the lobby was linked to channel
 	pub linked_at: Timestamp,
+}
+
+#[derive(Serialize_repr, Deserialize_repr)]
+#[repr(u8)]
+pub enum AutoArchiveDuration {
+	None = 0,
+	OneHour = 60,
+	OneDay = 1440,
+	ThreeDays = 4320,
+	OneWeek = 10080,
+}
+
+#[derive(Serialize_repr, Deserialize_repr)]
+#[repr(u8)]
+pub enum MessageRequestConsentStatus {
+	/// The DM isn't a message request
+	UNSPECIFIED = 0,
+	/// The message request is pending
+	PENDING = 1,
+	/// The message request was accepted
+	ACCEPTED = 2,
+	/// The message request was rejected
+	REJECTED = 3,
+}
+
+#[derive(Serialize, Deserialize)]
+pub enum ThreadSortType {
+	/// Sort by the last message sent in the thread (default)
+	last_message_time,
+	/// Sort by when the thread was last archived
+	archive_time,
+	/// Sort by relevance to the current user
+	relevance,
+	/// Sort by when the thread was created
+	creation_time,
+}
+
+#[derive(Serialize, Deserialize)]
+pub enum ThreadSortDirection {
+	/// Ascendng order
+	asc,
+	/// Descendng order
+	desc,
+}
+
+/// Note that when sending a message, you must provide a value for at least one of content, embeds, components, sticker_ids, activity, or files[n].
+#[derive(Serialize, Deserialize)]
+pub struct ThreadOnlyChannelMessageParams {
+	/// The message contents (max 2000 characters)
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub content: Option<ArrayString<2000>>,
+	/// Embedded rich content (max 6000 characters, max 10)
+	#[serde(skip_serializing_if = "Option::is_none")]
+	#[deprecated(note = "Cannot be used by user accounts.")]
+	pub embeds: Option<ArrayVec<Embed, 10>>,
+	/// Allowed mentions for the message
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub allowed_mentions: Option<AllowedMentions>,
+	/// Components to include with the message
+	#[serde(skip_serializing_if = "Option::is_none")]
+	#[deprecated(note = "Cannot be used by user accounts.")]
+	pub components: Option<Vec<Component>>,
+	/// IDs of up to 3 stickers to send in the message
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub sticker_ids: Option<ArrayVec<StickerId, 3>>,
+	/// The rich presence activity to invite users to
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub activity: Option<MessageActivity>,
+	/// The application ID of the activity to create a rich presence invite for (defaults to the primary activity if unspecified)
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub application_id: Option<ApplicationId>,
+	/// The message's flags (only `SUPPRESS_EMBEDS`, `SUPPRESS_NOTIFICATIONS`, and `VOICE_MESSAGE` can be set)
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub flags: Option<MessageFlags>,
+	/// Contents of the file being sent (max 10)
+	pub files: ArrayVec<Vec<u8>, 10>,
+	/// JSON-encoded body of non-file params
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub payload_json: Option<String>,
+	/// Partial attachment objects with filename and description (max 10)
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub attachments: Option<Vec<Attachment>>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct ThreadPostData {
+	/// The owner of the thread
+	pub owner: Option<GuildMember>,
+	/// The first message in the thread
+	pub first_message: Option<Message>,
 }

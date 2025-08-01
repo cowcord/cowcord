@@ -6,6 +6,7 @@ use serde_repr::{Deserialize_repr, Serialize_repr};
 
 use crate::api::emoji::Emoji;
 use crate::api::family_center::LinkedUser;
+use crate::common::hex::{self, Hex};
 use crate::common::id::{
 	GenericSnowflake,
 	GuildId,
@@ -15,6 +16,7 @@ use crate::common::id::{
 	SurveyId,
 	UserId,
 };
+use crate::common::image::ImageHash;
 use crate::common::locale::Locale;
 use crate::common::timestamp::Timestamp;
 
@@ -60,7 +62,8 @@ pub struct User {
 	/// The user's banner hash
 	pub banner: Option<String>,
 	/// The user's banner color encoded as an integer representation of a hexadecimal color code
-	pub accent_color: Option<u32>,
+	#[serde(with = "hex::as_num")]
+	pub accent_color: Option<Hex>,
 	/// The language option chosen by the user
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub locale: Option<Locale>,
@@ -132,7 +135,7 @@ pub struct PartialUser {
 	pub system: Option<bool>,
 	/// The user's banner hash
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub banner: Option<Option<String>>,
+	pub banner: Option<Option<ImageHash>>,
 	/// The user's banner color encoded as an integer representation of a hexadecimal color code
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub accent_color: Option<Option<u32>>,
@@ -401,7 +404,7 @@ pub struct Authenticator {
 }
 
 /// Authenticator types represent enabled multi-factor authentication methods. See the [MFA verification documentation](https://docs.discord.food/authentication#mfa-verification) for more information.
-#[derive(Serialize_repr, Deserialize_repr)]
+#[derive(Serialize_repr, Deserialize_repr, Debug)]
 #[repr(u8)]
 pub enum AuthenticatorType {
 	/// WebAuthn credentials
@@ -555,4 +558,123 @@ pub enum SurveyRequirementType {
 	IS_VIEWING,
 	/// The user must have the given permissions in any guild
 	GUILD_PERMISSIONS,
+}
+
+bitflags! {
+	pub struct UserPermissionFlags: u64 {
+		/// Allows creation of instant invites
+		const CREATE_INSTANT_INVITE = 1 << 0;
+		/// Allows kicking members
+		const KICK_MEMBERS = 1 << 1;
+		/// Allows banning members
+		const BAN_MEMBERS = 1 << 2;
+		/// Allows all permissions and bypasses channel permission overwrites
+		const ADMINISTRATOR = 1 << 3;
+		/// Allows management and editing of channels
+		const MANAGE_CHANNELS = 1 << 4;
+		/// Allows management and editing of the guild
+		const MANAGE_GUILD = 1 << 5;
+		/// Allows for the addition of reactions to messages
+		const ADD_REACTIONS = 1 << 6;
+		/// Allows for viewing of audit logs
+		const VIEW_AUDIT_LOG = 1 << 7;
+		/// Allows for using priority speaker in a voice channel
+		const PRIORITY_SPEAKER = 1 << 8;
+		/// Allows the user to use video and stream (go live) in a voice channel
+		const STREAM = 1 << 9;
+		/// Allows guild members to view a channel, which includes reading messages in text channels and joining voice channels
+		const VIEW_CHANNEL = 1 << 10;
+		/// Allows for sending messages in a channel and creating threads in a forum (does not allow sending messages in threads)
+		const SEND_MESSAGES = 1 << 11;
+		/// Allows for sending of /tts messages
+		const SEND_TTS_MESSAGES = 1 << 12;
+		/// Allows for deletion of other users messages
+		const MANAGE_MESSAGES = 1 << 13;
+		/// Links sent by users with this permission will be auto-embedded
+		const EMBED_LINKS = 1 << 14;
+		/// Allows for uploading images and files
+		const ATTACH_FILES = 1 << 15;
+		/// Allows for reading of message history
+		const READ_MESSAGE_HISTORY = 1 << 16;
+		/// Allows for using the @everyone tag to notify all users in a channel, and the @here tag to notify all online users in a channel
+		const MENTION_EVERYONE = 1 << 17;
+		/// Allows the usage of custom emojis from other servers
+		const USE_EXTERNAL_EMOJIS = 1 << 18;
+		/// Allows for viewing guild insights
+		const VIEW_GUILD_INSIGHTS = 1 << 19;
+		/// Allows for joining of a voice channel
+		const CONNECT = 1 << 20;
+		/// Allows for speaking in a voice channel
+		const SPEAK = 1 << 21;
+		/// Allows for muting members in a voice channel
+		const MUTE_MEMBERS = 1 << 22;
+		/// Allows for deafening of members in a voice channel
+		const DEAFEN_MEMBERS = 1 << 23;
+		/// Allows for moving of members between voice channels
+		const MOVE_MEMBERS = 1 << 24;
+		/// Allows for using voice-activity-detection in a voice channel
+		const USE_VAD = 1 << 25;
+		/// Allows for modification of own nickname
+		const CHANGE_NICKNAME = 1 << 26;
+		/// Allows for modification of other users nicknames
+		const MANAGE_NICKNAMES = 1 << 27;
+		/// Allows management and editing of roles
+		const MANAGE_ROLES = 1 << 28;
+		/// Allows management and editing of webhooks
+		const MANAGE_WEBHOOKS = 1 << 29;
+		/// Allows editing and deleting emojis, stickers, and soundboard sounds
+		const MANAGE_EXPRESSIONS = 1 << 30;
+		/// Allows members to use application commands, including slash commands and context menu commands
+		const USE_APPLICATION_COMMANDS = 1 << 31;
+		/// Allows for requesting to speak in stage channels
+		const REQUEST_TO_SPEAK = 1 << 32;
+		/// Allows for editing and deleting scheduled events
+		const MANAGE_EVENTS = 1 << 33;
+		/// Allows for deleting and archiving threads, and viewing all private threads
+		const MANAGE_THREADS = 1 << 34;
+		/// Allows for creating public and announcement threads
+		const CREATE_PUBLIC_THREADS = 1 << 35;
+		/// Allows for creating private threads
+		const CREATE_PRIVATE_THREADS = 1 << 36;
+		/// Allows the usage of custom stickers from other servers
+		const USE_EXTERNAL_STICKERS = 1 << 37;
+		/// Allows for sending messages in threads
+		const SEND_MESSAGES_IN_THREADS = 1 << 38;
+		/// Allows for using Activities (applications with the EMBEDDED flag) in a voice channel
+		const USE_EMBEDDED_ACTIVITIES = 1 << 39;
+		/// Allows for timing out users to prevent them from sending or reacting to messages in chat and threads, and from speaking in voice and stage channels
+		const MODERATE_MEMBERS = 1 << 40;
+		/// Allows for viewing guild role subscriptions insights
+		const VIEW_CREATOR_MONETIZATION_ANALYTICS = 1 << 41;
+		/// Allows the usage of the soundboard in a voice channel
+		const USE_SOUNDBOARD = 1 << 42;
+		/// Allows for creating emojis, stickers, and soundboard sounds, and editing/deleting ones created by the current user
+		const CREATE_EXPRESSIONS = 1 << 43;
+		/// Allows for creating scheduled events, and editing/deleting ones created by the current user
+		const CREATE_EVENTS = 1 << 44;
+		/// Allows the usage of custom soundboard sounds from other servers
+		const USE_EXTERNAL_SOUNDS = 1 << 45;
+		/// Allows for sending voice messages in a channel
+		const SEND_VOICE_MESSAGES = 1 << 46;
+		/// Allows setting voice channel status
+		const SET_VOICE_CHANNEL_STATUS = 1 << 48;
+		/// Allows sending polls
+		const SEND_POLLS = 1 << 49;
+		/// Allows the usage of user-installed applications without forced-ephemeral responses
+		const USE_EXTERNAL_APPS = 1 << 50;
+	}
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct LinkedAccount {
+	/// The ID of the linked account
+	pub id: UserId,
+	/// The name of the account
+	pub name: String,
+}
+
+#[derive(Serialize, Deserialize)]
+pub enum Theme {
+	dark,
+	light,
 }

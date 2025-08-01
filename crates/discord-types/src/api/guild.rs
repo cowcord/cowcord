@@ -9,6 +9,7 @@ use crate::api::emoji::Emoji;
 use crate::api::integrations::IntegrationApplication;
 use crate::api::stickers::Sticker;
 use crate::api::users::{AvatarDecorationData, PartialUser};
+use crate::common::hex::{self, Hex};
 use crate::common::id::{
 	ApplicationId,
 	ChannelId,
@@ -634,12 +635,13 @@ pub struct Role {
 	/// The ID of the role
 	pub id: RoleId,
 	/// The name of the role (max 100 characters)
-	pub name: ArrayString<100>>,
+	pub name: ArrayString<100>,
 	/// The description for the role (max 90 characters)
 	pub description: Option<ArrayString<90>>,
 	/// The color of the role represented as an integer representation of a hexadecimal color code
 	#[deprecated]
-	pub color: u32,
+	#[serde(with = "hex::as_num")]
+	pub color: Hex,
 	/// The colors of the role encoded as an integer representation of hexadecimal color codes
 	pub colors: RoleColors,
 	/// Whether this role is pinned in the user listing
@@ -669,11 +671,14 @@ pub struct Role {
 #[derive(Serialize, Deserialize)]
 pub struct RoleColors {
 	/// The primary color of the role (matches color)
-	pub primary_color: u32,
+	#[serde(with = "hex::as_num")]
+	pub primary_color: Hex,
 	/// The secondary color of the role, creating a two-point gradient
-	pub secondary_color: Option<u32>,
+	#[serde(with = "hex::as_num")]
+	pub secondary_color: Option<Hex>,
 	/// The tertiary color of the role, creating a three-point gradient
-	pub tertiary_color: Option<u32>,
+	#[serde(with = "hex::as_num")]
+	pub tertiary_color: Option<Hex>,
 }
 
 /// Tags with type null represent booleans. They will be present and set to null if they are true, and will be not present if they are false.

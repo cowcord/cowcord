@@ -1,158 +1,265 @@
-#![allow(non_snake_case)]
-
+use arrayvec::ArrayVec;
 use serde::{Deserialize, Serialize};
 
-use crate::api::auto_moderation::{AutomodAction, AutomodRule, AutomodTriggerMetadata};
-use crate::api::types::Snowflake;
-use crate::api::types::timestamp::Timestamp;
+use crate::api::auto_moderation::{
+	AutomodAction,
+	AutomodAlertActionType,
+	AutomodEventType,
+	AutomodRaidResolutionReason,
+	AutomodRule,
+	AutomodTriggerMetadata,
+	AutomodTriggerType,
+};
+use crate::common::id::{AutomodMessageId, AutomodRuleId, ChannelId, GuildId, MessageId, RoleId};
+use crate::common::timestamp::Timestamp;
 
-/// Type: get
+/// Method: `GET`
 ///
-/// requires MANAGE_GUILD permission
-pub fn GET_GUILD_AUTOMOD_RULES_ENDPOINT(guild_id: Snowflake) -> String {
+/// Requires the `MANAGE_GUILD` permission.
+///
+/// Returns a list of [automod rule](https://docs.discord.food/resources/auto-moderation#automod-rule-object) objects for the configured rules in the guild.
+pub fn GET_GUILD_AUTOMOD_RULES(guild_id: &GuildId) -> String {
 	format!("/guilds/{}/auto-moderation/rules", guild_id)
 }
 
-pub type GetGuildAutomodRulesResponse = Vec<AutomodRule>;
+pub type GetGuildAutomodRules = Vec<AutomodRule>;
 
-/// Type: get
+/// Method: `GET`
 ///
-/// supports the X-Audit-Log-Reason header
-pub fn GET_GUILD_AUTOMOD_RULE_ENDPOINT(
-	guild_id: Snowflake,
-	rule_id: Snowflake,
+/// Requires the `MANAGE_GUILD` permission.
+///
+/// Returns an [automod rule](https://docs.discord.food/resources/auto-moderation#automod-rule-object) object for the given rule ID in the guild.
+pub fn GET_GUILD_AUTOMOD_RULE(
+	guild_id: &GuildId,
+	automod_rule_id: &AutomodRuleId,
 ) -> String {
-	format!("/guilds/{}/auto-moderation/rules/{}", guild_id, rule_id)
+	format!(
+		"/guilds/{}/auto-moderation/rules/{}",
+		guild_id, automod_rule_id
+	)
 }
 
-pub type GetGuildAutomodRuleResponse = AutomodRule;
+pub type GetGuildAutomodRule = AutomodRule;
 
-/// Type: post
+/// Method: `POST`
 ///
-/// requires MANAGE_GUILD permission
-/// requires MANAGE_GUILD permission
-pub fn CREATE_GUILD_AUTOMOD_RULE_ENDPOINT(guild_id: Snowflake) -> String {
+/// Supports the `X-Audit-Log-Reason header`
+///
+/// Creates a new automod rule in the guild.
+///
+/// Requires the `MANAGE_GUILD` permission.
+///
+/// See [trigger types](https://docs.discord.food/resources/auto-moderation#automod-trigger-type) for limits on how many rules of each trigger type can be created per guild.
+///
+/// Returns an [automod rule](https://docs.discord.food/resources/auto-moderation#automod-rule-object) on success. Fires an [Auto Moderation Rule Create](https://docs.discord.food/topics/gateway-events#auto-moderation-rule-create) Gateway event.
+pub fn CREATE_GUILD_AUTOMOD_RULE(guild_id: &GuildId) -> String {
 	format!("/guilds/{}/auto-moderation/rules", guild_id)
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 pub struct CreateGuildAutomodRuleRequest {
+	/// The name of the rule
 	pub name: String,
-	/// https://docs.discord.food/resources/auto-moderation#automod-event-type
-	pub event_type: u8,
-	/// https://docs.discord.food/resources/auto-moderation#automod-trigger-type
-	pub trigger_type: u8,
-	/// see the trigger types in https://docs.discord.food/resources/auto-moderation#automod-trigger-metadata for when to include this
-	pub trigger_metadata: AutomodTriggerMetadata,
+	/// The type of event that triggers the rule
+	pub event_type: AutomodEventType,
+	/// The type of trigger that invokes the rule
+	pub trigger_type: AutomodTriggerType,
+	/// Metadata used to determine whether the rule should be triggered
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub trigger_metadata: Option<AutomodTriggerMetadata>,
+	/// The actions that will execute when the rule is triggered
 	pub actions: Vec<AutomodAction>,
-	pub enabled: bool,
-	pub exempt_roles: Vec<Snowflake>,
-	pub exempt_channels: Vec<Snowflake>,
+	/// Whether the rule is enabled (default false)
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub enabled: Option<bool>,
+	/// The IDs of the roles that won't be affected by the rule (max 20)
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub exempt_roles: Option<ArrayVec<RoleId, 20>>,
+	/// The IDs of the channels that won't be affected by the rule (max 50)
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub exempt_channels: Option<ArrayVec<ChannelId, 50>>,
 }
 
 pub type CreateGuildAutomodRuleResponse = AutomodRule;
 
-/// Type: patch
+/// Method: `POST`
 ///
-/// requires MANAGE_GUILD permission
-/// supports the X-Audit-Log-Reason header
-pub fn MODIFY_GUILD_AUTOMOD_RULE_ENDPOINT(
-	guild_id: Snowflake,
-	rule_id: Snowflake,
-) -> String {
-	format!("/guilds/{}/auto-moderation/rules/{}", guild_id, rule_id)
-}
-
-pub type ModifyGuildAutomodRuleRequest = CreateGuildAutomodRuleRequest;
-
-pub type ModifyGuildAutomodRuleResponse = AutomodRule;
-
-/// Type: delete
+/// Requires the `MANAGE_GUILD` permission.
 ///
-/// requires MANAGE_GUILD permission
-/// supports the X-Audit-Log-Reason header
-pub fn DELETE_GUILD_AUTOMOD_RULE_ENDPOINT(
-	guild_id: Snowflake,
-	rule_id: Snowflake,
-) -> String {
-	format!("/guilds/{}/auto-moderation/rules/{}", guild_id, rule_id)
-}
-
-/// Type: post
-///
-/// requires MANAGE_GUILD permission
-pub fn VALIDATE_GUILD_AUTOMOD_RULE_ENDPOINT(guild_id: Snowflake) -> String {
+/// Validates a potential rule request's schema for the guild.
+pub fn VALIDATE_GUILD_AUTOMOD_RULE(guild_id: &GuildId) -> String {
 	format!("/guilds/{}/auto-moderation/rules/validate", guild_id)
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 pub struct ValidateGuildAutomodRuleRequest {
-	/// see the trigger types in https://docs.discord.food/resources/auto-moderation#automod-trigger-metadata for when to include this
+	/// The trigger metadata to validate
 	pub trigger_metadata: AutomodTriggerMetadata,
 }
 
-#[derive(Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct ValidateGuildAutomodRuleResponse {
+	/// The validated trigger metadata
 	pub trigger_metadata: AutomodTriggerMetadata,
 }
 
-/// Type: post
+/// Method: `PATCH`
 ///
-/// requires MANAGE_GUILD permission
-pub fn EXECUTE_AUTOMOD_ALERT_ACTION_ENDPOINT(guild_id: Snowflake) -> String {
+/// Supports the `X-Audit-Log-Reason header`
+///
+/// Modifies an existing rule in the guild.
+///
+/// Requires the `MANAGE_GUILD` permission.
+///
+/// Returns an [automod rule](https://docs.discord.food/resources/auto-moderation#automod-rule-object) on success.
+/// Fires an [Auto Moderation Rule Update](https://docs.discord.food/topics/gateway-events#auto-moderation-rule-update) Gateway event.
+pub fn MODIFY_GUILD_AUTOMOD_RULE(
+	guild_id: &GuildId,
+	automod_rule_id: &AutomodRuleId,
+) -> String {
+	format!(
+		"/guilds/{}/auto-moderation/rules/{}",
+		guild_id, automod_rule_id
+	)
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct ModifyGuildAutomodRuleRequest {
+	/// The name of the rule
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub name: Option<String>,
+	/// The type of event that triggers the rule
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub event_type: Option<AutomodEventType>,
+	/// Metadata used to determine whether the rule should be triggered
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub trigger_metadata: Option<AutomodTriggerMetadata>,
+	/// The actions that will execute when the rule is triggered
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub actions: Option<Vec<AutomodAction>>,
+	/// Whether the rule is enabled (default false)
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub enabled: Option<bool>,
+	/// The IDs of the roles that won't be affected by the rule (max 20)
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub exempt_roles: Option<ArrayVec<RoleId, 20>>,
+	/// The IDs of the channels that won't be affected by the rule (max 50)
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub exempt_channels: Option<ArrayVec<ChannelId, 50>>,
+}
+
+pub type ModifyGuildAutomodRuleResponse = AutomodRule;
+
+/// Method: `DELETE`
+///
+/// Supports the `X-Audit-Log-Reason header`
+///
+/// Deletes a rule in the guild.
+///
+/// Requires the `MANAGE_GUILD` permission.
+///
+/// Returns a 204 empty response on success.
+/// Fires an [Auto Moderation Rule Delete](https://docs.discord.food/topics/gateway-events#auto-moderation-rule-delete) Gateway event.
+pub fn DELETE_GUILD_AUTOMOD_RULE(
+	guild_id: &GuildId,
+	automod_rule_id: &AutomodRuleId,
+) -> String {
+	format!(
+		"/guilds/{}/auto-moderation/rules/{}",
+		guild_id, automod_rule_id
+	)
+}
+
+/// Method: `POST`
+///
+/// Executes an alert action on an [AutoMod alert](https://docs.discord.food/resources/auto-moderation#automod-alert).
+///
+/// Requires the `MANAGE_GUILD` permission.
+///
+/// Returns a 204 empty response on success.
+/// Fires a [Message Update](https://docs.discord.food/topics/gateway-events#message-update) Gateway event.
+pub fn EXECUTE_AUTOMOD_ALERT_ACTION(guild_id: &GuildId) -> String {
 	format!("/guilds/{}/auto-moderation/alert-action", guild_id)
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 pub struct ExecuteAutomodAlertActionRequest {
-	pub channel_id: Snowflake,
-	pub message_id: Snowflake,
-	/// https://docs.discord.food/resources/auto-moderation#automod-alert-action-type
-	pub alert_action_type: u8,
+	/// The ID of the channel where the alert was sent
+	pub channel_id: ChannelId,
+	/// The ID of the AutoMod system message
+	pub message_id: MessageId,
+	/// The type of alert action to execute
+	pub alert_action_type: AutomodAlertActionType,
 }
 
-/// Type: put
+/// Method: `PUT`
 ///
-/// requires MANAGE_GUILD permission
-pub fn MODIFY_AUTOMOD_INCIDENTS_ENDPOINT(guild_id: Snowflake) -> String {
+/// Sets the incident actions for the guild.
+///
+/// Requires the `MANAGE_GUILD` permission.
+///
+/// Fires a [Guild Update](https://docs.discord.food/topics/gateway-events#guild-update) Gateway event.
+pub fn MODIFY_AUTOMOD_INCIDENT_ACTIONS(guild_id: &GuildId) -> String {
 	format!("/guilds/{}/incident-actions", guild_id)
 }
 
-#[derive(Serialize)]
-pub struct ModifyGuildAutomodIncidentsRequest {
+#[derive(Serialize, Deserialize)]
+pub struct ModifyAutomodIncidentActionsRequest {
+	/// When invites will be re-enabled (max 24 hours from now)
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub invites_disabled_until: Option<Timestamp>,
+	/// When DMs will be re-enabled (max 24 hours from now)
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub dms_disabled_until: Option<Timestamp>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct ModifyAutomodIncidentActionsResponse {
+	/// When invites will be re-enabled (max 24 hours from now)
 	pub invites_disabled_until: Timestamp,
+	/// When DMs will be re-enabled (max 24 hours from now)
 	pub dms_disabled_until: Timestamp,
 }
 
-#[derive(Deserialize)]
-pub struct ModifyGuildAutomodIncidentsResponse {
-	pub invites_disabled_until: Timestamp,
-	pub dms_disabled_until: Timestamp,
-}
-
-/// Type: post
+/// Method: `POST`
 ///
-/// requires MANAGE_GUILD permission
-pub fn RESOLVE_AUTOMOD_INCIDENT_ENDPOINT(guild_id: Snowflake) -> String {
+/// Resolves an [AutoMod incident](https://docs.discord.food/resources/auto-moderation#automod-incident-notification).
+///
+/// Requires the `MANAGE_GUILD` permission.
+///
+/// Returns a 204 empty response on success.
+/// Fires a [Message Update](https://docs.discord.food/topics/gateway-events#message-update) Gateway event.
+pub fn RESOLVE_AUTOMOD_INCIDENT(guild_id: &GuildId) -> String {
 	format!("/guilds/{}/auto-moderation/false-alarm", guild_id)
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 pub struct ResolveAutomodIncidentRequest {
-	pub alert_message_id: Snowflake,
-	pub reason: String,
+	/// The ID of the AutoMod system message
+	pub alert_message_id: AutomodMessageId,
+	/// The reason for resolving the notification
+	pub reason: AutomodRaidResolutionReason,
 }
 
-/// Type: post
+/// Method: `POST`
 ///
-/// requires MANAGE_GUILD permission
-pub fn REPORT_AUTOMOD_INCIDENT_ENDPOINT(guild_id: Snowflake) -> String {
+/// Reports an ongoing raid [AutoMod incident](https://docs.discord.food/resources/auto-moderation#automod-incident-notification).
+///
+/// Requires the `MANAGE_GUILD` permission.
+///
+/// Returns a 204 empty response on success.
+/// Fires a [Message Create](https://docs.discord.food/topics/gateway-events#message-update) Gateway event.
+pub fn REPORT_AUTOMOD_INCIDENT(guild_id: &GuildId) -> String {
 	format!("/guilds/{}/auto-moderation/report-raid", guild_id)
 }
 
-/// Type: post
+/// Method: `POST`
 ///
-/// requires MANAGE_GUILD permission
-pub fn CLEAR_MENTION_RAID_ENDPOINT(guild_id: Snowflake) -> String {
+/// Clears a mention raid [AutoMod incident](https://docs.discord.food/resources/auto-moderation#automod-incident-notification).
+///
+/// Requires the `MANAGE_GUILD` permission.
+///
+/// Returns a 204 empty response on success.
+pub fn CLEAR_MENTION_RAID_INCIDENT(guild_id: &GuildId) -> String {
 	format!("/guilds/{}/auto-moderation/clear-mention-raid", guild_id)
 }

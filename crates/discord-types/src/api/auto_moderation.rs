@@ -60,6 +60,7 @@ pub struct AutomodAlertEmbed {
 	pub alert_actions_execution: Option<AutomodAlertActionsExecution>,
 }
 
+#[derive(Serialize, Deserialize)]
 pub enum AutomodDecisionOutcome {
 	/// The action was flagged by AutoMod
 	flagged,
@@ -67,6 +68,7 @@ pub enum AutomodDecisionOutcome {
 	blocked,
 }
 
+#[derive(Serialize, Deserialize)]
 pub enum AutomodProfileUpdateType {
 	/// When a user updates their nickname in the guild
 	nickname_update,
@@ -74,6 +76,7 @@ pub enum AutomodProfileUpdateType {
 	nickname_reset,
 }
 
+#[derive(Serialize, Deserialize)]
 pub enum AutomodQuarantineUserReason {
 	/// The user's username triggered the rule
 	username,
@@ -85,6 +88,7 @@ pub enum AutomodQuarantineUserReason {
 	clan_tag,
 }
 
+#[derive(Serialize, Deserialize)]
 pub enum AutomodQuarantineEventType {
 	/// When a user joins the guild
 	guild_join,
@@ -96,6 +100,7 @@ pub enum AutomodQuarantineEventType {
 	clan_tag_update,
 }
 
+#[derive(Serialize, Deserialize)]
 pub enum AutomodInteractionCallbackType {
 	/// A modal interaction callback triggered the rule
 	modal,
@@ -163,6 +168,7 @@ pub struct AutomodIncidentNotificationEmbed {
 	pub resolved_reason: Option<String>,
 }
 
+#[derive(Serialize, Deserialize)]
 pub enum AutomodIncidentNotificationType {
 	/// Activity alerts were enabled in the guild
 	activity_alerts_enabled,
@@ -174,6 +180,7 @@ pub enum AutomodIncidentNotificationType {
 	interaction_blocked,
 }
 
+#[derive(Serialize, Deserialize)]
 pub enum AutomodRaidType {
 	/// A join raid was detected
 	JOIN_RAID,
@@ -181,6 +188,7 @@ pub enum AutomodRaidType {
 	MENTION_RAID,
 }
 
+#[derive(Serialize, Deserialize)]
 pub enum AutomodRaidResolutionReason {
 	/// The increased activity was expected
 	LEGITIMATE_ACTIVITY,

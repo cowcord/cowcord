@@ -279,6 +279,16 @@ id_u64! {
 	DiscoveryCategoryId: "An identifier for a server discovery category.";
 	DeviceId: "An identifier for the user device.";
 	EulaId: "An Identifier for an EULA.";
+	ActivityLinkId: "An identifier for an activity link.";
+	DeveloperId: "An identifier for an application developer.";
+	PublisherId: "An identifier for an application publisher.";
+	GameId: "An identifier for an application game.";
+	AutomodMessageId: "An identifier for an automod system message.";
+	ChannelPermissionId: "An identifier for a channel permission.";
+	SafetyWarningId: "An identifier for a safety warning.";
+	BranchId: "An identifier for a special branch for store channels.";
+	ConsoleCommandId: "An identifier for a console command.";
+	DirectoryEntryId: "An identifier for a directory entry.";
 }
 
 /// An identifier for a Shard.

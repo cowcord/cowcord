@@ -7,9 +7,11 @@ use serde_repr::{Deserialize_repr, Serialize_repr};
 
 use crate::api::guild::{PartialGuild, PremiumTier, RoleConnectionOperatorType};
 use crate::api::integrations::IntegrationApplication;
+use crate::api::presences::OperatingSystemDesktopType;
 use crate::api::teams::{Company, Team};
 use crate::api::users::PartialUser;
-use crate::common::id::{ApplicationAssetId, ApplicationId, EulaId, GuildId, SkuId};
+use crate::common::hex::{self, Hex};
+use crate::common::id::{ApplicationAssetId, ApplicationId, EulaId, GameId, GuildId, SkuId};
 use crate::common::timestamp::Timestamp;
 
 #[derive(Serialize, Deserialize)]
@@ -36,7 +38,8 @@ pub struct Application {
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub primary_sku_id: Option<SkuId>,
 	/// The hex encoded client public key for verification in interactions and the GameSDK's GetTicket
-	pub verify_key: String,
+	#[serde(with = "hex::as_str")]
+	pub verify_key: Hex,
 	/// The ID of the guild linked to the application
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub guild_id: Option<GuildId>,
@@ -216,7 +219,8 @@ pub struct PartialApplication {
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub primary_sku_id: Option<SkuId>,
 	/// The hex encoded client public key for verification in interactions and the GameSDK's GetTicket
-	pub verify_key: String,
+	#[serde(with = "hex::as_str")]
+	pub verify_key: Hex,
 	/// The ID of the guild linked to the application
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub guild_id: Option<GuildId>,
@@ -593,7 +597,7 @@ bitflags! {
 #[derive(Serialize, Deserialize)]
 pub struct ApplicationExecutable {
 	/// The operating system the executable can be found on
-	pub os: String,
+	pub os: OperatingSystemDesktopType,
 	/// The name of the executable
 	pub name: String,
 	/// Whether the executable is for a game launcher
@@ -603,13 +607,23 @@ pub struct ApplicationExecutable {
 #[derive(Serialize, Deserialize)]
 pub struct ApplicationSku {
 	/// The ID of the game
-	pub id: Option<String>,
+	pub id: Option<GameId>,
 	/// The SKU of the game
-	pub sku: Option<String>,
+	pub sku: Option<SkuId>,
 	/// The distributor of the game
-	pub distributor: String,
+	pub distributor: ApplicationDistributorType,
 }
 
+#[derive(Serialize, Deserialize)]
+pub struct ApplicationDistributor {
+	/// The application distributor
+	pub distributor: ApplicationDistributorType,
+	/// The SKU of the application (max 256 characters)
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub sku: Option<String>,
+}
+
+#[derive(Serialize, Deserialize)]
 pub enum ApplicationDistributorType {
 	/// Discord Store
 	discord,
@@ -719,6 +733,7 @@ pub enum EmbeddedActivityOrientationLockStateType {
 	LANDSCAPE = 3,
 }
 
+#[derive(Serialize, Deserialize)]
 pub enum EmbeddedActivityPlatformType {
 	/// Web
 	web,
@@ -859,4 +874,72 @@ pub enum ActivityLinkType {
 	MANAGED_LINK = 0,
 	/// Made by the user and last for 30 days
 	QUICK_LINK = 1,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct WhitelistedUser {
+	/// The user that is whitelisted for the application
+	pub user: PartialUser,
+	/// The state of the whitelisted user
+	pub state: ApplicationMembershipState,
+}
+
+#[derive(Serialize_repr, Deserialize_repr)]
+#[repr(u8)]
+pub enum ApplicationMembershipState {
+	/// The user has been invited to the application but has not yet accepted
+	INVITED = 1,
+	/// The user has accepted the invitation to the application and is whitelisted
+	ACCEPTED = 2,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct ExternalAsset {
+	/// The URL of the asset
+	pub url: String,
+	/// The path to the asset on the media proxy (https://media.discordapp.net/)
+	pub external_asset_path: String,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct DetectableApplication {
+	/// The ID of the application
+	pub id: ApplicationId,
+	/// The name of the application
+	pub name: String,
+	/// Other names the application's game is associated with
+	pub aliases: Vec<String>,
+	/// The unique executables of the application's game
+	pub executables: Vec<ApplicationExecutable>,
+	/// The themes of the application's game
+	pub themes: Vec<String>,
+	/// Whether the Discord client is allowed to hook into the application's game directly
+	pub hook: bool,
+	/// Whether the application's game supports the Discord overlay (default false)
+	pub overlay: bool,
+	/// The methods of overlaying that the application's game supports
+	pub overlay_methods: Option<OverlayMethodFlags>,
+	/// Whether the Discord overlay is known to be problematic with this application's game (default false)
+	pub overlay_warn: bool,
+	/// Whether to use the compatibility hook for the overlay (default false)
+	pub overlay_compatibility_hook: bool,
+}
+
+#[derive(Serialize_repr, Deserialize_repr)]
+#[repr(u8)]
+pub enum ApplicationDisclosureType {
+	/// Unspecified disclosure
+	UNSPECIFIED_DISCLOSURE = 0,
+	/// Application may access the user's IP address
+	IP_LOCATION = 1,
+	/// Application may display advertisements
+	DISPLAYS_ADVERTISEMENTS = 2,
+	/// Application's game uses the social layer SDK's messaging features, which surface in-game messages on Discord
+	PARTNER_SDK_DATA_SHARING_MESSAGE = 3,
+}
+
+#[derive(Serialize, Deserialize)]
+pub enum ApplicationMissingDataType {
+	/// The application's icon hash is not found and should be uploaded using the Upload Unverified Application Icon endpoint
+	icon,
 }

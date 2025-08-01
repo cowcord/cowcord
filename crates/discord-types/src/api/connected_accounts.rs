@@ -64,7 +64,7 @@ pub struct ConnectionIntegration {
 	pub guild: IntegrationGuild,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub enum ConnectionType {
 	#[serde(rename = "amazon-music")]
 	amazon_music,
@@ -117,4 +117,49 @@ pub struct ConsoleDevice {
 	pub name: String,
 	/// The console platform (only playstation and playstation-stg are allowed)
 	pub platform: String,
+}
+
+#[derive(Serialize, Deserialize)]
+pub enum TwoWayLinkType {
+	/// The connection is linked via web
+	web,
+	/// The connection is linked via mobile
+	mobile,
+	/// The connection is linked via desktop
+	desktop,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct FriendListEntry {
+	/// E.164-formatted phone number of the contact
+	pub friend_id: String,
+}
+
+#[derive(Serialize_repr, Deserialize_repr)]
+#[repr(u8)]
+pub enum ContactSyncSuggestionsSetting {
+	/// Users who have contact synced that have the current user as a contact
+	MUTUAL_CONTACT_INFO_ONLY = 1,
+	/// Users who have contact synced
+	ANYONE_WITH_CONTACT_INFO = 2,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct ConnectRequestProperties {
+	/// The console handoff type
+	pub handoff_type: String,
+}
+
+#[derive(Serialize, Deserialize)]
+pub enum ConsoleHandoffType {
+	/// Create a new call on a console device
+	CREATE_NEW_CALL,
+	/// Transfer an existing call to a console device
+	TRANSFER_EXISTING_CALL,
+}
+
+#[derive(Serialize, Deserialize)]
+pub enum ConsoleCommandType {
+	/// Connect to a voice call
+	connect_voice,
 }
