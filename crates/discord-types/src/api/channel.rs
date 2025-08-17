@@ -532,14 +532,14 @@ pub struct ThreadOnlyChannelMessageParams {
 	pub content: Option<ArrayString<2000>>,
 	/// Embedded rich content (max 6000 characters, max 10)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	#[deprecated(note = "Cannot be used by user accounts.")]
+	#[cfg(feature = "bot")]
 	pub embeds: Option<ArrayVec<Embed, 10>>,
 	/// Allowed mentions for the message
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub allowed_mentions: Option<AllowedMentions>,
 	/// Components to include with the message
 	#[serde(skip_serializing_if = "Option::is_none")]
-	#[deprecated(note = "Cannot be used by user accounts.")]
+	#[cfg(feature = "bot")]
 	pub components: Option<Vec<Component>>,
 	/// IDs of up to 3 stickers to send in the message
 	#[serde(skip_serializing_if = "Option::is_none")]

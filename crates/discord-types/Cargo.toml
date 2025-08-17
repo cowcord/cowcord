@@ -36,3 +36,8 @@ hex = { version = "0.4.3", features = ["serde"] }
 default = ["chrono"]
 
 chrono = ["dep:chrono", "typesize?/chrono"]
+
+# include bot specific endpoints/struct fields
+bot = []
+# include discord employee specific endpoints/struct fields
+employee = []
