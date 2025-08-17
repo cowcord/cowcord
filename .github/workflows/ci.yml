@@ -20,4 +20,4 @@ jobs:
           sudo mv dx /usr/local/bin/
 
       - name: Build
-        run: dx build
+        run: dx build -p Cowcord
