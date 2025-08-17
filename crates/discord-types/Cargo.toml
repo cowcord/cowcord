@@ -31,6 +31,7 @@ time = { version = "0.3.41", features = [
 chrono = { version = "0.4.41", optional = true, features = ["serde"] }
 arrayvec = { version = "0.7.6", features = ["serde"] }
 hex = { version = "0.4.3", features = ["serde"] }
+phf = { version = "0.12.1", features = ["macros"] }
 
 [features]
 default = ["chrono"]
