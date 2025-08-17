@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/discord-types", "crates/app"]
+members = ["crates/*", "scripts/*"]
 resolver = "3"
 
 [profile.release]
