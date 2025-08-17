@@ -263,3 +263,19 @@ pub enum GiftStyle {
 	/// Nitroween standard style gift code
 	NITROWEEN_STANDARD = 12,
 }
+
+#[derive(Serialize_repr, Deserialize_repr)]
+#[repr(u8)]
+pub enum EntitlementOwnerType {
+	/// Entitlement is for a guild
+	GUILD = 1,
+	/// Entitlement is for a user
+	USER = 2,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct GatewayCheckoutContext {
+	/// The Braintree device data collected during checkout
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub braintree_device_data: Option<Option<String>>,
+}

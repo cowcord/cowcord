@@ -2,11 +2,14 @@ use std::collections::HashMap;
 
 use arrayvec::{ArrayString, ArrayVec};
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
+use crate::api::channel::PartialChannel;
 use crate::api::connected_accounts::VisibilityType;
 use crate::api::emoji::Emoji;
 use crate::api::guild::{GuildFeatures, PremiumTier};
+use crate::api::invites::Invite;
 use crate::api::stickers::Sticker;
 use crate::common::hex::{self, Hex};
 use crate::common::id::{ApplicationId, ChannelId, DiscoveryCategoryId, EmojiId, GuildId};
@@ -322,4 +325,51 @@ pub enum GuildVisibility {
 	RESTRICTED = 2,
 	/// The guild is considered public, allowing anyone to view it and submit a join request
 	PUBLIC_WITH_RECRUITMENT = 3,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct MonetizationStorePage {
+	/// The guild information
+	pub guild: StorePageGuild,
+	/// The guild's role subscription information
+	pub role_subscription: StorePageRoleSubscription,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct StorePageGuild {
+	/// The ID of the guild
+	pub id: GuildId,
+	/// The name of the guild (2-100 characters)
+	pub name: String,
+	/// The guild's icon hash
+	pub icon_hash: Option<String>,
+	/// Approximate number of members in the guild
+	pub approximate_member_count: u32,
+	/// Approximate number of online members in the guild
+	pub approximate_presence_count: u32,
+	/// Whether the entire guild is locked behind a role subscription
+	pub locked_server: bool,
+	/// A special CREATOR_PAGE invite for the guild
+	pub invite: Option<Invite>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct StorePageRoleSubscription {
+	/// The guild's role subscription settings
+	// pub settings: RoleSubscriptionSettings,
+	pub settings: Value,
+	/// The guild's role subscription group listings
+	// pub group_listings: Vec<RoleSubscriptionGroupListing>,
+	pub group_listings: Vec<Value>,
+	/// The guild's role subscription trials
+	// pub trials: Vec<RoleSubscriptionTrial>,
+	pub trials: Vec<Value>,
+	/// The number of subscribers to the guild's role subscriptions, if public
+	pub subscriber_count: Option<u32>,
+	/// The channels that are unlocked by role subscriptions
+	pub benefit_channels: Vec<PartialChannel>,
+	/// The emojis that are unlocked by role subscriptions
+	pub benefit_emojis: Vec<Emoji>,
+	/// A special ROLE_SUBSCRIPTIONS invite for the guild
+	pub purchase_page_invite: Option<Invite>,
 }
