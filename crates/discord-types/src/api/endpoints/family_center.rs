@@ -1,11 +1,11 @@
 use serde::{Deserialize, Serialize};
 
-use crate::api::family_center::{FamilyCenter, LinkStatus, LinkedUsers};
+use crate::api::family_center::{FamilyCenter, LinkStatus, LinkedUsers, LinkedUser};
 use crate::common::id::UserId;
 
 /// Method: `GET`
 ///
-/// Returns a [Family Center](https://ee085bcf.discord-userdoccers.pages.dev/resources/family-center#family-center-object) object.
+/// Returns a [Family Center](https://docs.discord.food/resources/family-center#family-center-object) object.
 pub const GET_FAMILY_CENTER_OVERVIEW: &str = "/family-center/@me";
 
 pub type GetFamilyCenterOverviewResponse = FamilyCenter;
@@ -27,7 +27,7 @@ pub struct GetLinkCodeResponse {
 
 /// Method: `GET`
 ///
-/// Returns a [linked users](https://ee085bcf.discord-userdoccers.pages.dev/resources/family-center#linked-users-object) object.
+/// Returns a [linked users](https://docs.discord.food/resources/family-center#linked-users-object) object.
 pub const GET_LINKED_USERS: &str = "/users/@me/linked-users";
 
 pub type GetLinkedUsersResponse = LinkedUsers;
@@ -36,8 +36,8 @@ pub type GetLinkedUsersResponse = LinkedUsers;
 ///
 /// Creates a request that appears in the linked user's Family Center.
 ///
-/// Returns a [linked users](https://ee085bcf.discord-userdoccers.pages.dev/resources/family-center#linked-users-object) object on success.
-/// Fires a [User Update](https://ee085bcf.discord-userdoccers.pages.dev/topics/gateway-events#user-update) Gateway event.
+/// Returns a [linked users](https://docs.discord.food/resources/family-center#linked-users-object) object on success.
+/// Fires a [User Update](https://docs.discord.food/topics/gateway-events#user-update) Gateway event.
 pub const CREATE_LINKED_USERS_REQUEST: &str = "/users/@me/linked-users";
 
 #[derive(Serialize, Deserialize)]
@@ -56,8 +56,8 @@ pub type CreateLinkedUsersResponse = LinkedUsers;
 ///
 /// Can be invoked by either the linked user or the requestor if used for removing the link.
 ///
-/// Returns an array of [linked user](https://ee085bcf.discord-userdoccers.pages.dev/resources/family-center#linked-user-object) objects on success.
-/// Fires a [User Update](https://ee085bcf.discord-userdoccers.pages.dev/topics/gateway-events#user-update) Gateway event.
+/// Returns an array of [linked user](https://docs.discord.food/resources/family-center#linked-user-object) objects on success.
+/// Fires a [User Update](https://docs.discord.food/topics/gateway-events#user-update) Gateway event.
 pub const MODIFY_LINKED_USERS: &str = "/users/@me/linked-users";
 
 #[derive(Serialize, Deserialize)]
@@ -67,3 +67,5 @@ pub struct ModifyLinkedUsersRequest {
 	/// The ID of the user the linked user or requestor is modifying
 	pub linked_user_id: UserId,
 }
+
+pub type ModifyLinkedUsersResponse = Vec<LinkedUser>;

@@ -28,10 +28,10 @@ pub mod login {
 	///
 	/// If logging in via email, the user will receive a link that redirects to the official Discord client with a verification token present in the URL's fragment (e.g. https://discord.com/authorize-ip#token=Wzg1Mjg5MjI5NzY2MTkwNjk5MywiMTI3LjAuMC4x8J+RvSJd.kdI8zppMIeTZsIBva3zZslaz_58).
 	///
-	/// If logging in via phone number, the request will fail with a [70007 JSON error code](https://ee085bcf.discord-userdoccers.pages.dev/topics/opcodes-and-status-codes#json-error-codes), and the user will receive a verification code via SMS. A verification token should be retrieved by [verifying the phone number](https://ee085bcf.discord-userdoccers.pages.dev/topics/phone-verification#verify-phone-number).
+	/// If logging in via phone number, the request will fail with a [70007 JSON error code](https://docs.discord.food/topics/opcodes-and-status-codes#json-error-codes), and the user will receive a verification code via SMS. A verification token should be retrieved by [verifying the phone number](https://docs.discord.food/topics/phone-verification#verify-phone-number).
 	///
 	///
-	/// After [IP authorization](https://ee085bcf.discord-userdoccers.pages.dev/authentication#authorize-ip-address) with this verification token, the login request should be retried. A new CAPTCHA challenge should not be required.
+	/// After [IP authorization](https://docs.discord.food/authentication#authorize-ip-address) with this verification token, the login request should be retried. A new CAPTCHA challenge should not be required.
 	///
 	/// If the user's account is suspended by Discord, the login request will fail with a 403 forbidden and a special error response body, similar to a success response:
 	///
@@ -124,9 +124,9 @@ pub mod login {
 	///
 	/// Does not require authentication
 	///
-	/// Verifies a multi-factor login and retrieves an authentication token using the specified [authenticator type](https://ee085bcf.discord-userdoccers.pages.dev/authentication#authenticator-type).
+	/// Verifies a multi-factor login and retrieves an authentication token using the specified [authenticator type](https://docs.discord.food/authentication#authenticator-type).
 	///
-	/// To verify using SMS MFA, you must first send a code to the user's phone number using the [Send MFA SMS](https://ee085bcf.discord-userdoccers.pages.dev/authentication#send-mfa-sms) endpoint.
+	/// To verify using SMS MFA, you must first send a code to the user's phone number using the [Send MFA SMS](https://docs.discord.food/authentication#send-mfa-sms) endpoint.
 	///
 	/// If the user's account is suspended by Discord, the login request will fail with a 403 forbidden and a special error response body, similar to a success response:
 	///
@@ -167,7 +167,7 @@ pub mod login {
 	///
 	/// Generates a challenge to start the conditional UI flow for WebAuthn login.
 	///
-	/// If this endpoint is requested with a valid authentication token, an [authentication token](https://ee085bcf.discord-userdoccers.pages.dev/authentication#example-response-(completed)) will be returned irrespective of the request body.
+	/// If this endpoint is requested with a valid authentication token, an [authentication token](https://docs.discord.food/authentication#example-response-(completed)) will be returned irrespective of the request body.
 	pub const START_PASSWORDLESS_LOGIN: &str = "/auth/conditional/start";
 
 	#[derive(Serialize, Deserialize)]
@@ -298,7 +298,7 @@ pub mod register {
 	/// If this endpoint is requested with a valid authentication token, a success response will be returned irrespective of the request body.
 	///
 	/// Accounts should only be registered for a user to immediately use. Upon registration, the client should immediately connect to the Gateway using the retrieved authentication token.
-	/// Suspicious account creations may be flagged by Discord and require [additional verification steps](https://ee085bcf.discord-userdoccers.pages.dev/resources/user#required-action-type) or lead to immediate account termination.
+	/// Suspicious account creations may be flagged by Discord and require [additional verification steps](https://docs.discord.food/resources/user#required-action-type) or lead to immediate account termination.
 	pub const REGISTER_ACCOUNT: &str = "/auth/register";
 
 	#[derive(Serialize, Deserialize)]
@@ -360,7 +360,7 @@ pub mod register {
 	///
 	/// Sends a verification code to the user's phone number to register an account.
 	///
-	/// The verification code should be first used to [verify the phone number](https://ee085bcf.discord-userdoccers.pages.dev/topics/phone-verification#verify-phone-number) before [completing the registration](https://ee085bcf.discord-userdoccers.pages.dev/authentication#register-account).
+	/// The verification code should be first used to [verify the phone number](https://docs.discord.food/topics/phone-verification#verify-phone-number) before [completing the registration](https://docs.discord.food/authentication#register-account).
 	///
 	/// Returns a 204 empty response on success.
 	pub const REGISTER_ACCOUNT_WITH_PHONE_NUMBER: &str = "/auth/register/phone";
@@ -443,7 +443,7 @@ pub mod register {
 	///
 	/// Checks whether a unique username is available for the user to register with.
 	///
-	/// See the [Usernames and Nicknames section](https://ee085bcf.discord-userdoccers.pages.dev/resources/user#usernames-and-nicknames) for more information on username restrictions.
+	/// See the [Usernames and Nicknames section](https://docs.discord.food/resources/user#usernames-and-nicknames) for more information on username restrictions.
 	pub const GET_UNIQUE_USERNAME_ELIGIBILITY: &str = "/unique-username/username-attempt-unauthed";
 
 	#[derive(Serialize, Deserialize)]
@@ -474,10 +474,10 @@ pub mod recovery {
 	///
 	/// If providing an email, the user will receive a link that redirects to the official Discord client with a verification token present in the URL's fragment (e.g. https://discord.com/reset#token=eyJpZCI6ODUyODkyMjk3NjYxOTA2OTkzLCJlbWFpbCI6Im5lbGx5QGRpc2NvcmRhcHAuY29tIn0.Z6pQDg.pKCZBaaiodflO6FZhdttm6B_z74).
 	///
-	/// If providing a phone number, the request will fail with a [70007 JSON error code](https://ee085bcf.discord-userdoccers.pages.dev/topics/opcodes-and-status-codes#json-error-codes), and the user will receive a verification code via SMS.
-	/// A verification token should be retrieved by [verifying the phone number](https://ee085bcf.discord-userdoccers.pages.dev/topics/phone-verification#verify-phone-number).
+	/// If providing a phone number, the request will fail with a [70007 JSON error code](https://docs.discord.food/topics/opcodes-and-status-codes#json-error-codes), and the user will receive a verification code via SMS.
+	/// A verification token should be retrieved by [verifying the phone number](https://docs.discord.food/topics/phone-verification#verify-phone-number).
 	///
-	/// If the user is ineligible to reset their password via phone number, the phone number verification request will fail with a [70009 JSON error code](https://ee085bcf.discord-userdoccers.pages.dev/topics/opcodes-and-status-codes#json-error-codes) and the user will receive a link to reset their password via email.
+	/// If the user is ineligible to reset their password via phone number, the phone number verification request will fail with a [70009 JSON error code](https://docs.discord.food/topics/opcodes-and-status-codes#json-error-codes) and the user will receive a link to reset their password via email.
 	///
 	/// Returns a 204 empty response on success.
 	pub const FORGOT_PASSWORD: &str = "/auth/forgot";
@@ -494,7 +494,7 @@ pub mod recovery {
 	///
 	/// Resets the user's password and retrieves an authentication token.
 	///
-	/// When attempting to reset the password of a user with multi-factor authentication enabled, the request will return a response similar to the [MFA Required response](https://ee085bcf.discord-userdoccers.pages.dev/authentication#mfa-verification).
+	/// When attempting to reset the password of a user with multi-factor authentication enabled, the request will return a response similar to the [MFA Required response](https://docs.discord.food/authentication#mfa-verification).
 	///
 	/// To complete the password reset, the client must retry the request with the ticket and code parameters specified.
 	pub const RESET_PASSWORD: &str = "/auth/reset";
