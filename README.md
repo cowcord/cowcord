@@ -1,5 +1,3 @@
-<h1 align="center">
-Credits
-</h1>
+## Contributing
 
-Portions of this code are adapted from [serenity-rs](https://github.com/serenity-rs/serenity), licensed under the ISC License.
+Read the [contributing.md](./CONTRIBUTING.md) for more info on how to get things setup and how to contribute.

@@ -34,7 +34,7 @@ enum ImageHashInner {
 ///
 /// # Example
 /// ```rust
-/// use serenity::model::misc::ImageHash;
+/// use crate::common::image::ImageHash;
 ///
 /// let image_hash: ImageHash = "f1eff024d9c85339c877985229ed8fec".parse().unwrap();
 /// assert_eq!(
@@ -51,7 +51,7 @@ impl ImageHash {
 	///
 	/// # Example
 	/// ```rust
-	/// use serenity::model::misc::ImageHash;
+	/// use crate::common::image::ImageHash;
 	///
 	/// let animated_hash: ImageHash = "a_e3c0db7f38777778fb43081f8746ebc9".parse().unwrap();
 	/// assert!(animated_hash.is_animated());
