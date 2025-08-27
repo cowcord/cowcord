@@ -9,22 +9,12 @@ use crate::api::emoji::Emoji;
 use crate::api::integrations::IntegrationApplication;
 use crate::api::stickers::Sticker;
 use crate::api::users::{AvatarDecorationData, PartialUser};
-use crate::common::hex::{self, Hex};
 use crate::common::id::{
-	ApplicationId,
-	ChannelId,
-	GenericSnowflake,
-	GuildId,
-	GuildJoinRequestId,
-	IntegrationId,
-	OnboardingPromptId,
-	OnboardingPromptOptionId,
-	RoleId,
-	SkuId,
-	SubscriptionId,
-	UserId,
+	ApplicationId, ChannelId, GenericSnowflake, GuildId, GuildJoinRequestId, IntegrationId,
+	OnboardingPromptId, OnboardingPromptOptionId, RoleId, SkuId, SubscriptionId, UserId,
 };
 use crate::common::timestamp::Timestamp;
+use hex::Hex;
 
 #[derive(Serialize, Deserialize)]
 pub struct Guild {

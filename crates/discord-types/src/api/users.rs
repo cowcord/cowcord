@@ -6,19 +6,13 @@ use serde_repr::{Deserialize_repr, Serialize_repr};
 
 use crate::api::emoji::Emoji;
 use crate::api::family_center::LinkedUser;
-use crate::common::hex::{self, Hex};
 use crate::common::id::{
-	GenericSnowflake,
-	GuildId,
-	HarvestId,
-	ProfileEffectId,
-	SkuId,
-	SurveyId,
-	UserId,
+	GenericSnowflake, GuildId, HarvestId, ProfileEffectId, SkuId, SurveyId, UserId,
 };
 use crate::common::image::ImageHash;
 use crate::common::locale::Locale;
 use crate::common::timestamp::Timestamp;
+use hex::Hex;
 
 #[derive(Serialize, Deserialize)]
 pub struct User {
@@ -138,7 +132,8 @@ pub struct PartialUser {
 	pub banner: Option<Option<ImageHash>>,
 	/// The user's banner color encoded as an integer representation of a hexadecimal color code
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub accent_color: Option<Option<u32>>,
+	#[serde(with = "hex::as_num")]
+	pub accent_color: Option<Option<Hex>>,
 	/// The public flags on a user's account
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub public_flags: Option<UserFlags>,
@@ -370,10 +365,12 @@ pub struct ProfileMetadata {
 	pub banner: Option<Option<String>>,
 	/// The user's banner color encoded as an integer representation of a hexadecimal color code
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub accent_color: Option<Option<u32>>,
+	#[serde(with = "hex::as_num")]
+	pub accent_color: Option<Option<Hex>>,
 	/// The user's two theme colors encoded as an array of integers representing hexadecimal color codes
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub theme_colors: Option<Option<(u32, u32)>>,
+	#[serde(with = "hex::as_num")]
+	pub theme_colors: Option<Option<(Hex, Hex)>>,
 	/// The user's profile popout animation particle type
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub popout_animation_particle_type: Option<Option<GenericSnowflake>>,

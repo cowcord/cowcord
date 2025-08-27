@@ -13,7 +13,7 @@ use crate::api::discovery::{
 	GuildVisibility,
 	MonetizationStorePage,
 };
-use crate::common::hex::{self, Hex};
+use hex::Hex;
 use crate::common::id::{ApplicationId, DiscoveryCategoryId, GuildId};
 use crate::common::image::ImageHash;
 use crate::common::locale::Locale;

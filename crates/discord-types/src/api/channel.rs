@@ -5,28 +5,15 @@ use serde_repr::{Deserialize_repr, Serialize_repr};
 use crate::api::components::Component;
 use crate::api::guild::GuildMember;
 use crate::api::messages::{
-	AllowedMentions,
-	Attachment,
-	Embed,
-	Message,
-	MessageActivity,
-	MessageFlags,
+	AllowedMentions, Attachment, Embed, Message, MessageActivity, MessageFlags,
 };
 use crate::api::users::PartialUser;
 use crate::common::id::{
-	ApplicationId,
-	ChannelId,
-	EmojiId,
-	ForumTagId,
-	GenericSnowflake,
-	GuildId,
-	LobbyId,
-	MessageId,
-	StickerId,
-	UserId,
-	WebhookId,
+	ApplicationId, ChannelId, EmojiId, ForumTagId, GenericSnowflake, GuildId, LobbyId, MessageId,
+	StickerId, UserId, WebhookId,
 };
 use crate::common::timestamp::Timestamp;
+use hex::Hex;
 
 #[derive(Serialize, Deserialize)]
 pub struct Channel {
@@ -168,7 +155,8 @@ pub struct Channel {
 	pub is_spam: Option<bool>,
 	/// The background color of the channel icon emoji encoded as an integer representation of a hexadecimal color code
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub theme_color: Option<Option<u32>>,
+	#[serde(with = "hex::as_num")]
+	pub theme_color: Option<Option<Hex>>,
 	/// The status of the voice channel (max 500 characters)
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub status: Option<Option<ArrayString<500>>>,

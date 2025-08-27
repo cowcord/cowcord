@@ -1,43 +1,21 @@
 use std::collections::HashMap;
 
 use arrayvec::{ArrayString, ArrayVec};
+use hex::Hex;
 use serde::{Deserialize, Serialize};
 
 use crate::api::channel::{
-	AutoArchiveDuration,
-	Channel,
-	ChannelFlags,
-	ChannelType,
-	DefaultReaction,
-	ForumLayoutType,
-	IconEmoji,
-	MessageRequestConsentStatus,
-	PartialForumTag,
-	PermissionOverwrite,
-	SafetyWarningType,
-	SearchTagSetting,
-	SortOrderType,
-	ThreadMember,
-	ThreadMemberFlags,
-	ThreadOnlyChannelMessageParams,
-	ThreadPostData,
-	ThreadSortDirection,
-	ThreadSortType,
+	AutoArchiveDuration, Channel, ChannelFlags, ChannelType, DefaultReaction, ForumLayoutType,
+	IconEmoji, MessageRequestConsentStatus, PartialForumTag, PermissionOverwrite,
+	SafetyWarningType, SearchTagSetting, SortOrderType, ThreadMember, ThreadMemberFlags,
+	ThreadOnlyChannelMessageParams, ThreadPostData, ThreadSortDirection, ThreadSortType,
 	VideoQualityMode,
 };
 use crate::api::messages::Message;
 use crate::api::users::LinkedAccount;
 use crate::common::id::{
-	BranchId,
-	ChannelId,
-	ChannelPermissionId,
-	EmojiId,
-	ForumTagId,
-	GuildId,
-	MessageId,
-	SafetyWarningId,
-	SkuId,
-	UserId,
+	BranchId, ChannelId, ChannelPermissionId, EmojiId, ForumTagId, GuildId, MessageId,
+	SafetyWarningId, SkuId, UserId,
 };
 use crate::common::image::ImageHash;
 use crate::common::timestamp::Timestamp;
@@ -376,7 +354,8 @@ pub struct ModifyChannelRequest {
 	pub icon_emoji: Option<Option<IconEmoji>>,
 	/// The background color of the channel icon emoji encoded as an integer representation of a hexadecimal color code
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub theme_color: Option<Option<u32>>,
+	#[serde(with = "hex::as_num")]
+	pub theme_color: Option<Option<Hex>>,
 }
 
 pub type ModifyChannelResponse = Channel;

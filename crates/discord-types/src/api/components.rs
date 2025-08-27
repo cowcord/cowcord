@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use arrayvec::{ArrayString, ArrayVec};
+use hex::Hex;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
@@ -11,14 +12,7 @@ use crate::api::guild::GuildMember;
 use crate::api::messages::{AttachmentFlags, ContentScanMetadata};
 use crate::api::users::PartialUser;
 use crate::common::id::{
-	ApplicationId,
-	AttachmentId,
-	ChannelId,
-	GenericSnowflake,
-	GuildId,
-	RoleId,
-	SkuId,
-	UserId,
+	ApplicationId, AttachmentId, ChannelId, GenericSnowflake, GuildId, RoleId, SkuId, UserId,
 };
 use crate::common::timestamp::Timestamp;
 
@@ -714,7 +708,8 @@ pub struct Container {
 	pub components: Vec<Component>,
 	/// Color for the accent on the container encoded as an integer representation of a hexadecimal color code
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub accent_color: Option<Option<u32>>,
+	#[serde(with = "hex::as_num")]
+	pub accent_color: Option<Option<Hex>>,
 	/// Whether the container should be spoilered (default false)
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub spoiler: Option<bool>,

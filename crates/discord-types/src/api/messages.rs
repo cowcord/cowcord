@@ -13,26 +13,12 @@ use crate::api::presences::ActivityActionType;
 use crate::api::soundboard::SoundboardSound;
 use crate::api::stickers::{Sticker, StickerItem};
 use crate::api::users::PartialUser;
-use crate::common::hex::{self, Hex};
 use crate::common::id::{
-	AnswerId,
-	ApplicationId,
-	AttachmentId,
-	ChangelogId,
-	ChannelId,
-	EmojiId,
-	GuildId,
-	GuildListingId,
-	InteractionId,
-	LobbyId,
-	MessageId,
-	RoleId,
-	SkuId,
-	SummaryId,
-	UserId,
-	WebhookId,
+	AnswerId, ApplicationId, AttachmentId, ChangelogId, ChannelId, EmojiId, GuildId,
+	GuildListingId, InteractionId, LobbyId, MessageId, RoleId, SkuId, SummaryId, UserId, WebhookId,
 };
 use crate::common::timestamp::Timestamp;
+use hex::Hex;
 
 #[derive(Serialize, Deserialize)]
 pub struct Message {
@@ -584,7 +570,8 @@ pub struct Reaction {
 	/// Reaction emoji information
 	pub emoji: Emoji,
 	/// The hex-encoded colors to render the burst reaction with
-	pub burst_colors: Vec<String>,
+	#[serde(with = "hex::as_str")]
+	pub burst_colors: Vec<Hex>,
 }
 
 #[derive(Serialize, Deserialize)]

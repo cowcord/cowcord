@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use crate::common::hex::{self, Hex};
+use hex::Hex;
 use crate::common::id::{ApplicationId, QuestId, SkuId, UserId};
 use crate::common::timestamp::Timestamp;
 

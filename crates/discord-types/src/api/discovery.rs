@@ -11,7 +11,7 @@ use crate::api::emoji::Emoji;
 use crate::api::guild::{GuildFeatures, PremiumTier};
 use crate::api::invites::Invite;
 use crate::api::stickers::Sticker;
-use crate::common::hex::{self, Hex};
+use hex::Hex;
 use crate::common::id::{ApplicationId, ChannelId, DiscoveryCategoryId, EmojiId, GuildId};
 use crate::common::timestamp::Timestamp;
 

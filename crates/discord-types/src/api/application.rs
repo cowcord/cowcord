@@ -10,7 +10,7 @@ use crate::api::integrations::IntegrationApplication;
 use crate::api::presences::OperatingSystemDesktopType;
 use crate::api::teams::{Company, Team};
 use crate::api::users::PartialUser;
-use crate::common::hex::{self, Hex};
+use hex::Hex;
 use crate::common::id::{ApplicationAssetId, ApplicationId, EulaId, GameId, GuildId, SkuId};
 use crate::common::timestamp::Timestamp;
 
