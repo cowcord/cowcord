@@ -9,6 +9,7 @@ use wasm_bindgen::closure::Closure;
 use wasm_bindgen::prelude::*;
 use web_sys::{BinaryType, MessageEvent, WebSocket, console};
 
+#[macro_export]
 pub mod utils;
 
 mod views;
