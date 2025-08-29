@@ -1,5 +1,5 @@
 {
-    "name": "Codespaces Rust Starter",
+    "name": "cowcord",
     "dockerFile": "Dockerfile",
     "customizations": {
         "vscode": {
