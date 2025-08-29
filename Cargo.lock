@@ -699,7 +699,6 @@ dependencies = [
  "dioxus",
  "discord-types",
  "gloo-timers",
- "js-sys",
  "reqwest",
  "serde",
  "serde_json",

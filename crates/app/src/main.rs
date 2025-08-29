@@ -69,7 +69,7 @@ fn start_websocket(token: &str) {
 	let token = token.to_string();
 
 	let onmessage_callback = Closure::wrap(Box::new(move |e: MessageEvent| {
-		if let Ok(text) = e.data().dyn_into::<js_sys::JsString>() {
+		if let Ok(text) = e.data().dyn_into::<web_sys::js_sys::JsString>() {
 			let text_str = text.as_string().unwrap();
 			let data: GatewayRecieveEvent =
 				serde_json::from_str(&text_str).expect("Failed to parse JSON");

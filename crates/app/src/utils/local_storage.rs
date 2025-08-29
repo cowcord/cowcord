@@ -1,47 +1,35 @@
-use js_sys::Reflect::{get, set};
-use wasm_bindgen::JsValue;
-use web_sys::window;
+use wasm_bindgen::{JsValue, prelude::wasm_bindgen};
+use web_sys::Storage;
 
-pub fn get_value(key: &str) -> Option<String> {
-	if let Some(window) = window() {
-		if let Ok(local_storage) = get(&window, &JsValue::from_str("localStorage")) {
-			if let Ok(token_value) = get(&local_storage, &JsValue::from_str(key)) {
-				if !token_value.is_undefined() && !token_value.is_null() {
-					if let Some(token_str) = token_value.as_string() {
-						if !token_str.is_empty() {
-							return Some(token_str);
-						}
-					}
-				}
-			}
-		}
-	}
-	None
-}
+#[wasm_bindgen]
+pub struct LocalStorage(Storage);
 
-pub fn save_value(
-	key: &str,
-	value: &str,
-) {
-	if let Some(window) = window() {
-		if let Ok(local_storage) = get(&window, &JsValue::from_str("localStorage")) {
-			set(
-				&local_storage,
-				&JsValue::from_str(key),
-				&JsValue::from_str(value),
-			);
-		}
-	}
-}
+#[wasm_bindgen]
+impl LocalStorage {
+    #[wasm_bindgen(constructor)]
+    pub fn new() -> Result<LocalStorage, JsValue> {
+        let window =
+            web_sys::window().ok_or_else(|| JsValue::from_str("`window` does not exist."))?;
+        let storage = window
+            .local_storage()
+            .map_err(|err| JsValue::from(err))?
+            .ok_or_else(|| JsValue::from_str("`localStorage` does not exist."))?;
 
-pub fn remove_value(key: &str) {
-	if let Some(window) = window() {
-		if let Ok(local_storage) = get(&window, &JsValue::from_str("localStorage")) {
-			let remove_item = JsValue::from_str("removeItem");
-			let token_key = js_sys::Array::new();
-			token_key.push(&JsValue::from_str(key));
-			js_sys::Function::from(get(&local_storage, &remove_item).unwrap())
-				.apply(&local_storage, &token_key);
-		}
-	}
+        Ok(LocalStorage(storage))
+    }
+
+    #[wasm_bindgen]
+    pub fn get_value(&self, key: &str) -> Option<String> {
+        self.0.get_item(key).unwrap_or(Some("Unknown".to_string()))
+    }
+
+    #[wasm_bindgen]
+    pub fn set_value(&self, key: &str, value: &str) -> Result<(), JsValue> {
+        self.0.set_item(key, value)
+    }
+
+    #[wasm_bindgen]
+    pub fn remove_value(&self, key: &str) -> Result<(), JsValue> {
+        self.0.remove_item(key)
+    }
 }
