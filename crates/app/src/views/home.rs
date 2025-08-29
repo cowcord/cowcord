@@ -3,7 +3,7 @@ use dioxus::prelude::*;
 use crate::utils::local_storage::get_value;
 
 #[component]
-pub fn FateDecider() -> Element {
+pub fn Home() -> Element {
 	let navigator = use_navigator();
 
 	let redirect = match get_value("token") {

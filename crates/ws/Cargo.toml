@@ -1,0 +1,9 @@
+[package]
+name = "ws"
+description = "websocket connection handler."
+version = "0.0.1"
+edition = "2024"
+
+[dependencies]
+discord-types = { workspace = true }
+web-sys = { version = "0.3.77", features = ["BinaryType", "Blob", "ErrorEvent", "FileReader", "MessageEvent", "ProgressEvent", "WebSocket"] }

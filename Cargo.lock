@@ -5923,6 +5923,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "ws"
+version = "0.0.1"
+dependencies = [
+ "discord-types",
+ "web-sys",
+]
+
+[[package]]
 name = "x11"
 version = "2.21.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
