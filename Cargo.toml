@@ -2,6 +2,10 @@
 members = ["crates/*", "scripts/*"]
 resolver = "3"
 
+[workspace.dependencies]
+hex = { path = "crates/hex" }
+discord-types = { path = "crates/discord-types" }
+
 [profile.release]
 opt-level = "z"
 debug = false
@@ -10,10 +14,6 @@ codegen-units = 1
 panic = "abort"
 strip = true
 incremental = true
-
-[profile.beta]
-inherits = "release"
-opt-level = 3
 
 [profile.dev]
 opt-level = 1

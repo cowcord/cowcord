@@ -17,7 +17,7 @@ cd cowcord
 2. Install Dioxus cli
 
 ```bash
-cargo install dioxus-cli
+cargo install dioxus-cli -F wasm-opt
 ```
 
 3. Run
