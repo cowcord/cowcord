@@ -1,5 +1,10 @@
 on:
   pull_request:
+    paths:
+      - 'Cargo.toml'
+      - 'crates/**/*.rs'
+      - 'crates/**/Cargo.toml'
+      - '.github/workflows/**'
 
 jobs:
   build:
