@@ -7,6 +7,7 @@ pub struct LocalStorage(Storage);
 #[wasm_bindgen]
 impl LocalStorage {
     #[wasm_bindgen(constructor)]
+    #[must_use]
     pub fn new() -> Result<LocalStorage, JsValue> {
         let window =
             web_sys::window().ok_or_else(|| JsValue::from_str("`window` does not exist."))?;
