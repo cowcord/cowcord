@@ -20,7 +20,7 @@ level = "z"
 
 [bundle]
 identifier = "fr.notacow.cowcord"
-publisher = "notacow"
+publisher = "not a cow"
 
 # icon = [
 #    "assets/icons/32x32.png",
