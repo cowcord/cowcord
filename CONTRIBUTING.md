@@ -34,7 +34,7 @@ dx serve --platform <web|desktop>
 1. Run this
 
 ```bash
-dx build --release --profile <beta|release|dev> --platform desktop
+dx build --platform desktop
 ```
 
 idk what else to do, ill fix this part later
@@ -119,12 +119,6 @@ bitflags! {
 ```
 
 Again this will be done automatically for you if copying the code via the copy button on a table from [discord userdoccers].
-
-</details>
-
-<details><summary><h2>Components</h2></summary>
-
-This ones pretty easy, all it is is that if theres some ui element thats used more than once, in more than one place, make it into a seperate component instead of something built into the page
 
 </details>
 
