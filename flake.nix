@@ -17,11 +17,15 @@
         {
           devShells.default = mkShell {
             packages = [
+              # required tools
               dioxus-cli
+              just
 
-            openssl
-            pkg-config
+              # required for rust-analyzer
+              openssl
+              pkg-config
 
+              # required for dioxus
               gtk3
               libayatana-appindicator
               webkitgtk_4_1
