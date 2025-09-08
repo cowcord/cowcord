@@ -1,4 +1,7 @@
+use std::collections::HashMap;
+
 use arrayvec::{ArrayString, ArrayVec};
+use hex::Hex;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_repr::{Deserialize_repr, Serialize_repr};
@@ -10,11 +13,21 @@ use crate::api::integrations::IntegrationApplication;
 use crate::api::stickers::Sticker;
 use crate::api::users::{AvatarDecorationData, PartialUser};
 use crate::common::id::{
-	ApplicationId, ChannelId, GenericSnowflake, GuildId, GuildJoinRequestId, IntegrationId,
-	OnboardingPromptId, OnboardingPromptOptionId, RoleId, SkuId, SubscriptionId, UserId,
+	ApplicationId,
+	ChannelId,
+	GenericSnowflake,
+	GuildId,
+	GuildJoinRequestId,
+	IntegrationId,
+	OnboardingPromptId,
+	OnboardingPromptOptionId,
+	RoleId,
+	SkuId,
+	SubscriptionId,
+	UserId,
 };
+use crate::common::image::ImageHash;
 use crate::common::timestamp::Timestamp;
-use hex::Hex;
 
 #[derive(Serialize, Deserialize)]
 pub struct Guild {
@@ -701,6 +714,8 @@ bitflags! {
 	}
 }
 
+pub type RoleConnectionConfiguration = Vec<Vec<RoleConnectionRequirement>>;
+
 #[derive(Serialize, Deserialize)]
 pub struct RoleConnectionRequirement {
 	/// The type of connection required
@@ -1092,6 +1107,101 @@ pub enum OnboardingPromptType {
 	DROPDOWN = 1,
 }
 
+/// The welcome experience for new and existing members in a guild, also known as the server guide.
+///
+/// The new member welcome experience enforces constraints when enabled.
+/// These constraints are that there must be at least 3 new member actions,
+/// all referenced channels must be viewable by the default role,
+/// and new member action channels with an `action_type` of `CHAT` must allow sending messages to the default role.
+#[derive(Serialize, Deserialize)]
+pub struct NewMemberWelcome {
+	/// The ID of the guild this new member welcome is for
+	pub guild_id: GuildId,
+	/// Whether the new member welcome experience is enabled
+	pub enabled: bool,
+	/// Welcome message shown to new members of the guild
+	pub welcome_message: NewMemberWelcomeMessage,
+	/// Actions shown to new members of the guild (max 5)
+	pub new_member_actions: Vec<NewMemberAction>,
+	/// Read-only channels that provide resources for new members (max 7)
+	pub resource_channels: Vec<ResourceChannel>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct NewMemberWelcomeMessage {
+	/// The IDs of the users who authored the welcome message
+	/// (max 10)
+	///
+	/// New member welcome message authors must be guild members with the `MANAGE_GUILD` or `MANAGE_ROLES` permission.
+	pub author_ids: ArrayVec<UserId, 10>,
+	/// The welcome message shown to new members (max 300 characters)
+	///
+	/// `[@username]` may be used as a placeholder for the member's name.
+	pub message: ArrayString<300>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct NewMemberAction {
+	/// The ID of the channel where the action is located
+	pub channel_id: ChannelId,
+	/// The type of action the user should take in the channel
+	pub action_type: NewMemberActionType,
+	/// The title of the action
+	/// (max 60 characters)
+	pub title: ArrayString<60>,
+	/// The description of the action
+	/// (max 200 characters)
+	pub description: ArrayString<200>,
+	/// The emoji representing the action
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub emoji: Option<Emoji>,
+	/// The icon hash representing the action
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub icon: Option<ImageHash>,
+}
+
+#[derive(Serialize_repr, Deserialize_repr)]
+#[repr(u8)]
+pub enum NewMemberActionType {
+	/// View the channel
+	VIEW = 0,
+	/// Send a message in the channel
+	CHAT = 1,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct ResourceChannel {
+	/// The ID of the channel that provides resources for new members
+	pub channel_id: ChannelId,
+	/// The title of the resource channel
+	/// (max 60 characters)
+	pub title: ArrayString<60>,
+	/// The description of the resource channel (max 200 characters)
+	pub description: ArrayString<200>,
+	/// The emoji representing the resource channel
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub emoji: Option<Emoji>,
+	/// The icon hash representing the resource channel
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub icon: Option<ImageHash>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct NewMemberActionsProgress {
+	/// The ID of the guild this new member actions progress is for
+	pub guild_id: GuildId,
+	/// The ID of the user this new member actions progress is for
+	pub user_id: UserId,
+	/// The progress of the user in each new member action channel they have interacted with
+	pub channel_actions: HashMap<UserId, NewMemberActionProgress>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct NewMemberActionProgress {
+	/// Whether the user has completed the new member action in the channel
+	pub completed: bool,
+}
+
 #[derive(Serialize, Deserialize)]
 pub struct PremiumGuildSubscription {
 	/// The ID of the premium guild subscription
@@ -1109,4 +1219,140 @@ pub struct PremiumGuildSubscription {
 	pub pause_ends_at: Option<Timestamp>,
 	/// The user this premium guild subscription is for
 	pub user: PartialUser,
+}
+
+#[derive(Serialize_repr, Deserialize_repr)]
+#[repr(u8)]
+pub enum MemberSortType {
+	/// Sort by when the user joined the guild descending (default)
+	JOINED_AT_DESC = 1,
+	/// Sort by when the user joined the guild ascending
+	JOINED_AT_ASC = 2,
+	/// Sort by when the user joined Discord descending
+	USER_ID_DESC = 3,
+	/// Sort by when the user joined Discord ascending
+	USER_ID_ASC = 4,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct MemberFilter {
+	/// Query to match member IDs against
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub user_id: Option<Query<UserId>>,
+	/// Query to match display name(s), username(s), and nickname(s) against
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub usernames: Option<Query<ArrayString<100>>>,
+	/// IDs of roles to match members against
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub role_ids: Option<Query<RoleId>>,
+	/// When the user joined the guild
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub guild_joined_at: Option<Query<u64>>,
+	/// Safety signals to match members against
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub safety_signals: Option<SafetySignals>,
+	/// Whether the member has not yet passed the guild's member verification requirements
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub is_pending: Option<bool>,
+	/// Whether the member left and rejoined the guild
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub did_rejoin: Option<bool>,
+	/// How the user joined the guild
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub join_source_type: Option<Query<JoinSourceType>>,
+	/// The invite code or vanity used to join the guild
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub source_invite_code: Option<Query<ArrayString<100>>>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct SafetySignals {
+	/// When the member's unusual DM activity flag will expire
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub unusual_dm_activity_until: Option<Query<u32>>,
+	/// When the member's timeout will expire
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub communication_disabled_until: Option<Query<u32>>,
+	/// Whether the user has the `SPAMMER` flag
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub unusual_account_activity: Option<bool>,
+	/// Whether the member has been indefinitely quarantined by an AutoMod Rule for their username, display name, or nickname
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub automod_quarantined_username: Option<bool>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct Query<T> {
+	/// The values to match against using OR logic (1-100 characters, max 10)
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub or_query: Option<ArrayVec<T, 10>>,
+	/// The values to match against using AND logic (1-100 characters, max 10)
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub and_query: Option<ArrayVec<T, 10>>,
+	/// The range of values to match against
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub range: Option<RangeQuery<T>>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct RangeQuery<T> {
+	/// Inclusive lower bound value to match
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub gte: Option<T>,
+	/// Inclusive upper bound value to match
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub lte: Option<T>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct MemberPaginationFilter {
+	/// The ID of the user to paginate past
+	pub user_id: UserId,
+	/// When the user to paginate past joined the guild
+	pub guild_joined_at: u32,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct GuildMemberUnusualDmActivity {
+	/// The ID of the user with unusual DM activity
+	pub user_id: UserId,
+	/// The ID of the guild the user is in
+	pub guild_id: GuildId,
+	/// When the user's unusual DM activity flag will expire
+	pub unusual_dm_activity_until: Timestamp,
+}
+
+#[derive(Serialize, Deserialize)]
+pub enum GuildWidgetImageStyleOption {
+	/// Shield style widget with Discord icon and online count
+	shield,
+	/// Large image with guild icon, name and online count; "POWERED BY DISCORD" as the footer of the widget
+	banner1,
+	/// Smaller widget style with guild icon, name and online count; split on the right with Discord logo
+	banner2,
+	/// Large image with guild icon, name and online count; in the footer, Discord logo on the left and "Chat Now" on the right
+	banner3,
+	/// Large Discord logo at the top of the widget; guild icon, name and online count in the middle portion of the widget and a "JOIN MY SERVER" button at the bottom
+	banner4,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct GameActivity {
+	/// The ID of the application representing the game
+	pub game_application_id: ApplicationId,
+	/// The activity level of the guild in the game
+	pub activity_level: u8,
+	/// The activity score of the guild in the game
+	pub activity_score: u16, // could possibly u8 but i need to test
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct StudentHubGuild {
+	/// The ID of the student hub
+	pub id: GuildId,
+	/// The name of the student hub
+	/// (2-100 characters)
+	pub name: ArrayString<100>,
+	/// The student hub's icon hash
+	pub icon: Option<ImageHash>,
 }
