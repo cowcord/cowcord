@@ -4,6 +4,8 @@ use arrayvec::{ArrayString, ArrayVec};
 use hex::Hex;
 use serde::{Deserialize, Serialize};
 
+#[cfg(feature = "employee")]
+use crate::api::channel::SafetyWarningType;
 use crate::api::channel::{
 	AutoArchiveDuration,
 	Channel,
@@ -15,7 +17,6 @@ use crate::api::channel::{
 	MessageRequestConsentStatus,
 	PartialForumTag,
 	PermissionOverwrite,
-	SafetyWarningType,
 	SearchTagSetting,
 	SortOrderType,
 	ThreadMember,

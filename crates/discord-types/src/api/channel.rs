@@ -3,16 +3,12 @@ use hex::Hex;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
+#[cfg(feature = "non-user")]
 use crate::api::components::Component;
 use crate::api::guild::GuildMember;
-use crate::api::messages::{
-	AllowedMentions,
-	Attachment,
-	Embed,
-	Message,
-	MessageActivity,
-	MessageFlags,
-};
+#[cfg(feature = "non-user")]
+use crate::api::messages::Embed;
+use crate::api::messages::{AllowedMentions, Attachment, Message, MessageActivity, MessageFlags};
 use crate::api::users::PartialUser;
 use crate::common::id::{
 	ApplicationId,

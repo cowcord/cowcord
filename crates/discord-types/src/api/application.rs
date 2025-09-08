@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use arrayvec::{ArrayString, ArrayVec};
+use hex::Hex;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_repr::{Deserialize_repr, Serialize_repr};
@@ -10,7 +11,6 @@ use crate::api::integrations::IntegrationApplication;
 use crate::api::presences::OperatingSystemDesktopType;
 use crate::api::teams::{Company, Team};
 use crate::api::users::PartialUser;
-use hex::Hex;
 use crate::common::id::{ApplicationAssetId, ApplicationId, EulaId, GameId, GuildId, SkuId};
 use crate::common::timestamp::Timestamp;
 

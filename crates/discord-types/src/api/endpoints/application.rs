@@ -3,6 +3,8 @@ use std::collections::HashMap;
 use arrayvec::{ArrayString, ArrayVec};
 use serde::{Deserialize, Serialize};
 
+#[cfg(feature = "non-user")]
+use crate::api::application::ApplicationInteractionsVersion;
 use crate::api::application::{
 	ActivityLink,
 	Application,
@@ -15,7 +17,6 @@ use crate::api::application::{
 	ApplicationInstallParams,
 	ApplicationIntegrationType,
 	ApplicationIntegrationTypeConfiguration,
-	ApplicationInteractionsVersion,
 	ApplicationMissingDataType,
 	ApplicationMonetizationState,
 	ApplicationProxyConfig,
@@ -31,6 +32,7 @@ use crate::api::application::{
 	PartialApplication,
 	WhitelistedUser,
 };
+#[cfg(feature = "non-user")]
 use crate::api::integrations::IntegrationType;
 use crate::api::messages::Attachment;
 use crate::api::presences::OperatingSystemDesktopType;
