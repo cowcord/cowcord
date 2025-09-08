@@ -34,6 +34,7 @@ pub mod websocket;
 
 pub mod auth;
 pub mod endpoints;
+pub mod guild_templates;
 
 pub enum API_VERSION {
 	v10,

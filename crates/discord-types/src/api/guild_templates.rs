@@ -1,10 +1,10 @@
 use arrayvec::ArrayString;
 use serde::{Deserialize, Serialize};
 
-use crate::{
-	api::{guild::PartialGuild, users::PartialUser},
-	common::{id::{GuildId, UserId}, timestamp::Timestamp},
-};
+use crate::api::guild::PartialGuild;
+use crate::api::users::PartialUser;
+use crate::common::id::{GuildId, UserId};
+use crate::common::timestamp::Timestamp;
 
 /// default guild template when creating a guild:
 /// ```json
