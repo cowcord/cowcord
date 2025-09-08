@@ -146,10 +146,10 @@ pub type GetApplicationResponse = Application;
 /// Method: `GET`
 ///
 /// Returns the [application](https://docs.discord.food/resources/application#application-object) object associated with the requestor.
-#[cfg(feature = "bot")]
+#[cfg(feature = "non-user")]
 pub const GET_CURRENT_APPLICATION: &str = "/applications/@me";
 
-#[cfg(feature = "bot")]
+#[cfg(feature = "non-user")]
 pub type GetCurrentApplicationResponse = Application;
 
 /// Method: `PATCH`
@@ -262,11 +262,11 @@ pub type ModifyApplicationResponse = Application;
 /// Method: `PATCH`
 ///
 /// Modifies the requestor's application information. Returns the updated [application](https://docs.discord.food/resources/application#application-object) object on success.
-#[cfg(feature = "bot")]
+#[cfg(feature = "non-user")]
 pub const MODIFY_CURRENT_APPLICATION: &str = "/applications/@me";
 
 #[derive(Serialize, Deserialize)]
-#[cfg(feature = "bot")]
+#[cfg(feature = "non-user")]
 pub struct ModifyCurrentApplicationRequest {
 	/// The description of the application
 	#[serde(skip_serializing_if = "Option::is_none")]
@@ -319,7 +319,7 @@ pub struct ModifyCurrentApplicationRequest {
 	pub max_participants: Option<Option<i32>>,
 }
 
-#[cfg(feature = "bot")]
+#[cfg(feature = "non-user")]
 pub type ModifyCurrentApplicationResponse = Application;
 
 /// Method: `POST`

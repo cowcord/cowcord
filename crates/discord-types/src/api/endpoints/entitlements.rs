@@ -188,13 +188,13 @@ pub type GetApplicationEntitlementResponse = Entitlement;
 /// Creates a test entitlement to a given subscription SKU for a given guild or user.
 ///
 /// Returns an [entitlement](https://docs.discord.food/resources/entitlement#entitlement-object) object on success. Fires an [Entitlement Create](https://docs.discord.food/topics/gateway-events#entitlement-create) Gateway event.
-#[cfg(feature = "bot")]
+#[cfg(feature = "non-user")]
 pub fn CREATE_APPLICATION_ENTITLEMENT(application_id: &ApplicationId) -> String {
 	format!("/applications/{}/entitlements", application_id)
 }
 
 #[derive(Serialize, Deserialize)]
-#[cfg(feature = "bot")]
+#[cfg(feature = "non-user")]
 pub struct CreateApplicationEntitlementRequest {
 	/// The ID of the SKU to grant the entitlement to
 	pub sku_id: String,

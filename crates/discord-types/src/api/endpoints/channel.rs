@@ -828,13 +828,13 @@ pub fn REPORT_SAFETY_WARNING_FALSE_POSITIVE(channel_id: &ChannelId) -> String {
 ///
 /// Returns all active threads in the guild, including public and private threads.
 /// Threads are ordered by their id, in descending order.
-#[cfg(feature = "bot")]
+#[cfg(feature = "non-user")]
 pub fn GET_GUILD_ACTIVE_THREADS(guild_id: &GuildId) -> String {
 	format!("/guilds/{}/threads/active", guild_id)
 }
 
 #[derive(Serialize, Deserialize)]
-#[cfg(feature = "bot")]
+#[cfg(feature = "non-user")]
 pub struct GetGuildActiveThreadsResponse {
 	/// The active threads
 	pub threads: Vec<Channel>,
@@ -1188,7 +1188,7 @@ pub struct GetThreadMembersQueryParams {
 /// Requires the `VIEW_CHANNEL` permission.
 ///
 /// Returns a [thread member](https://docs.discord.food/resources/channel#thread-member-object) object for the specified user if they are a member of the thread.
-#[cfg(feature = "bot")]
+#[cfg(feature = "non-user")]
 pub fn GET_THREAD_MEMBER(
 	query: &GetThreadMemberQueryParams,
 	channel_id: &ChannelId,
@@ -1203,14 +1203,14 @@ pub fn GET_THREAD_MEMBER(
 }
 
 #[derive(Serialize, Deserialize)]
-#[cfg(feature = "bot")]
+#[cfg(feature = "non-user")]
 pub struct GetThreadMemberQueryParams {
 	/// Whether to include a guild member object for the thread member
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub with_member: Option<bool>,
 }
 
-#[cfg(feature = "bot")]
+#[cfg(feature = "non-user")]
 pub type GetThreadMemberResponse = ThreadMember;
 
 /// Method: `PUT`

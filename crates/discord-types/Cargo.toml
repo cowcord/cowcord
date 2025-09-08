@@ -45,6 +45,6 @@ default = ["chrono"]
 chrono = ["dep:chrono", "typesize?/chrono"]
 
 # include bot specific endpoints/struct fields
-bot = []
+non-user = []
 # include discord employee specific endpoints/struct fields
 employee = []

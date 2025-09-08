@@ -1,19 +1,33 @@
 use arrayvec::{ArrayString, ArrayVec};
+use hex::Hex;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
 use crate::api::components::Component;
 use crate::api::guild::GuildMember;
 use crate::api::messages::{
-	AllowedMentions, Attachment, Embed, Message, MessageActivity, MessageFlags,
+	AllowedMentions,
+	Attachment,
+	Embed,
+	Message,
+	MessageActivity,
+	MessageFlags,
 };
 use crate::api::users::PartialUser;
 use crate::common::id::{
-	ApplicationId, ChannelId, EmojiId, ForumTagId, GenericSnowflake, GuildId, LobbyId, MessageId,
-	StickerId, UserId, WebhookId,
+	ApplicationId,
+	ChannelId,
+	EmojiId,
+	ForumTagId,
+	GenericSnowflake,
+	GuildId,
+	LobbyId,
+	MessageId,
+	StickerId,
+	UserId,
+	WebhookId,
 };
 use crate::common::timestamp::Timestamp;
-use hex::Hex;
 
 #[derive(Serialize, Deserialize)]
 pub struct Channel {
@@ -520,14 +534,14 @@ pub struct ThreadOnlyChannelMessageParams {
 	pub content: Option<ArrayString<2000>>,
 	/// Embedded rich content (max 6000 characters, max 10)
 	#[serde(skip_serializing_if = "Option::is_none")]
-	#[cfg(feature = "bot")]
+	#[cfg(feature = "non-user")]
 	pub embeds: Option<ArrayVec<Embed, 10>>,
 	/// Allowed mentions for the message
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub allowed_mentions: Option<AllowedMentions>,
 	/// Components to include with the message
 	#[serde(skip_serializing_if = "Option::is_none")]
-	#[cfg(feature = "bot")]
+	#[cfg(feature = "non-user")]
 	pub components: Option<Vec<Component>>,
 	/// IDs of up to 3 stickers to send in the message
 	#[serde(skip_serializing_if = "Option::is_none")]

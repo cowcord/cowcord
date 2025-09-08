@@ -424,7 +424,7 @@ pub fn DELETE_GUILD(guild_id: &GuildId) -> String {
 /// This endpoint is not usable by user accounts and is restricted according to whether the `GUILD_MEMBERS` [Privileged Intent](https://docs.discord.food/topics/gateway#privileged-intents) is enabled for the application.
 ///
 /// Returns a list of [guild member](https://docs.discord.food/resources/guild#guild-member-object) objects that are members of the guild.
-#[cfg(feature = "bot")]
+#[cfg(feature = "non-user")]
 pub fn GET_GUILD_MEMBERS(
 	query: &GetGuildMembersQueryParams,
 	guild_id: &GuildId,
@@ -432,7 +432,7 @@ pub fn GET_GUILD_MEMBERS(
 	format!("/guilds/{}/members{}", guild_id, query.to_string_query())
 }
 
-#[cfg(feature = "bot")]
+#[cfg(feature = "non-user")]
 #[derive(Serialize, Deserialize)]
 pub struct GetGuildMembersQueryParams {
 	/// Max number of members to return
@@ -444,7 +444,7 @@ pub struct GetGuildMembersQueryParams {
 	pub after: Option<UserId>,
 }
 
-#[cfg(feature = "bot")]
+#[cfg(feature = "non-user")]
 pub type GetGuildMembersResponse = Vec<GuildMember>;
 
 /// Method: `GET`
@@ -456,7 +456,7 @@ pub type GetGuildMembersResponse = Vec<GuildMember>;
 /// Functionally identical to the [Request Guild Members](https://docs.discord.food/topics/gateway-events#request-guild-members) Gateway Opcode.
 ///
 /// Returns a list of [guild member](https://docs.discord.food/resources/guild#guild-member-object) objects whose username or nickname contains a provided string.
-#[cfg(feature = "bot")]
+#[cfg(feature = "non-user")]
 pub fn QUERY_GUILD_MEMBERS(
 	query: &QueryGuildMembersQueryParams,
 	guild_id: &GuildId,
@@ -468,7 +468,7 @@ pub fn QUERY_GUILD_MEMBERS(
 	)
 }
 
-#[cfg(feature = "bot")]
+#[cfg(feature = "non-user")]
 #[derive(Serialize, Deserialize)]
 pub struct QueryGuildMembersQueryParams {
 	/// Query to match username(s) and nickname(s) against
@@ -479,7 +479,7 @@ pub struct QueryGuildMembersQueryParams {
 	pub limit: Option<NonZeroU16>,
 }
 
-#[cfg(feature = "bot")]
+#[cfg(feature = "non-user")]
 pub type QueryGuildMembersRequest = Vec<GuildMember>;
 
 /// Method: `POST`
@@ -702,7 +702,7 @@ pub struct JoinGuildResponseExtraFields {
 /// or a `204` empty response (if the user is already a member of the guild) on success.
 /// May fire a [Guild Member Add](https://docs.discord.food/topics/gateway-events#guild-member-add)
 /// and/or [Guild Join Request Create](https://docs.discord.food/topics/gateway-events#guild-join-request-create) Gateway event.
-#[cfg(feature = "bot")]
+#[cfg(feature = "non-user")]
 pub fn ADD_GUILD_MEMBER(
 	guild_id: &GuildId,
 	user_id: &UserId,
@@ -710,7 +710,7 @@ pub fn ADD_GUILD_MEMBER(
 	format!("/guilds/{}/members/{}", guild_id, user_id)
 }
 
-#[cfg(feature = "bot")]
+#[cfg(feature = "non-user")]
 #[derive(Serialize, Deserialize)]
 pub struct AddGuildMemberRequest {
 	/// An OAuth2 access token granted with the `guilds.join` to the bot's application for the user you want to add to the guild
@@ -747,7 +747,7 @@ pub struct AddGuildMemberRequest {
 	pub flags: Option<GuildMemberFlags>,
 }
 
-#[cfg(feature = "bot")]
+#[cfg(feature = "non-user")]
 pub type AddGuildMemberResponse = GuildMember;
 
 /// Method: `PATCH`
