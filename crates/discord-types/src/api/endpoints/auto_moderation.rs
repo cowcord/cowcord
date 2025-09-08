@@ -158,7 +158,7 @@ pub type ModifyGuildAutomodRuleResponse = AutomodRule;
 ///
 /// Requires the `MANAGE_GUILD` permission.
 ///
-/// Returns a 204 empty response on success.
+/// Returns a `204` empty response on success.
 /// Fires an [Auto Moderation Rule Delete](https://docs.discord.food/topics/gateway-events#auto-moderation-rule-delete) Gateway event.
 pub fn DELETE_GUILD_AUTOMOD_RULE(
 	guild_id: &GuildId,
@@ -176,7 +176,7 @@ pub fn DELETE_GUILD_AUTOMOD_RULE(
 ///
 /// Requires the `MANAGE_GUILD` permission.
 ///
-/// Returns a 204 empty response on success.
+/// Returns a `204` empty response on success.
 /// Fires a [Message Update](https://docs.discord.food/topics/gateway-events#message-update) Gateway event.
 pub fn EXECUTE_AUTOMOD_ALERT_ACTION(guild_id: &GuildId) -> String {
 	format!("/guilds/{}/auto-moderation/alert-action", guild_id)
@@ -227,7 +227,7 @@ pub struct ModifyAutomodIncidentActionsResponse {
 ///
 /// Requires the `MANAGE_GUILD` permission.
 ///
-/// Returns a 204 empty response on success.
+/// Returns a `204` empty response on success.
 /// Fires a [Message Update](https://docs.discord.food/topics/gateway-events#message-update) Gateway event.
 pub fn RESOLVE_AUTOMOD_INCIDENT(guild_id: &GuildId) -> String {
 	format!("/guilds/{}/auto-moderation/false-alarm", guild_id)
@@ -247,7 +247,7 @@ pub struct ResolveAutomodIncidentRequest {
 ///
 /// Requires the `MANAGE_GUILD` permission.
 ///
-/// Returns a 204 empty response on success.
+/// Returns a `204` empty response on success.
 /// Fires a [Message Create](https://docs.discord.food/topics/gateway-events#message-update) Gateway event.
 pub fn REPORT_AUTOMOD_INCIDENT(guild_id: &GuildId) -> String {
 	format!("/guilds/{}/auto-moderation/report-raid", guild_id)
@@ -259,7 +259,7 @@ pub fn REPORT_AUTOMOD_INCIDENT(guild_id: &GuildId) -> String {
 ///
 /// Requires the `MANAGE_GUILD` permission.
 ///
-/// Returns a 204 empty response on success.
+/// Returns a `204` empty response on success.
 pub fn CLEAR_MENTION_RAID_INCIDENT(guild_id: &GuildId) -> String {
 	format!("/guilds/{}/auto-moderation/clear-mention-raid", guild_id)
 }

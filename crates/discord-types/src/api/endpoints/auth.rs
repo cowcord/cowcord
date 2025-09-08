@@ -227,7 +227,7 @@ pub mod login {
 ///
 /// Does not require authentication
 ///
-/// Authorizes the client's IP address for login. Returns a 204 empty response on success.
+/// Authorizes the client's IP address for login. Returns a `204` empty response on success.
 pub const AUTHORIZE_IP_ADDRESS: &str = "/auth/authorize-ip";
 
 #[derive(Serialize, Deserialize)]
@@ -362,7 +362,7 @@ pub mod register {
 	///
 	/// The verification code should be first used to [verify the phone number](https://docs.discord.food/topics/phone-verification#verify-phone-number) before [completing the registration](https://docs.discord.food/authentication#register-account).
 	///
-	/// Returns a 204 empty response on success.
+	/// Returns a `204` empty response on success.
 	pub const REGISTER_ACCOUNT_WITH_PHONE_NUMBER: &str = "/auth/register/phone";
 
 	#[derive(Serialize, Deserialize)]
@@ -479,7 +479,7 @@ pub mod recovery {
 	///
 	/// If the user is ineligible to reset their password via phone number, the phone number verification request will fail with a [70009 JSON error code](https://docs.discord.food/topics/opcodes-and-status-codes#json-error-codes) and the user will receive a link to reset their password via email.
 	///
-	/// Returns a 204 empty response on success.
+	/// Returns a `204` empty response on success.
 	pub const FORGOT_PASSWORD: &str = "/auth/forgot";
 
 	#[derive(Serialize, Deserialize)]

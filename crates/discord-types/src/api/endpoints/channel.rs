@@ -5,17 +5,40 @@ use hex::Hex;
 use serde::{Deserialize, Serialize};
 
 use crate::api::channel::{
-	AutoArchiveDuration, Channel, ChannelFlags, ChannelType, DefaultReaction, ForumLayoutType,
-	IconEmoji, MessageRequestConsentStatus, PartialForumTag, PermissionOverwrite,
-	SafetyWarningType, SearchTagSetting, SortOrderType, ThreadMember, ThreadMemberFlags,
-	ThreadOnlyChannelMessageParams, ThreadPostData, ThreadSortDirection, ThreadSortType,
+	AutoArchiveDuration,
+	Channel,
+	ChannelFlags,
+	ChannelType,
+	DefaultReaction,
+	ForumLayoutType,
+	IconEmoji,
+	MessageRequestConsentStatus,
+	PartialForumTag,
+	PermissionOverwrite,
+	SafetyWarningType,
+	SearchTagSetting,
+	SortOrderType,
+	ThreadMember,
+	ThreadMemberFlags,
+	ThreadOnlyChannelMessageParams,
+	ThreadPostData,
+	ThreadSortDirection,
+	ThreadSortType,
 	VideoQualityMode,
 };
 use crate::api::messages::Message;
 use crate::api::users::LinkedAccount;
 use crate::common::id::{
-	BranchId, ChannelId, ChannelPermissionId, EmojiId, ForumTagId, GuildId, MessageId,
-	SafetyWarningId, SkuId, UserId,
+	BranchId,
+	ChannelId,
+	ChannelPermissionId,
+	EmojiId,
+	ForumTagId,
+	GuildId,
+	MessageId,
+	SafetyWarningId,
+	SkuId,
+	UserId,
 };
 use crate::common::image::ImageHash;
 use crate::common::timestamp::Timestamp;
@@ -207,13 +230,13 @@ pub type CreateGuildChannelResponse = Channel;
 ///
 /// Modifies the positions of a set of [channel](https://docs.discord.food/resources/channel#channel-object) objects for the guild.
 ///
-/// Requires the MANAGE_CHANNELS permission.
+/// Requires the `MANAGE_CHANNELS` permission.
 ///
 /// Only channels to be modified are required.
 ///
 /// This endpoint takes a JSON array of parameters in the following format:
 ///
-/// Returns a 204 empty response on success.
+/// Returns a `204` empty response on success.
 /// Fires multiple [Channel Update](https://docs.discord.food/topics/gateway-events#channel-update) Gateway events.
 pub fn MODIFY_GUILD_CHANNEL_POSITIONS(guild_id: &GuildId) -> String {
 	format!("/guilds/{}/channels", guild_id)
@@ -398,7 +421,7 @@ pub type DeleteChannelResponse = Channel;
 ///
 /// This should be used to delete various read states of channels the client has not been able to access for a while.
 ///
-/// Returns a 204 empty response on success.
+/// Returns a `204` empty response on success.
 pub fn DELETE_READ_STATE(channel_id: &ChannelId) -> String {
 	format!("/channels/{}/messages/ack", channel_id)
 }
@@ -421,7 +444,7 @@ pub struct DeleteReadtStateRequest {
 ///
 /// Requires the `SET_VOICE_CHANNEL_STATUS` permission and additionally the `MANAGE_CHANNELS` permission if the current user is not connected to the voice channel.
 ///
-/// Returns a 204 empty response on success.
+/// Returns a `204` empty response on success.
 /// Fires a [Voice Channel Status Update](https://docs.discord.food/topics/gateway-events#voice-channel-status-update) Gateway event.
 pub fn MODIFY_CHANNEL_STATUS(channel_id: &ChannelId) -> String {
 	format!("/channels/{}/voice-status", channel_id)
@@ -445,7 +468,7 @@ pub struct ModifyChannelStatusRequest {
 ///
 /// Only permissions you have in the guild or parent channel (if applicable) can be allowed/denied (unless you have a `MANAGE_ROLES` overwrite in the channel).
 ///
-/// Returns a 204 empty response on success.
+/// Returns a `204` empty response on success.
 /// Fires a [Channel Update](https://docs.discord.food/topics/gateway-events#channel-update) Gateway event.
 pub fn MODIFY_CHANNEL_PERMISSIONS(
 	channel_id: &ChannelId,
@@ -476,7 +499,7 @@ pub struct ModifyChannelPermissionsRequest {
 ///
 /// Requires the `MANAGE_ROLES` permission.
 ///
-/// Returns a 204 empty response on success.
+/// Returns a `204` empty response on success.
 /// Fires a [Channel Update](https://docs.discord.food/topics/gateway-events#channel-update) Gateway event.
 pub fn DELETE_CHANNEL_PERMISSION(
 	channel_id: &ChannelId,
@@ -511,7 +534,7 @@ pub struct FollowChannelRequesr {
 ///
 /// Official clients expire a typing indicator 10 seconds after the last [Typing Start](https://docs.discord.food/topics/gateway-events#typing-start) Gateway event.
 ///
-/// Returns a 204 empty response on success, unless a ratelimit has been hit, then it returns the `TriggerTypingResponse` object.
+/// Returns a `204` empty response on success, unless a ratelimit has been hit, then it returns the `TriggerTypingResponse` object.
 /// Fires a [Typing Start](https://docs.discord.food/topics/gateway-events#typing-start) Gateway event.
 pub fn TRIGGER_TYPING_INDICATOR(channel_id: &ChannelId) -> String {
 	format!("/channels/{}/typing", channel_id)
@@ -549,7 +572,7 @@ pub struct GetCallEligibilityResponse {
 ///
 /// This endpoint requires an active call to do anything.
 ///
-/// Returns a 204 empty response on success.
+/// Returns a `204` empty response on success.
 /// Fires a [Call Update](https://docs.discord.food/topics/gateway-events#call-update) Gateway event.
 pub fn MODIFY_CALL(channel_id: &ChannelId) -> String {
 	format!("/channels/{}/call", channel_id)
@@ -570,7 +593,7 @@ pub struct ModifyCallRequest {
 ///
 /// This endpoint requires an active call to do anything.
 ///
-/// Returns a 204 empty response on success.
+/// Returns a `204` empty response on success.
 /// Fires a [Call Update](https://docs.discord.food/topics/gateway-events#call-update) Gateway event.
 pub fn RING_CHANNEL_RECIPIENTS(channel_id: &ChannelId) -> String {
 	format!("/channels/{}/call/ring", channel_id)
@@ -591,7 +614,7 @@ pub struct RingChannelRecipientsRequest {
 ///
 /// This endpoint requires an active call to do anything.
 ///
-/// Returns a 204 empty response on success.
+/// Returns a `204` empty response on success.
 /// Fires a [Call Update](https://docs.discord.food/topics/gateway-events#call-update) Gateway event.
 pub fn STOP_RINGING_CHANNEL_RECIPIENTS(channel_id: &ChannelId) -> String {
 	format!("/channels/{}/call/stop-ringing", channel_id)
@@ -617,7 +640,7 @@ pub struct StopRingingChannelRecipientsRequest {
 /// If operating on a DM, returns a [group DM channel](https://docs.discord.food/resources/channel#channel-object) object on success.
 /// Fires a [Channel Create](https://docs.discord.food/topics/gateway-events#channel-create) Gateway event.
 ///
-/// If operating on a group DM, returns a 204 empty response on success.
+/// If operating on a group DM, returns a `204` empty response on success.
 /// Fires a [Channel Recipient Add](https://docs.discord.food/topics/gateway-events#channel-recipient-add) Gateway event.
 pub fn ADD_CHANNEL_RECIPIENT(
 	channel_id: &ChannelId,
@@ -646,7 +669,7 @@ pub struct AddChannelRecipientRequest {
 ///
 /// Requires ownership of the target channel.
 ///
-/// Returns a 204 empty response on success.
+/// Returns a `204` empty response on success.
 /// Fires a [Channel Recipient Remove](https://docs.discord.food/topics/gateway-events#channel-recipient-remove) Gateway event.
 pub fn REMOVE_CHANNEL_RECIPIENT(
 	channel_id: &ChannelId,
@@ -1128,7 +1151,7 @@ pub struct GetChannelPostDataResponse {
 
 /// Method: `GET`
 ///
-/// Requires the VIEW_CHANNEL permission.
+/// Requires the `VIEW_CHANNEL` permission.
 ///
 /// Starting in api v11, this endpoint will always return paginated results. Paginated results can be enabled before API v11 by setting `with_member` to true.
 ///
@@ -1197,7 +1220,7 @@ pub type GetThreadMemberResponse = ThreadMember;
 /// Requires the `VIEW_CHANNEL` permission.
 /// Also requires the thread is not archived.
 ///
-/// Returns a 204 empty response on success.
+/// Returns a `204` empty response on success.
 /// Fires a [Thread Members Update](https://docs.discord.food/topics/gateway-events#thread-members-update) and a [Thread Create](https://docs.discord.food/topics/gateway-events#thread-create) Gateway event.
 pub fn JOIN_THREAD(channel_id: &ChannelId) -> String {
 	format!("/channels/{}/thread-members/@me", channel_id)
@@ -1210,7 +1233,7 @@ pub fn JOIN_THREAD(channel_id: &ChannelId) -> String {
 /// Requires the `SEND_MESSAGES` permission.
 /// Also requires the thread is not archived.
 ///
-/// Returns a 204 empty response on success.
+/// Returns a `204` empty response on success.
 /// Fires a [Thread Members Update](https://docs.discord.food/topics/gateway-events#thread-members-update) Gateway event.
 pub fn ADD_THREAD_MEMBER(
 	channel_id: &ChannelId,
@@ -1225,7 +1248,7 @@ pub fn ADD_THREAD_MEMBER(
 ///
 /// User must be a member of the thread.
 ///
-/// Returns a [thread member](https://docs.discord.food/resources/channel#thread-member-object) on success, or a 204 empty response if nothing changed.
+/// Returns a [thread member](https://docs.discord.food/resources/channel#thread-member-object) on success, or a `204` empty response if nothing changed.
 /// Fires a [Thread Member Update](https://docs.discord.food/topics/gateway-events#thread-member-update) Gateway event.
 pub fn MODIFY_THREAD_SETTINGS(channel_id: &ChannelId) -> String {
 	format!("/channels/{}/thread-members/@me/settings", channel_id)
@@ -1252,7 +1275,7 @@ pub type ModifyThreadSettingsResponse = Option<ThreadMember>;
 ///
 /// Also requires the thread is not archived.
 ///
-/// Returns a 204 empty response on success.
+/// Returns a `204` empty response on success.
 /// Fires a [Thread Members Update](https://docs.discord.food/topics/gateway-events#thread-members-update) Gateway event.
 pub fn LEAVE_THREAD(channel_id: &ChannelId) -> String {
 	format!("/channels/{}/thread-members/@me", channel_id)
@@ -1265,7 +1288,7 @@ pub fn LEAVE_THREAD(channel_id: &ChannelId) -> String {
 /// Requires the `MANAGE_THREADS` permission, or the creator of the thread if it is a `PRIVATE_THREAD`.
 /// Also requires the thread is not archived.
 ///
-/// Returns a 204 empty response on success.
+/// Returns a `204` empty response on success.
 /// Fires a [Thread Members Update](https://docs.discord.food/topics/gateway-events#thread-members-update) Gateway event.
 pub fn REMOVE_THREAD_MEMBER(
 	channel_id: &ChannelId,

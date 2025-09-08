@@ -48,7 +48,7 @@ pub type GetDirectoryEntriesResponse = Vec<DirectoryEntry>;
 
 /// Method: `GET`
 ///
-/// Requires the VIEW_CHANNEL permission.
+/// Requires the `VIEW_CHANNEL` permission.
 ///
 /// Returns a list of partial [directory entry](https://docs.discord.food/resources/directory-entry#directory-entry-object) objects in the given directory channel.
 pub fn GET_PARTIAL_DIRECTORY_ENTRIES(
@@ -103,7 +103,7 @@ pub type SearchDirectoryEntriesResponse = Vec<DirectoryEntry>;
 
 /// Method: `GET`
 ///
-/// Requires the VIEW_CHANNEL permission.
+/// Requires the `VIEW_CHANNEL` permission.
 ///
 /// Returns a [directory entry](https://docs.discord.food/resources/directory-entry#directory-entry-object) object for the given entity ID in the directory channel.
 pub fn GET_DIRECTORY_ENTRY(
@@ -176,7 +176,7 @@ pub type ModifyDirectoryEntryResponse = DirectoryEntry;
 ///
 /// Requires the `VIEW_CHANNEL` permission and the `MANAGE_GUILD` permission on the entity being deleted.
 ///
-/// Returns a 204 empty response on success.
+/// Returns a `204` empty response on success.
 /// Fires a [Guild Directory Entry Delete](https://docs.discord.food/topics/gateway-events#guild-directory-entry-delete) Gateway event.
 pub fn DELETE_DIRECTORY_ENTRY(
 	channel_id: &ChannelId,

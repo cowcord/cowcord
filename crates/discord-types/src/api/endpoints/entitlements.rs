@@ -210,7 +210,7 @@ pub struct CreateApplicationEntitlementRequest {
 ///
 /// For one-time purchase consumable SKUs, marks a given entitlement for the user as consumed.
 ///
-/// Returns a 204 empty response on success.
+/// Returns a `204` empty response on success.
 /// Fires an [Entitlement Update](https://docs.discord.food/topics/gateway-events#entitlement-update) Gateway event.
 pub fn CONSUME_APPLICATION_ENTITLEMENT(
 	application_id: &ApplicationId,
@@ -228,7 +228,7 @@ pub fn CONSUME_APPLICATION_ENTITLEMENT(
 ///
 /// Deletes a currently-active test entitlement.
 ///
-/// Returns a 204 empty response on success.
+/// Returns a `204` empty response on success.
 /// Fires an [Entitlement Delete](https://docs.discord.food/topics/gateway-events#entitlement-delete) Gateway event.
 pub fn DELETE_APPLICATION_ENTITLEMENT(
 	application_id: &ApplicationId,
@@ -339,7 +339,7 @@ pub struct CreateUserGiftCodeRequest {
 ///
 /// Revokes a gift code created by the current user.
 ///
-/// Returns a 204 empty response on success.
+/// Returns a `204` empty response on success.
 pub fn REVOKE_USER_GIFT_CODE(code: &str) -> String {
 	format!("/users/@me/entitlements/gift-codes/{}", code)
 }

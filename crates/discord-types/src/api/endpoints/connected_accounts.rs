@@ -234,7 +234,7 @@ pub type GetUserConnectionSubredditsResponse = Vec<GetUserConnectionSubredditsRe
 ///
 /// Refreshes a connection.
 ///
-/// Returns a 204 empty response on success.
+/// Returns a `204` empty response on success.
 /// Fires a [User Connections Update](https://docs.discord.food/topics/gateway-events#user-connections-update) Gateway event.
 pub fn REFRESH_USER_CONNECTION(
 	connection_type: &ConnectionType,
@@ -286,7 +286,7 @@ pub type ModifyUserConnectionResponse = Connection;
 ///
 /// Deleting a connection will remove you from any guilds you joined via the connection's [integrations](https://docs.discord.food/resources/connected-accounts#connection-integration-structure).
 ///
-/// Returns a 204 empty response on success.
+/// Returns a `204` empty response on success.
 /// Fires a [User Connections Update](https://docs.discord.food/topics/gateway-events#user-connections-update) and optionally a [Guild Delete](https://docs.discord.food/topics/gateway-events#guild-delete) Gateway event.
 pub fn DELETE_USER_CONNECTION(
 	connection_type: &ConnectionType,
@@ -329,7 +329,7 @@ pub struct CreateConsoleConnectionResponse {
 ///
 /// Cancels a console connection request.
 ///
-/// Returns a 204 empty response on success.
+/// Returns a `204` empty response on success.
 pub fn CANCEL_CONSOLE_CONNECTION_REQUEST(nonce: &str) -> String {
 	format!("/consoles/connect-request/{}", nonce)
 }
@@ -386,7 +386,7 @@ pub struct SendConsoleCommandResponse {
 ///
 /// Cancels a console command.
 ///
-/// Returns a 204 empty response on success.
+/// Returns a `204` empty response on success.
 pub fn CANCEL_CONSOLE_COMMAND(
 	connection_type: &ConnectionType,
 	device_id: &DeviceId,

@@ -1,4 +1,5 @@
 use arrayvec::{ArrayString, ArrayVec};
+use hex::Hex;
 use serde::{Deserialize, Serialize};
 
 use crate::api::discovery::{
@@ -13,7 +14,6 @@ use crate::api::discovery::{
 	GuildVisibility,
 	MonetizationStorePage,
 };
-use hex::Hex;
 use crate::common::id::{ApplicationId, DiscoveryCategoryId, GuildId};
 use crate::common::image::ImageHash;
 use crate::common::locale::Locale;
@@ -269,7 +269,7 @@ pub struct ModifyGuildDiscoveryMetadataRequest {
 ///
 /// Requires the `MANAGE_GUILD` permission.
 ///
-/// Returns a 204 empty response on success.
+/// Returns a `204` empty response on success.
 pub fn ADD_GUILD_DISCOVERY_SUBCATEGORY(
 	guild_id: &GuildId,
 	category_id: &DiscoveryCategoryId,
@@ -283,7 +283,7 @@ pub fn ADD_GUILD_DISCOVERY_SUBCATEGORY(
 ///
 /// Requires the `MANAGE_GUILD` permission.
 ///
-/// Returns a 204 empty response on success.
+/// Returns a `204` empty response on success.
 pub fn REMOVE_GUILD_DISCOVERY_SUBCATEGORY(
 	guild_id: &GuildId,
 	category_id: &DiscoveryCategoryId,

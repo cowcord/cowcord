@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use arrayvec::{ArrayString, ArrayVec};
+use hex::Hex;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_repr::{Deserialize_repr, Serialize_repr};
@@ -11,7 +12,6 @@ use crate::api::emoji::Emoji;
 use crate::api::guild::{GuildFeatures, PremiumTier};
 use crate::api::invites::Invite;
 use crate::api::stickers::Sticker;
-use hex::Hex;
 use crate::common::id::{ApplicationId, ChannelId, DiscoveryCategoryId, EmojiId, GuildId};
 use crate::common::timestamp::Timestamp;
 
@@ -271,9 +271,9 @@ pub struct GuildProfile {
 #[derive(Serialize, Deserialize)]
 pub struct GameActivity {
 	/// The activity level of the guild in the game
-	pub activity_level: i64,
+	pub activity_level: u8,
 	/// The activity score of the guild in the game
-	pub activity_score: i64,
+	pub activity_score: u16,
 }
 
 #[derive(Serialize, Deserialize)]

@@ -142,7 +142,7 @@ pub type ModifyGuildEmojiResponse = Emoji;
 /// For emojis created by the current user, requires either the `CREATE_EXPRESSIONS` or `MANAGE_EXPRESSIONS` permission.
 /// For other emojis, requires the `MANAGE_EXPRESSIONS` permission.
 ///
-/// Returns a 204 empty response on success.
+/// Returns a `204` empty response on success.
 /// Fires a [Guild Emojis Update](https://docs.discord.food/topics/gateway-events#guild-emojis-update) Gateway event.
 pub fn DELETE_GUILD_EMOJI(
 	guild_id: &GuildId,
@@ -230,7 +230,7 @@ pub struct ModifyApplicationEmojiRequest {
 ///
 /// Delete the given emoji.
 ///
-/// Returns a 204 empty response on success.
+/// Returns a `204` empty response on success.
 pub fn DELETE_APPLICATION_EMOJI(
 	application_id: &ApplicationId,
 	emoji_id: &EmojiId,

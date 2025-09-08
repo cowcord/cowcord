@@ -330,7 +330,7 @@ pub type ModifyCurrentApplicationResponse = Application;
 ///
 /// User must be the owner of the application or current team.
 ///
-/// Returns a 204 empty response on success.
+/// Returns a `204` empty response on success.
 pub fn DELETE_APPLICATION(application_id: &ApplicationId) -> String {
 	format!("/applications/{}/delete", application_id)
 }
@@ -418,7 +418,7 @@ pub type AddApplicationTesterResponse = WhitelistedUser;
 ///
 /// Invited users will receive an email with a link that redirects to the official Discord client with a verification token present in the URL's query (e.g. https://discord.com/oauth2/allowlist/accept?token=h9sYyrafnMhhObX4nGi9VOugCa9CSt).
 ///
-/// Returns a 204 empty response on success.
+/// Returns a `204` empty response on success.
 pub fn ACCEPT_APPLICATION_TESTER_INVITATION(
 	query: &AcceptApplicationTesterInvitationQueryParams
 ) -> String {
@@ -437,7 +437,7 @@ pub struct AcceptApplicationTesterInvitationQueryParams {
 ///
 /// User must be the owner of the application or developer of the current team.
 ///
-/// Returns a 204 empty response on success.
+/// Returns a `204` empty response on success.
 pub fn REMOVE_APPLICATION_TESTER(
 	application_id: &ApplicationId,
 	user_id: &UserId,
@@ -517,7 +517,7 @@ pub struct ResetApplicationBotTokenResponse {
 ///
 /// User must be the owner of the application or developer of the current team.
 ///
-/// Returns a 204 empty response on success.
+/// Returns a `204` empty response on success.
 pub fn REQUEST_APPLICATION_GATEWAY_INTENTS(application_id: &ApplicationId) -> String {
 	format!(
 		"/applications/{}/request-additional-intents",
@@ -636,7 +636,7 @@ pub struct GetApplicationDiscoverabilityStateResponse {
 ///
 /// User must be the owner of the application or developer of the current team.
 ///
-/// Returns a 204 empty response on success.
+/// Returns a `204` empty response on success.
 pub fn QUERY_APPLICATION_TEST_MODE(application_id: &ApplicationId) -> String {
 	format!("/activities/{}/test-mode", application_id)
 }
@@ -671,7 +671,7 @@ pub struct GetEmbeddedActivitiesResponse {
 ///
 /// User must be the owner of the application or developer of the current team.
 ///
-/// Returns a 204 empty response on success.
+/// Returns a `204` empty response on success.
 pub fn SET_APPLICATION_EMBEDDABILITY(application_id: &ApplicationId) -> String {
 	format!("/applications/{}/set-embedded", application_id)
 }
@@ -819,7 +819,7 @@ pub type CreateApplicationAssetResponse = ApplicationAsset;
 ///
 /// User must be the owner of the application or developer of the current team.
 ///
-/// Returns a 204 empty response on success.
+/// Returns a `204` empty response on success.
 pub fn DELETE_APPLICATION_ASSET(
 	application_id: &ApplicationId,
 	asset_id: &ApplicationAssetId,
@@ -970,7 +970,7 @@ pub struct AcknowledgeApplicationDisclosuresResponse {
 
 /// Method: `GET`
 ///
-/// Requires the MANAGE_GUILD permission.
+/// Requires the `MANAGE_GUILD` permission.
 ///
 /// An application is considered attached to a guild if the [application's guild_id field](https://docs.discord.food/resources/application#application-object) is set to the guild's ID.
 ///
@@ -1044,7 +1044,7 @@ pub struct ReportUnverifiedApplicationResponse {
 ///
 /// Uploads an unverified application's icon to Discord.
 ///
-/// Returns a 204 empty response on success.
+/// Returns a `204` empty response on success.
 pub const UPLOAD_UNVERIFIED_APPLICATION_ICON: &str = "/unverified-applications/icons";
 
 /// Method: `GET`
@@ -1162,7 +1162,7 @@ pub type UpdateActivityManagedLinkResponse = ActivityLink;
 ///
 /// User must be the owner of the application or developer of the current team.
 ///
-/// Returns a 204 empty response on success.
+/// Returns a `204` empty response on success.
 pub fn DELETE_APPLICATION_MANAGED_LINK(
 	application_id: &ApplicationId,
 	link_id: &ActivityLinkId,
