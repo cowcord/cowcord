@@ -15,4 +15,5 @@ pub mod guild;
 pub mod guild_templates;
 pub mod integrations;
 pub mod invites;
+pub mod lobbies;
 pub mod websocket;
