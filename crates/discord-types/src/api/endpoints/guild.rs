@@ -1920,6 +1920,8 @@ pub type ResetGuildJoinRequestResponse = GuildJoinRequest;
 ///
 /// Acknowledges an approved join request for the current user.
 ///
+/// If `guild_join_request_id` is `None` it will default to `@me` which gets results for the current user
+///
 /// Users can only acknowledge their own join requests, and only if the request is approved and is not already acknowledged (has a `last_seen` of `null`).
 /// Upon acknowledgement, the join request is no longer considered active and will not be returned in the [Ready event](https://docs.discord.food/topics/gateway-events#ready).
 ///
@@ -1930,25 +1932,15 @@ pub type ResetGuildJoinRequestResponse = GuildJoinRequest;
 )]
 pub fn ACKNOWLEDGE_GUILD_JOIN_REQUEST(
 	guild_id: &GuildId,
-	guild_join_request_id: &GuildJoinRequestId,
+	guild_join_request_id: Option<&GuildJoinRequestId>,
 ) -> String {
 	format!(
 		"/guilds/{}/requests/{}/ack",
-		guild_id, guild_join_request_id
+		guild_id,
+		guild_join_request_id
+			.map(|id| id.to_string())
+			.unwrap_or("@me".to_string())
 	)
-}
-
-/// Method: `POST`
-///
-/// Acknowledges an approved join request for the current user.
-///
-/// Users can only acknowledge their own join requests, and only if the request is approved and is not already acknowledged (has a `last_seen` of `null`).
-/// Upon acknowledgement, the join request is no longer considered active and will not be returned in the [Ready event](https://docs.discord.food/topics/gateway-events#ready).
-///
-/// Returns a `204` empty response on success.
-/// Fires a [Guild Join Request Update](https://docs.discord.food/topics/gateway-events#guild-join-request-update) Gateway event.
-pub fn ACKNOWLEDGE_USER_GUILD_JOIN_REQUEST(guild_id: &GuildId) -> String {
-	format!("/guilds/{}/requests/@me/ack", guild_id)
 }
 
 /// Method: `DELETE`
