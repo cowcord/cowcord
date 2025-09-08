@@ -121,6 +121,13 @@ pub struct InviteMetadata {
 }
 
 #[derive(Serialize, Deserialize)]
+pub struct InviteWithMetadata {
+	#[serde(flatten)]
+	pub invite: Invite,
+	pub metadata: InviteMetadata,
+}
+
+#[derive(Serialize, Deserialize)]
 pub struct InviteGuild {
 	/// The ID of the guild
 	pub id: GuildId,
