@@ -5,7 +5,7 @@
 - [ ] [git](https://git-scm.com/downloads)
 - [ ] Some non ancient rustc version
 
-## Testing
+## Development
 
 1. Clone the repo
 
@@ -67,6 +67,24 @@ pub const SUPER_COOL: &str = "/super/cool";
 pub struct SuperCoolRequest {}
 
 pub type SuperCoolResponse = SomeOtherThing;
+```
+
+Endpoint docs
+
+These arent incredibly consistent since i've changed how I want them structured since starting writing them but in general they follow this format.
+When in doubt you can always look at endpoints already defined.
+
+As for grammar, I really couldnt care less if you make a mistake, mispell a word, forget a comma etc. I probably do it more than you ever will and it doesnt affect anyone.
+
+```rust
+/// meta info about the endpoint, like http method, supported headers and auth, required flags etc.
+/// 
+/// what the endpoint does
+/// 
+/// additional info like gotchas or examples
+/// 
+/// what the endpoint returns and/or what event(s) it fires
+pub const SUPER_COOL: &str = "/super/cool";
 ```
 
 Most of these will be already adhered to if copying the endpoint via the copy button from [discord userdoccers].
