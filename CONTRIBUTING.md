@@ -124,4 +124,9 @@ Again this will be done automatically for you if copying the code via the copy b
 
 <!-- # Troubleshooting -->
 
+# AI
+
+I don't mind if you use AI to help write simpler more repetitive parts, but I will not accept fully AI generated pull requests. Additionally, do not use AI at all when working with the `discord-types` crate, instead, all data there should be from your own research (make sure you document it or add your documentation to the [discord userdoccers github]) and/or [discord userdoccers].
+
 [discord userdoccers]: https://docs.discord.food
+[discord userdoccers github]: https://github.com/discord-userdoccers/discord-userdoccers
