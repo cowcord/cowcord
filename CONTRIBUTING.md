@@ -10,7 +10,7 @@
 1. Clone the repo
 
 ```bash
-git clone https://github.com/not-a-cowfr/cowcord.git
+git clone https://github.com/cowcord/cowcord.git
 cd cowcord
 ```
 
