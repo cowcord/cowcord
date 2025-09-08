@@ -184,4 +184,32 @@ pub enum GifMediaFormat {
 	tinygif,
 	/// GIF image in a very small size
 	nanogif,
+	/// Animated WebP image
+	webp,
+	/// Animated WebP image in a smaller size
+	tinywebp,
+	/// Animated WebP image in a very small size
+	nanowebp,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct TenorGif {
+	/// The type of the GIF (always gif)
+	pub r#type: String,
+	/// The provider source URL of the GIF
+	pub url: String,
+	/// The media URL of the GIF
+	pub src: String,
+	/// Width of image
+	pub width: u16,
+	/// Height of image
+	pub height: u16,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct GifCategory {
+	/// The name of the category
+	pub name: String,
+	/// The media URL of a preview GIF
+	pub src: String,
 }

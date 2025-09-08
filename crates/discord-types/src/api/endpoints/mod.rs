@@ -13,4 +13,5 @@ pub mod entitlements;
 pub mod family_center;
 pub mod guild;
 pub mod guild_templates;
+pub mod integrations;
 pub mod websocket;
