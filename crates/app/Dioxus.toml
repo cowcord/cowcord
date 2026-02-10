@@ -1,0 +1,47 @@
+[application]
+out_dir = "dist"
+asset_dir = "assets"
+
+[web.app]
+title = "cowcord"
+base_path = "/"
+
+[web.build]
+out_dir = "dist"
+
+[web.watcher]
+index_on_404 = true
+reload = false
+watch_path = ["src", "assets"]
+
+[profile.release.web.wasm_opt]
+debug = false
+level = "z"
+
+[bundle]
+identifier = "fr.notacow.cowcord"
+publisher = "not a cow"
+
+# icon = [
+#    "assets/icons/32x32.png",
+#    "assets/icons/128x128.png",
+#    "assets/icons/128x128@2x.png",
+#    "assets/icons/icon.icns",
+#    "assets/icons/icon.ico"
+# ]
+
+category = "SocialNetworking"
+short_description = "Robust Discord client."
+long_description = "Robust Discord client."
+
+[bundle.macos]
+license = "LICENSE"
+# signing_identity = ""
+provider_short_name = "not a cow"
+
+[bundle.windows]
+digest_algorithm = "sha-256"
+# certificate_thumbprint = ""
+timestamp_url = "http://timestamp.digicert.com"
+tsp = true
+# icon_path = "assets/icons/icon.ico"

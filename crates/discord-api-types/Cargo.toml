@@ -1,0 +1,46 @@
+[package]
+name = "discord-api-types"
+description = "Provides typings for discord api objects and discord endpoints."
+
+version = "0.0.1"
+edition = "2024"
+
+license = "Unlicense"
+repository = "https://github.com/cowcord/cowcord"
+readme = "README.md"
+
+[dependencies]
+
+# serialization/deserialization
+# bitflags = "2.9.0"
+# serde = { version = "1.0.219", features = ["derive"] }
+# serde_json = "1.0.140"
+# serde_urlencoded = "0.7.1"
+# serde_repr = "0.1.20"
+# prost-types = "0.14.1"
+
+# custom types
+# typesize = { version = "0.1.14", optional = true, features = [
+#     "url",
+#     "time",
+#     "serde_json",
+#     "secrecy",
+#     "dashmap",
+#     "parking_lot",
+#     "details",
+# ] }
+# time = { version = "0.3.41", features = [
+#     "formatting",
+#     "parsing",
+#     "serde-well-known",
+# ] }
+# chrono = { version = "0.4.41", optional = true, features = ["serde"] }
+# arrayvec = { version = "0.7.6", features = ["serde"] }
+# hex = { workspace = true }
+# phf = { version = "0.12.1", features = ["macros"] }
+
+[features]
+# default = ["chrono"]
+
+# chrono = ["dep:chrono", "typesize?/chrono"]
+

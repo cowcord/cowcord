@@ -1,0 +1,17 @@
+[package]
+name = "hex"
+description = "Custom hex type with serialization and deserialization as a base 10 number or a hex string."
+
+version = "0.0.1"
+edition = "2024"
+
+license = "Unlicense"
+repository = "https://github.com/cowcord/cowcord"
+readme = "README.md"
+
+[dependencies]
+hex_encode = { version = "0.4.3", package = "hex"}
+serde = { version = "1.0.219", features = ["derive"] }
+
+[dev-dependencies]
+serde_json = "1.0.143"

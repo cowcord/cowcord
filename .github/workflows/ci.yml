@@ -1,0 +1,27 @@
+on:
+  push:
+    paths:
+      - 'Cargo.toml'
+      - 'crates/**/*.rs'
+      - 'crates/**/Cargo.toml'
+      - '.github/workflows/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, 'skip_build')"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          target: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Install Dioxus CLI
+        run: |
+          curl -L -o dioxus.tar.gz https://github.com/DioxusLabs/dioxus/releases/download/v0.7.3/dx-x86_64-unknown-linux-gnu-v0.7.3.tar.gz
+          tar -xzf dioxus.tar.gz
+          sudo mv dx /usr/local/bin/
+
+      - name: Build
+        run: dx build -p cowcord
