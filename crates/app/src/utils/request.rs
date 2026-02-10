@@ -150,15 +150,14 @@ pub trait RequestBuilderExt {
 
 impl RequestBuilderExt for RequestBuilder {
 	fn add_headers(self) -> Result<RequestBuilder, JsError> {
-		if let Some(token) = LocalStorage::new()
-			.map_err(|e| JsError::from(e))?
-			.get_value("token")
-		{
+		let nav = use_navigator();
+
+		if let Some(token) = LocalStorage::new()?.get_value("token") {
 			Ok(self
 				.header("Authorization", token)
 				.header("Origin", DISCORD_URL))
 		} else {
-			use_navigator().replace("/login");
+			nav.replace("/login");
 			Err(JsError::new("Authorization token is missing"))
 		}
 	}

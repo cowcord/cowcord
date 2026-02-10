@@ -4,14 +4,23 @@ use crate::utils::local_storage::LocalStorage;
 
 #[component]
 pub fn Home() -> Element {
-	let navigator = use_navigator();
+	let nav = use_navigator();
 
-	let redirect = match LocalStorage::new().map_err(|e| e).get_value("token") {
+	let ls = match LocalStorage::new() {
+		| Ok(ls) => ls,
+		| Err(e) => {
+			return rsx! {
+				p { "An unexpected error occured! {e:?}" }
+			};
+		},
+	};
+
+	let redirect = match ls.get_value("token") {
 		| Some(_token) => "/channels/@me",
 		| None => "/login",
 	};
 
-	navigator.replace(redirect);
+	nav.replace(redirect);
 
 	rsx! {}
 }
