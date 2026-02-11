@@ -5,7 +5,7 @@ default-members = ["crates/app"]
 
 [workspace.dependencies]
 hex = { path = "crates/hex" }
-discord-api-types = { path = "crates/discord-api-types" }
+discord-api = { path = "crates/discord-api" }
 
 [profile.release]
 opt-level = "z"

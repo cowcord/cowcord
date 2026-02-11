@@ -1,5 +1,5 @@
 use dioxus::prelude::use_navigator;
-use discord_api_types::{ApiVerion, DISCORD_URL};
+use discord_api::{ApiVerion, DISCORD_URL};
 use reqwest::{Client, RequestBuilder, Response};
 use serde::Serialize;
 use serde::de::DeserializeOwned;

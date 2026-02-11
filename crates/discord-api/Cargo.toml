@@ -1,5 +1,5 @@
 [package]
-name = "discord-api-types"
+name = "discord-api"
 description = "Provides typings for discord api objects and discord endpoints."
 
 version = "0.0.1"

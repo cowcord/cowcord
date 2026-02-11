@@ -390,14 +390,11 @@ name = "cowcord"
 version = "0.0.1"
 dependencies = [
  "dioxus",
- "discord-api-types",
+ "discord-api",
  "gloo-timers",
  "reqwest",
  "serde",
  "serde_json",
- "wasm-bindgen",
- "wasm-bindgen-futures",
- "web-sys",
 ]
 
 [[package]]
@@ -997,7 +994,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "discord-api-types"
+name = "discord-api"
 version = "0.0.1"
 
 [[package]]
