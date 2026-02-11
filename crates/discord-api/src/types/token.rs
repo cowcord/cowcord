@@ -1,7 +1,9 @@
 use base64::Engine;
 use base64::prelude::BASE64_STANDARD;
+use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(transparent)]
 pub struct Token(pub String);
 
 impl Token {

@@ -4,11 +4,12 @@
 @layer base {
 	:root {
 		--radius: 0.5rem;
+		--link: hsl(230, 100%, 80%);
 
 		--background: hsl(0, 0%, 6%);
 		--foreground: hsl(0, 8%, 85%);
 
-		--muted-darker: hsl(240 5% 8%);
+		--muted-darker: hsl(240 5% 12%);
 		--muted: hsl(240 5% 14%);
 		--muted-lighter: hsl(240 4.8% 25%);
 		--muted-foreground: hsl(240 5% 65%);
@@ -36,7 +37,8 @@
 	--radius-md: calc(var(--radius) - 2px);
 	--radius-lg: var(--radius);
 	--radius-xl: calc(var(--radius) + 4px);
-
+	--color-link: var(--link);
+	
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
 

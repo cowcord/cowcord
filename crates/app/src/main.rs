@@ -17,6 +17,9 @@ enum Route {
     #[route("/")]
     Home {},
 
+	#[route("/login")]
+	Login {},
+
     #[route("/:..route")]
     PageNotFound {
         route: Vec<String>,
