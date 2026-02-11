@@ -996,6 +996,9 @@ dependencies = [
 [[package]]
 name = "discord-api"
 version = "0.0.1"
+dependencies = [
+ "base64",
+]
 
 [[package]]
 name = "dispatch"

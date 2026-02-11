@@ -10,6 +10,7 @@ repository = "https://github.com/cowcord/cowcord"
 readme = "README.md"
 
 [dependencies]
+base64 = "0.22.1"
 
 # serialization/deserialization
 # bitflags = "2.9.0"
