@@ -18,13 +18,13 @@ watch_path = ["src", "assets"]
 identifier = "fr.notacow.cowcord"
 publisher = "not a cow"
 
-# icon = [
+icon = [
+   "assets/icons/placeholder.png",
 #    "assets/icons/32x32.png",
 #    "assets/icons/128x128.png",
-#    "assets/icons/128x128@2x.png",
 #    "assets/icons/icon.icns",
 #    "assets/icons/icon.ico"
-# ]
+]
 
 category = "SocialNetworking"
 short_description = "Robust Discord client."
