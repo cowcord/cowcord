@@ -1,7 +1,7 @@
 {
   pkgs ? import <nixpkgs> { },
 }:
-pkgs.mkShell {
+pkgs.mkShell rec {
     strictDeps = true;
 
     nativeBuildInputs = with pkgs; [
@@ -24,6 +24,7 @@ pkgs.mkShell {
       xdotool
     ];
 
+    LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath buildInputs;
     PKG_CONFIG_PATH = "${pkgs.openssl.dev}/lib/pkgconfig";
   }
 
