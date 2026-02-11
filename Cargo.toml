@@ -21,9 +21,3 @@ incremental = true
 
 [profile.wasm-dev]
 inherits = "dev"
-
-[profile.server-dev]
-inherits = "dev"
-
-[profile.android-dev]
-inherits = "dev"

@@ -14,10 +14,6 @@ index_on_404 = true
 reload = false
 watch_path = ["src", "assets"]
 
-[profile.release.web.wasm_opt]
-debug = false
-level = "z"
-
 [bundle]
 identifier = "fr.notacow.cowcord"
 publisher = "not a cow"
