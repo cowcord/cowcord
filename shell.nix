@@ -6,6 +6,7 @@ pkgs.mkShell rec {
 
     nativeBuildInputs = with pkgs; [
       dioxus-cli
+      tailwindcss_4
 
       gcc
       openssl

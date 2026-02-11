@@ -1,3 +1,97 @@
 @import "tailwindcss";
 @source "./src/**/*.{rs,html,css}";
 
+@layer base {
+	:root {
+		--radius: 0.5rem;
+
+		--background: hsl(0, 0%, 6%);
+		--foreground: hsl(0, 8%, 85%);
+
+		--muted-darker: hsl(240 5% 8%);
+		--muted: hsl(240 5% 14%);
+		--muted-lighter: hsl(240 4.8% 25%);
+		--muted-foreground: hsl(240 5% 65%);
+
+		--primary: hsl(235, 86%, 65%);
+		--primary-muted: hsl(235, 40%, 30%);
+
+		--border: hsl(240 5% 20%);
+		--card: hsl(230, 10%, 10%);
+
+		--destructive: hsl(5, 100%, 37%);
+		--destructive-foreground: hsl(0 0% 98%);
+
+		--success: hsl(140, 65%, 45%);
+		--success-foreground: hsl(0 0% 98%);
+	}
+
+	.light {
+		/* todo */
+	}
+}
+
+@theme inline {
+	--radius-sm: calc(var(--radius) - 4px);
+	--radius-md: calc(var(--radius) - 2px);
+	--radius-lg: var(--radius);
+	--radius-xl: calc(var(--radius) + 4px);
+
+	--color-background: var(--background);
+	--color-foreground: var(--foreground);
+
+	--color-muted-darker: var(--muted-darker);
+	--color-muted: var(--muted);
+	--color-muted-foreground: var(--muted-foreground);
+	--color-muted-lighter: var(--muted-lighter);
+
+	--color-primary: var(--primary);
+	--color-primary-muted: var(--primary-muted);
+
+	--color-border: var(--border);
+	--color-card: var(--card);
+
+	--color-destructive: var(--destructive);
+	--color-destructive-foreground: var(--destructive-foreground);
+
+	--color-success: var(--success);
+	--color-success-foreground: var(--success-foreground);
+}
+
+body {
+	background: var(--background);
+	color: var(--foreground);
+}
+
+::-webkit-scrollbar {
+	width: 10px;
+	height: 10px;
+}
+
+::-webkit-scrollbar-track {
+	background: var(--background);
+	border-radius: var(--radius);
+}
+
+::-webkit-scrollbar-thumb {
+	background: var(--muted-lighter);
+	border-radius: var(--radius);
+	border: 2px solid var(--background);
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: var(--primary);
+}
+
+* {
+	scrollbar-width: thin;
+	scrollbar-color: var(--muted-lighter) var(--background);
+}
+
+button {
+	cursor: pointer;
+}
+
+button:disabled {
+	cursor: not-allowed;
+}
