@@ -2,6 +2,7 @@
 
 use dioxus::prelude::*;
 
+pub mod components;
 pub mod utils;
 
 mod views;
