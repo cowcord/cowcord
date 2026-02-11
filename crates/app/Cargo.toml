@@ -4,31 +4,9 @@ version = "0.0.1"
 edition = "2024"
 
 [dependencies]
-
-# core deps
-dioxus = { version = "0.7.3", features = ["router"] }
-wasm-bindgen = "0.2.100"
-wasm-bindgen-futures = "0.4.50"
-web-sys = { version = "0.3.77", features = [
-    "Window",
-    "Element",
-    "DomRect",
-    "WebSocket",
-    "MessageEvent",
-    "BinaryType",
-    "ErrorEvent",
-    "CloseEvent",
-    "console",
-    "Storage"
-] }
-
-gloo-timers = "0.3.0"
+dioxus = { version = "0.7.3", features = ["router", "desktop"] }
 reqwest = { version = "0.12.15", features = ["json", "blocking", "multipart"] }
 serde = "1.0.219"
 serde_json = "1.0.140"
-discord-api-types = { workspace = true }
-
-
-[features]
-default = ["desktop"]
-desktop = ["dioxus/desktop"]
+keyring = "3.6.3"
+discord-api = { workspace = true }

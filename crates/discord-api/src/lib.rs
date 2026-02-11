@@ -1,3 +1,5 @@
+pub mod types;
+
 pub const DISCORD_URL: &str = "https://discord.com/";
 
 #[derive(Debug, Clone)]

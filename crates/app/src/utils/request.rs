@@ -3,9 +3,8 @@ use discord_api::{ApiVerion, DISCORD_URL};
 use reqwest::{Client, RequestBuilder, Response};
 use serde::Serialize;
 use serde::de::DeserializeOwned;
-use wasm_bindgen::JsError;
 
-use crate::utils::local_storage::LocalStorage;
+use crate::utils::token::load_token;
 
 pub struct RequestClient {
 	client: Client,
@@ -20,7 +19,7 @@ impl RequestClient {
 		}
 	}
 
-	async fn handle_response<T>(response: Response) -> Result<T, JsError>
+	async fn handle_response<T>(response: Response) -> Result<T, Box<dyn std::error::Error>>
 	where
 		T: DeserializeOwned,
 	{
@@ -31,10 +30,11 @@ impl RequestClient {
 			let result: T = serde_json::from_str(&response_text)?;
 			Ok(result)
 		} else {
-			Err(JsError::new(&format!(
+			Err(format!(
 				"Request failed with status: {}. Response: {}",
 				status, response_text
-			)))
+			)
+			.into())
 		}
 	}
 
@@ -42,7 +42,7 @@ impl RequestClient {
 		&self,
 		endpoint: &str,
 		body: Option<&T>,
-	) -> Result<R, JsError>
+	) -> Result<R, Box<dyn std::error::Error>>
 	where
 		T: Serialize,
 		R: DeserializeOwned,
@@ -63,7 +63,7 @@ impl RequestClient {
 		&self,
 		endpoint: &str,
 		body: Option<&T>,
-	) -> Result<R, JsError>
+	) -> Result<R, Box<dyn std::error::Error>>
 	where
 		T: Serialize,
 		R: DeserializeOwned,
@@ -84,7 +84,7 @@ impl RequestClient {
 		&self,
 		endpoint: &str,
 		body: Option<&T>,
-	) -> Result<R, JsError>
+	) -> Result<R, Box<dyn std::error::Error>>
 	where
 		T: Serialize,
 		R: DeserializeOwned,
@@ -105,7 +105,7 @@ impl RequestClient {
 		&self,
 		endpoint: &str,
 		body: Option<&T>,
-	) -> Result<R, JsError>
+	) -> Result<R, Box<dyn std::error::Error>>
 	where
 		T: Serialize,
 		R: DeserializeOwned,
@@ -126,7 +126,7 @@ impl RequestClient {
 		&self,
 		endpoint: &str,
 		body: Option<&T>,
-	) -> Result<R, JsError>
+	) -> Result<R, Box<dyn std::error::Error>>
 	where
 		T: Serialize,
 		R: DeserializeOwned,
@@ -145,20 +145,23 @@ impl RequestClient {
 }
 
 pub trait RequestBuilderExt {
-	fn add_headers(self) -> Result<RequestBuilder, JsError>;
+	fn add_headers(self) -> Result<RequestBuilder, Box<dyn std::error::Error>>;
 }
 
 impl RequestBuilderExt for RequestBuilder {
-	fn add_headers(self) -> Result<RequestBuilder, JsError> {
+	fn add_headers(self) -> Result<RequestBuilder, Box<dyn std::error::Error>> {
 		let nav = use_navigator();
+		let token = load_token()?;
 
-		if let Some(token) = LocalStorage::new()?.get_value("token") {
+		if let Some(token) = token
+			&& token.is_valid()
+		{
 			Ok(self
-				.header("Authorization", token)
+				.header("Authorization", token.0)
 				.header("Origin", DISCORD_URL))
 		} else {
 			nav.replace("/login");
-			Err(JsError::new("Authorization token is missing"))
+			Err("Authorization token is missing or is invalid".into())
 		}
 	}
 }
