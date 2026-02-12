@@ -1,8 +1,10 @@
+# Cowcord
+
 ## Contributing
 
 Prequisites (if on NixOS, use `nix-shell`)
 - rust
-- dioxus-cli
+- dioxus cli
 - tailwind cli
 
 Set up tailwind
@@ -14,3 +16,16 @@ Run dev app with hotreloading
 ```bash
 dx serve
 ```
+
+## Todo
+
+### Basic features
+- [ ] Logging in
+	- [ ] with email/phone + password
+	- [x] with qr code and mobile
+	- [ ] mfa support
+- [ ] view servers
+- [ ] view a server's channels
+- [ ] view a channel and its messages
+- [ ] view a server list
+- [ ] send a message
