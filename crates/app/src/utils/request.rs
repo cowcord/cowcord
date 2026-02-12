@@ -9,13 +9,15 @@ use crate::utils::token::load_token;
 pub struct RequestClient {
 	client: Client,
 	api_base: String,
+	no_auth: bool,
 }
 
 impl RequestClient {
-	pub fn new() -> Self {
+	pub fn new(no_auth: bool) -> Self {
 		RequestClient {
 			client: Client::new(),
 			api_base: format!("/api/{:?}", ApiVerion::v10),
+			no_auth,
 		}
 	}
 
@@ -48,7 +50,7 @@ impl RequestClient {
 		R: DeserializeOwned,
 	{
 		let url = format!("{}{}{}", DISCORD_URL, self.api_base, endpoint);
-		let mut request = self.client.post(&url).add_headers()?;
+		let mut request = self.client.post(&url).add_headers(self.no_auth)?;
 
 		if let Some(body) = body {
 			request = request.json(body);
@@ -69,7 +71,7 @@ impl RequestClient {
 		R: DeserializeOwned,
 	{
 		let url = format!("{}{}{}", DISCORD_URL, self.api_base, endpoint);
-		let mut request = self.client.get(&url).add_headers()?;
+		let mut request = self.client.get(&url).add_headers(self.no_auth)?;
 
 		if let Some(body) = body {
 			request = request.json(body);
@@ -90,7 +92,7 @@ impl RequestClient {
 		R: DeserializeOwned,
 	{
 		let url = format!("{}{}{}", DISCORD_URL, self.api_base, endpoint);
-		let mut request = self.client.delete(&url).add_headers()?;
+		let mut request = self.client.delete(&url).add_headers(self.no_auth)?;
 
 		if let Some(body) = body {
 			request = request.json(body);
@@ -111,7 +113,7 @@ impl RequestClient {
 		R: DeserializeOwned,
 	{
 		let url = format!("{}{}{}", DISCORD_URL, self.api_base, endpoint);
-		let mut request = self.client.put(&url).add_headers()?;
+		let mut request = self.client.put(&url).add_headers(self.no_auth)?;
 
 		if let Some(body) = body {
 			request = request.json(body);
@@ -132,7 +134,7 @@ impl RequestClient {
 		R: DeserializeOwned,
 	{
 		let url = format!("{}{}{}", DISCORD_URL, self.api_base, endpoint);
-		let mut request = self.client.patch(&url).add_headers()?;
+		let mut request = self.client.patch(&url).add_headers(self.no_auth)?;
 
 		if let Some(body) = body {
 			request = request.json(body);
@@ -145,23 +147,32 @@ impl RequestClient {
 }
 
 pub trait RequestBuilderExt {
-	fn add_headers(self) -> Result<RequestBuilder, Box<dyn std::error::Error>>;
+	fn add_headers(
+		self,
+		no_auth: bool,
+	) -> Result<RequestBuilder, Box<dyn std::error::Error>>;
 }
 
 impl RequestBuilderExt for RequestBuilder {
-	fn add_headers(self) -> Result<RequestBuilder, Box<dyn std::error::Error>> {
+	fn add_headers(
+		self,
+		no_auth: bool,
+	) -> Result<RequestBuilder, Box<dyn std::error::Error>> {
 		let nav = use_navigator();
 		let token = load_token()?;
+		let mut builder = self.header("Origin", DISCORD_URL);
 
-		if let Some(token) = token
-			&& token.is_valid()
-		{
-			Ok(self
-				.header("Authorization", token.0)
-				.header("Origin", DISCORD_URL))
-		} else {
-			nav.replace("/login");
-			Err("Authorization token is missing or is invalid".into())
+		if !no_auth {
+			if let Some(token) = token
+				&& token.is_valid()
+			{
+				builder = builder.header("Authorization", token.0);
+			} else {
+				nav.replace("/login");
+				return Err("Authorization token is missing or is invalid".into());
+			}
 		}
+
+		Ok(builder)
 	}
 }

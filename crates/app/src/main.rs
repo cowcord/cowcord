@@ -4,6 +4,7 @@ use dioxus::prelude::*;
 
 pub mod components;
 pub mod utils;
+pub mod ws;
 
 mod views;
 use views::*;

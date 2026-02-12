@@ -93,3 +93,17 @@ pub enum LoginRequiredActionType {
 	/// The user must change their password to meet Discord's new password requirements
 	update_password,
 }
+
+pub const REMOTE_AUTH_TICKET_EXCHANGE: &str = "/users/@me/remote-auth/login";
+
+#[derive(Serialize, Deserialize)]
+pub struct RemoteAuthTicketExchangeRequest {
+	/// The ticket obtained from the remote authentication flow
+	pub ticket: String,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct RemoteAuthTicketExchangeResponse {
+	/// The authentication token encrypted with the client's public key
+	pub encrypted_token: String,
+}

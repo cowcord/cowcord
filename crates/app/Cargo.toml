@@ -5,9 +5,15 @@ edition = "2024"
 
 [dependencies]
 dioxus = { version = "0.7.3", features = ["router", "desktop"] }
-reqwest = { version = "0.12.15", features = ["json", "blocking", "multipart"] }
+reqwest = { version = "0.13.2", features = ["json", "blocking", "multipart"] }
 serde = { workspace = true }
 serde_json = { workspace = true }
 keyring = "3.6.3"
 discord-api = { workspace = true }
 tailwind_fuse = "0.3.2"
+futures = "0.3.31"
+tokio-tungstenite = { version = "0.28.0", features = ["native-tls"] }
+openssl = "0.10.75"
+tokio = "1.49.0"
+base64 = { workspace = true }
+qrcode = { version = "0.14.1", default-features = false, features = ["svg"] }
