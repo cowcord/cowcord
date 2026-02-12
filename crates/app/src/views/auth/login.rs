@@ -215,7 +215,7 @@ async fn get_remote_auth_qr_url(
 						"fingerprint mismatch! discord: {fingerprint} expected: {expected_fingerprint}"
 					);
 					client.close(None).await?;
-					return get_remote_auth_qr_url(qr_code_svg).await;
+					client = RemoteAuthWsClient::connect().await?;
 				}
 
 				// generate qr code from the fingerprint discord gave
