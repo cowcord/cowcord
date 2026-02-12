@@ -11,7 +11,7 @@ readme = "README.md"
 
 [dependencies]
 hex_encode = { version = "0.4.3", package = "hex"}
-serde = { version = "1.0.219", features = ["derive"] }
+serde = { workspace = true }
 
 [dev-dependencies]
-serde_json = "1.0.143"
+serde_json = { workspace = true }
