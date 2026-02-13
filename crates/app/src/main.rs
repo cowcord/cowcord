@@ -1,5 +1,6 @@
 #![allow(non_snake_case)]
 
+use dioxus::desktop::WindowBuilder;
 use dioxus::prelude::*;
 
 pub mod components;
@@ -28,7 +29,18 @@ enum Route {
 }
 
 fn main() {
-	dioxus::launch(|| {
+	let config = dioxus::desktop::Config::new()
+		.with_window(
+			WindowBuilder::new()
+				.with_maximized(true)
+				.with_title("cowcord"), // .with_decorations(false), // .with_transparent(true),
+		)
+		.with_menu(None);
+
+	// #[cfg(debug_assertions)]
+	// config = config.with_disable_context_menu(true);
+
+	LaunchBuilder::desktop().with_cfg(config).launch(|| {
 		rsx! {
 			Stylesheet { href: TAILWIND }
 			Router::<Route> {}
