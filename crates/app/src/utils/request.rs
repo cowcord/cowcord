@@ -101,7 +101,7 @@ impl RequestClient {
 		endpoint: &str,
 	) -> Result<Bytes, Box<dyn std::error::Error>> {
 		let url = format!("{}{}", self.api_base, endpoint);
-		let mut request = self.client.get(&url).add_headers(self.no_auth)?;
+		let request = self.client.get(&url).add_headers(self.no_auth)?;
 
 		let response = request.send().await?;
 		let status = response.status();

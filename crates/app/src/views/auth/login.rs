@@ -1,6 +1,7 @@
 use base64::Engine;
 use base64::prelude::{BASE64_STANDARD, BASE64_URL_SAFE_NO_PAD};
 use dioxus::prelude::*;
+use discord_api::CDN_URL;
 use discord_api::endpoints::auth::login::{
 	LoginAccountRequest,
 	LoginAccountResponse,
@@ -14,26 +15,17 @@ use discord_api::types::ws::remote_auth::{
 	RemoteAuthGatewayClientOpCode,
 	RemoteAuthGatewayServerOpCode,
 };
-use discord_api::{CDN_URL, REMOTE_AUTH_WS_URL};
+use fast_qr::convert::Builder;
 use fast_qr::convert::svg::SvgBuilder;
-use fast_qr::convert::{Builder, Shape};
 use fast_qr::{ECL, QRBuilder};
-use futures::{SinkExt, StreamExt};
 use lucide_dioxus::LoaderCircle;
 use openssl::encrypt::Decrypter;
 use openssl::hash::MessageDigest;
-use openssl::pkey::{PKey, Private};
+use openssl::pkey::PKey;
 use openssl::rsa::{Padding, Rsa};
 use openssl::sha::sha256;
-use tokio::net::TcpStream;
-use tokio::sync::mpsc;
-use tokio::time::{self, Duration, interval, timeout};
-use tokio_tungstenite::tungstenite::protocol::frame::coding::CloseCode;
-use tokio_tungstenite::tungstenite::protocol::{CloseFrame, WebSocketConfig};
-use tokio_tungstenite::tungstenite::{Error as WsError, Message};
-use tokio_tungstenite::{MaybeTlsStream, WebSocketStream, connect_async};
 
-use crate::components::ui::{Button, ButtonVariant};
+use crate::components::ui::Button;
 use crate::utils::request::{BaseUrl, RequestClient};
 use crate::utils::token::save_token;
 use crate::ws::remote_auth::RemoteAuthWsClient;
@@ -44,8 +36,8 @@ pub fn Login() -> Element {
 
 	let mut email = use_signal(String::new);
 	let mut password = use_signal(String::new);
-	let mut loading = use_signal(|| false);
-	let mut remote_auth_state = use_signal(|| RemoteAuthState::Loading);
+	let loading = use_signal(|| false);
+	let remote_auth_state = use_signal(|| RemoteAuthState::Loading);
 
 	use_resource(move || async move {
 		println!("Remote auth login state: {remote_auth_state:?}");
@@ -77,7 +69,7 @@ pub fn Login() -> Element {
 				match login_request(&email, &password).await {
 					| Ok(resp) => {
 						if let Some(token) = resp.token {
-							save_token(&token.0);
+							let _ = save_token(&token.0);
 							nav.replace("/channels/@me");
 						}
 					},
@@ -117,7 +109,7 @@ pub fn Login() -> Element {
 		},
 		| RemoteAuthState::Accepted {
 			user_id,
-			discriminator,
+			_discriminator,
 			avatar_hash,
 			username,
 		} => {
@@ -220,7 +212,7 @@ enum RemoteAuthState {
 	/// mobile client has accepted the connection
 	Accepted {
 		user_id: String,
-		discriminator: String,
+		_discriminator: String,
 		avatar_hash: String,
 		username: String,
 	},
@@ -252,8 +244,8 @@ async fn get_remote_auth_qr_url(
 		match opcode {
 			// server sends tihs after we connect
 			| RemoteAuthGatewayServerOpCode::Hello {
-				heartbeat_interval,
-				timeout_ms,
+				heartbeat_interval: _,
+				timeout_ms: _,
 			} => {
 				// we need to send Init opcode after recieving the Hello opcode
 				client
@@ -322,7 +314,7 @@ async fn get_remote_auth_qr_url(
 
 				remote_auth_state.set(RemoteAuthState::Accepted {
 					user_id: parts.next().unwrap().to_owned(),
-					discriminator: parts.next().unwrap().to_owned(),
+					_discriminator: parts.next().unwrap().to_owned(),
 					avatar_hash: parts.next().unwrap().to_owned(),
 					username: parts.next().unwrap().to_owned(),
 				});
@@ -360,6 +352,4 @@ async fn get_remote_auth_qr_url(
 			},
 		}
 	}
-
-	Ok(())
 }
