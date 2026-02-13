@@ -27,5 +27,6 @@ pkgs.mkShell rec {
 
     LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath buildInputs;
     PKG_CONFIG_PATH = "${pkgs.openssl.dev}/lib/pkgconfig";
+    GIO_MODULE_DIR="${pkgs.glib-networking}/lib/gio/modules/";
   }
 

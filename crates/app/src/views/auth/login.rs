@@ -1,7 +1,6 @@
 use base64::Engine;
 use base64::prelude::{BASE64_STANDARD, BASE64_URL_SAFE_NO_PAD};
 use dioxus::prelude::*;
-use discord_api::REMOTE_AUTH_WS_URL;
 use discord_api::endpoints::auth::login::{
 	LoginAccountRequest,
 	LoginAccountResponse,
@@ -9,19 +8,23 @@ use discord_api::endpoints::auth::login::{
 	RemoteAuthTicketExchangeRequest,
 	RemoteAuthTicketExchangeResponse,
 };
+use discord_api::endpoints::cdn::USER_AVATAR;
 use discord_api::types::ws::remote_auth::{
 	REMOTE_AUTH_QR_CODE_URL,
 	RemoteAuthGatewayClientOpCode,
 	RemoteAuthGatewayServerOpCode,
 };
+use discord_api::{CDN_URL, REMOTE_AUTH_WS_URL};
+use fast_qr::convert::svg::SvgBuilder;
+use fast_qr::convert::{Builder, Shape};
+use fast_qr::{ECL, QRBuilder};
 use futures::{SinkExt, StreamExt};
+use lucide_dioxus::LoaderCircle;
 use openssl::encrypt::Decrypter;
 use openssl::hash::MessageDigest;
 use openssl::pkey::{PKey, Private};
 use openssl::rsa::{Padding, Rsa};
 use openssl::sha::sha256;
-use qrcode::render::svg;
-use qrcode::{EcLevel, QrCode};
 use tokio::net::TcpStream;
 use tokio::sync::mpsc;
 use tokio::time::{self, Duration, interval, timeout};
@@ -31,7 +34,7 @@ use tokio_tungstenite::tungstenite::{Error as WsError, Message};
 use tokio_tungstenite::{MaybeTlsStream, WebSocketStream, connect_async};
 
 use crate::components::ui::{Button, ButtonVariant};
-use crate::utils::request::RequestClient;
+use crate::utils::request::{BaseUrl, RequestClient};
 use crate::utils::token::save_token;
 use crate::ws::remote_auth::RemoteAuthWsClient;
 
@@ -42,11 +45,15 @@ pub fn Login() -> Element {
 	let mut email = use_signal(String::new);
 	let mut password = use_signal(String::new);
 	let mut loading = use_signal(|| false);
-	let mut qr_code_svg = use_signal(|| None::<String>);
+	let mut remote_auth_state = use_signal(|| RemoteAuthState::Loading);
+
+	use_resource(move || async move {
+		println!("Remote auth login state: {remote_auth_state:?}");
+	});
 
 	use_effect(move || {
 		spawn(async move {
-			match get_remote_auth_qr_url(qr_code_svg).await {
+			match get_remote_auth_qr_url(remote_auth_state).await {
 				| Ok(_) => {
 					nav.replace("/channels/@me");
 				},
@@ -86,11 +93,55 @@ pub fn Login() -> Element {
 		});
 	};
 
+	let qrcode_component = match &*remote_auth_state.read() {
+		| RemoteAuthState::Loading => rsx! {
+			PreAccepted {
+				LoaderCircle { class: "animate-spin size-8 my-16" }
+			}
+		},
+		| RemoteAuthState::QrCode {
+			svg,
+		} => {
+			let svg_b64 = base64::engine::general_purpose::STANDARD.encode(svg.as_bytes());
+			let src = format!("data:image/svg+xml;base64,{svg_b64}");
+			rsx! {
+				PreAccepted {
+					img {
+						class: "rounded-2xl",
+						src: "{src}",
+						width: "160",
+						height: "160",
+					}
+				}
+			}
+		},
+		| RemoteAuthState::Accepted {
+			user_id,
+			discriminator,
+			avatar_hash,
+			username,
+		} => {
+			let avatar_url = format!("{}{}", CDN_URL, USER_AVATAR(user_id, avatar_hash));
+			rsx! {
+				div { class: "flex flex-col items-center gap-y-2 text-center",
+					img { class: "rounded-full mb-4", src: "{avatar_url}" }
+					h2 { class: "text-xl", "Check your phone!" }
+					p { class: "text-sm text-muted-foreground", "Logging in as {username}" }
+					a { class: "text-link text-xs", href: "", "Not me, start over" }
+				}
+			}
+		},
+		// discord client just restarts qr code process i think
+		| RemoteAuthState::Cancelled => rsx! {
+			p { "request cancelled by mobile client" }
+		},
+	};
+
 	rsx! {
 		div { class: "flex justify-center items-center h-screen flex-row",
-			// div { class: "flex flex-row ",
-				form { class: "flex flex-col gap-y-3 bg-muted p-6 rounded-lg w-1/2", onsubmit,
-					h1 { class: "text-3xl text-center", "Welcome to Cowcord!" }
+			div { class: "flex flex-row bg-muted p-6 gap-x-10 rounded-lg w-1/2 max-w-180",
+				form { class: "flex flex-col gap-y-3 w-2/3", onsubmit,
+					h2 { class: "text-2xl font-bold text-center mb-4", "Welcome to Cowcord!" }
 					div { class: "flex flex-col gap-y-1",
 						p { "Email or Phone Number" }
 						input {
@@ -119,17 +170,27 @@ pub fn Login() -> Element {
 					}
 					div { class: "flex flex-row text-xs gap-x-1",
 						p { "Need an account?" }
-						a { class: "text-link", href: "register", "Register" }
+						a { class: "text-link", href: "/register", "Register" }
 					}
-					if let Some(qr_code_svg) = qr_code_svg() {
-						div { dangerous_inner_html: "{qr_code_svg}" }
-					} else {
-						p { "Loading QR code..." }
-					}
-				// }
+				}
+				div { class: "justify-center items-center flex m-auto", {qrcode_component} }
 			}
 		}
 
+	}
+}
+
+#[component]
+fn PreAccepted(children: Element) -> Element {
+	rsx! {
+		div { class: "flex flex-col items-center gap-y-4 text-center",
+			{children}
+			h3 { class: "text-xl font-bold", "Log in with QR Code" }
+			p { class: "text-sm text-muted-foreground",
+				"Scan this with your Discord mobile app to log in"
+			}
+			a { class: "text-link text-xs", href: "", "or sign in with passkey" }
+		}
 	}
 }
 
@@ -148,9 +209,27 @@ async fn login_request(
 	Err("fuck you".into())
 }
 
+#[derive(Debug)]
+enum RemoteAuthState {
+	/// fingerprint has not yet been recieved
+	Loading,
+	/// fingerprint has been recieved and the qr code has been saved
+	QrCode {
+		svg: String,
+	},
+	/// mobile client has accepted the connection
+	Accepted {
+		user_id: String,
+		discriminator: String,
+		avatar_hash: String,
+		username: String,
+	},
+	Cancelled,
+}
+
 // todo: heartbeats, though it currently still works if youre fast enough
 async fn get_remote_auth_qr_url(
-	mut qr_code_svg: Signal<Option<String>>
+	mut remote_auth_state: Signal<RemoteAuthState>
 ) -> Result<(), Box<dyn std::error::Error>> {
 	let mut client = RemoteAuthWsClient::connect().await?;
 
@@ -222,9 +301,12 @@ async fn get_remote_auth_qr_url(
 
 				// generate qr code from the fingerprint discord gave
 				let url = REMOTE_AUTH_QR_CODE_URL(&fingerprint);
-				let code = QrCode::with_error_correction_level(&url, EcLevel::L)?;
-				let svg = code.render::<svg::Color>().min_dimensions(300, 300).build();
-				qr_code_svg.set(Some(svg));
+				let qr = QRBuilder::new(url).ecl(ECL::L).build().unwrap();
+				let svg = SvgBuilder::default().margin(2).to_str(&qr);
+
+				remote_auth_state.set(RemoteAuthState::QrCode {
+					svg,
+				});
 			},
 			// mobile client has scanned the qr code
 			| RemoteAuthGatewayServerOpCode::PendingTicket {
@@ -238,14 +320,12 @@ async fn get_remote_auth_qr_url(
 				let decrypted_str = str::from_utf8(&decrypted_payload[..len])?;
 				let mut parts = decrypted_str.split(':');
 
-				// todo: update state ui or whatever from a qr code to like a check saying who youre logging in as
-				let user_id = parts.next().unwrap();
-				let discriminator = parts.next().unwrap();
-				// 0 represents null avatar
-				let avatar_hash = parts.next().unwrap();
-				let username = parts.next().unwrap();
-
-				println!("logged in as {username}#{discriminator}");
+				remote_auth_state.set(RemoteAuthState::Accepted {
+					user_id: parts.next().unwrap().to_owned(),
+					discriminator: parts.next().unwrap().to_owned(),
+					avatar_hash: parts.next().unwrap().to_owned(),
+					username: parts.next().unwrap().to_owned(),
+				});
 			},
 			// mobile client has accepted the login attempt
 			// and now we need to take the ticket and get our token
@@ -275,7 +355,9 @@ async fn get_remote_auth_qr_url(
 				save_token(token)?;
 			},
 			| RemoteAuthGatewayServerOpCode::HeartbeatAck => {},
-			| RemoteAuthGatewayServerOpCode::Cancel => {},
+			| RemoteAuthGatewayServerOpCode::Cancel => {
+				remote_auth_state.set(RemoteAuthState::Cancelled);
+			},
 		}
 	}
 

@@ -84,9 +84,9 @@ pub fn Button(
 				role: if disabled { "link" } else { "" },
 				tabindex: if disabled { -1 } else { 0 },
 				onclick: move |evt| {
-					if let Some(handler) = &onclick {
-						handler.call(evt);
-					}
+				    if let Some(handler) = &onclick {
+				        handler.call(evt);
+				    }
 				},
 				..attributes,
 				{children}
@@ -100,9 +100,9 @@ pub fn Button(
 				r#type: "{button_type}",
 				disabled,
 				onclick: move |evt| {
-					if let Some(handler) = &onclick {
-						handler.call(evt);
-					}
+				    if let Some(handler) = &onclick {
+				        handler.call(evt);
+				    }
 				},
 				..attributes,
 				{children}

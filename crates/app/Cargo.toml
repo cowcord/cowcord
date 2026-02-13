@@ -16,4 +16,5 @@ tokio-tungstenite = { version = "0.28.0", features = ["native-tls"] }
 openssl = "0.10.75"
 tokio = "1.49.0"
 base64 = { workspace = true }
-qrcode = { version = "0.14.1", default-features = false, features = ["svg"] }
+fast_qr = { version = "0.13.1", features = ["svg"] }
+lucide-dioxus = { version = "2.563.0", features = ["all-icons"] }
