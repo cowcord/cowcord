@@ -96,6 +96,23 @@ impl RequestClient {
 		Self::handle_response(response).await
 	}
 
+	pub async fn get_bytes(
+		&self,
+		endpoint: &str,
+	) -> Result<Bytes, Box<dyn std::error::Error>> {
+		let url = format!("{}{}", self.api_base, endpoint);
+		let mut request = self.client.get(&url).add_headers(self.no_auth)?;
+
+		let response = request.send().await?;
+		let status = response.status();
+
+		if status.is_success() {
+			Ok(response.bytes().await?)
+		} else {
+			Err(format!("Request failed with status: {}", status,).into())
+		}
+	}
+
 	pub async fn delete<T, R>(
 		&self,
 		endpoint: &str,
