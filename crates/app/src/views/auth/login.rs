@@ -253,7 +253,7 @@ async fn get_remote_auth_qr_url(
 				ticket,
 			} => {
 				// create request client without sending an authorization header
-				let http_client = RequestClient::new(true);
+				let http_client = RequestClient::new(BaseUrl::Discord, true);
 
 				// send ticket to ticket exchange endpoint
 				let resp: RemoteAuthTicketExchangeResponse = http_client

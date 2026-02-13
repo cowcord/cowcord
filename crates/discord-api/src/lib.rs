@@ -20,6 +20,7 @@ pub mod endpoints;
 pub mod types;
 
 pub const DISCORD_URL: &str = "https://discord.com";
+pub const CDN_URL: &str = "https://cdn.discordapp.com";
 pub const REMOTE_AUTH_WS_URL: &str = "wss://remote-auth-gateway.discord.gg/?v=2"; // 2 is currently the only valid version
 
 #[derive(Debug, Clone)]

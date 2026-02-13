@@ -1,8 +1,9 @@
 use dioxus::prelude::use_navigator;
-use discord_api::{ApiVerion, DISCORD_URL};
+use discord_api::{ApiVerion, CDN_URL, DISCORD_URL};
 use reqwest::{Client, RequestBuilder, Response};
 use serde::Serialize;
 use serde::de::DeserializeOwned;
+use tokio_tungstenite::tungstenite::Bytes;
 
 use crate::utils::token::load_token;
 
@@ -12,11 +13,24 @@ pub struct RequestClient {
 	no_auth: bool,
 }
 
+pub enum BaseUrl {
+	Discord,
+	DiscordCdn,
+}
+
 impl RequestClient {
-	pub fn new(no_auth: bool) -> Self {
+	pub fn new(
+		base: BaseUrl,
+		no_auth: bool,
+	) -> Self {
+		let api_base = match base {
+			| BaseUrl::Discord => format!("{}/api/{:?}", DISCORD_URL, ApiVerion::v9),
+			| BaseUrl::DiscordCdn => CDN_URL.to_string(),
+		};
+
 		RequestClient {
 			client: Client::new(),
-			api_base: format!("/api/{:?}", ApiVerion::v10),
+			api_base,
 			no_auth,
 		}
 	}
@@ -49,7 +63,7 @@ impl RequestClient {
 		T: Serialize,
 		R: DeserializeOwned,
 	{
-		let url = format!("{}{}{}", DISCORD_URL, self.api_base, endpoint);
+		let url = format!("{}{}", self.api_base, endpoint);
 		let mut request = self.client.post(&url).add_headers(self.no_auth)?;
 
 		if let Some(body) = body {
@@ -70,7 +84,7 @@ impl RequestClient {
 		T: Serialize,
 		R: DeserializeOwned,
 	{
-		let url = format!("{}{}{}", DISCORD_URL, self.api_base, endpoint);
+		let url = format!("{}{}", self.api_base, endpoint);
 		let mut request = self.client.get(&url).add_headers(self.no_auth)?;
 
 		if let Some(body) = body {
@@ -91,7 +105,7 @@ impl RequestClient {
 		T: Serialize,
 		R: DeserializeOwned,
 	{
-		let url = format!("{}{}{}", DISCORD_URL, self.api_base, endpoint);
+		let url = format!("{}{}", self.api_base, endpoint);
 		let mut request = self.client.delete(&url).add_headers(self.no_auth)?;
 
 		if let Some(body) = body {
@@ -112,7 +126,7 @@ impl RequestClient {
 		T: Serialize,
 		R: DeserializeOwned,
 	{
-		let url = format!("{}{}{}", DISCORD_URL, self.api_base, endpoint);
+		let url = format!("{}{}", self.api_base, endpoint);
 		let mut request = self.client.put(&url).add_headers(self.no_auth)?;
 
 		if let Some(body) = body {
@@ -133,7 +147,7 @@ impl RequestClient {
 		T: Serialize,
 		R: DeserializeOwned,
 	{
-		let url = format!("{}{}{}", DISCORD_URL, self.api_base, endpoint);
+		let url = format!("{}{}", self.api_base, endpoint);
 		let mut request = self.client.patch(&url).add_headers(self.no_auth)?;
 
 		if let Some(body) = body {
