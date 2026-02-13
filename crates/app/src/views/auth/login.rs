@@ -47,7 +47,9 @@ pub fn Login() -> Element {
 	use_effect(move || {
 		spawn(async move {
 			match get_remote_auth_qr_url(qr_code_svg).await {
-				| Ok(_) => {},
+				| Ok(_) => {
+					nav.replace("/channels/@me");
+				},
 				| Err(e) => println!("remote auth error: {e}"),
 			}
 		});
@@ -271,7 +273,6 @@ async fn get_remote_auth_qr_url(
 				let token = str::from_utf8(&decrypted_payload[..len])?;
 
 				save_token(token)?;
-				use_navigator().replace("/channels/@me");
 			},
 			| RemoteAuthGatewayServerOpCode::HeartbeatAck => {},
 			| RemoteAuthGatewayServerOpCode::Cancel => {},
