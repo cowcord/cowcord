@@ -390,6 +390,7 @@ async fn get_remote_auth_qr_url(
 									let token=str::from_utf8(&decrypted_payload[..len])?;
 
 									save_token(token)?;
+									let _ = client.close(None).await;
 									Ok(())
 								},
 								ApiResponse::Error(e) => Err(format!("{:?}", e).into()),
