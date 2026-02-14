@@ -1,5 +1,3 @@
-use std::time::Duration;
-
 use discord_api::types::ws::remote_auth::{
 	RemoteAuthGatewayClientOpCode,
 	RemoteAuthGatewayServerOpCode,
@@ -7,13 +5,10 @@ use discord_api::types::ws::remote_auth::{
 use discord_api::{DISCORD_URL, REMOTE_AUTH_WS_URL};
 use futures::{SinkExt, StreamExt};
 use tokio::net::TcpStream;
-use tokio::time::timeout;
 use tokio_tungstenite::tungstenite::client::IntoClientRequest;
 use tokio_tungstenite::tungstenite::protocol::CloseFrame;
 use tokio_tungstenite::tungstenite::{Error as WsError, Message};
 use tokio_tungstenite::{MaybeTlsStream, WebSocketStream, connect_async};
-
-const TIMEOUT: Duration = Duration::from_millis(500);
 
 pub struct RemoteAuthWsClient(WebSocketStream<MaybeTlsStream<TcpStream>>);
 
