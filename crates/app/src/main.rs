@@ -15,6 +15,7 @@ pub mod utils;
 pub mod ws;
 
 mod views;
+use channels::me::Me;
 use views::*;
 
 const TAILWIND: Asset = asset!("/assets/tailwind.css");
@@ -28,6 +29,9 @@ enum Route {
 
 	#[route("/login")]
 	Login {},
+
+	#[route("/channels/@me")]
+	Me {},
 
     #[route("/:..route")]
     PageNotFound {

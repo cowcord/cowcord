@@ -8,3 +8,5 @@ pub use not_found::*;
 
 pub mod auth;
 pub use auth::*;
+
+pub mod channels;
