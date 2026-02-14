@@ -28,5 +28,7 @@ jobs:
 
       - name: Check
         run: |
+          # since this environment didnt start the tailwind cli
+          touch crates/app/assets/tailwind.css
           dx check
           cargo check
