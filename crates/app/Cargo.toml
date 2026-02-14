@@ -18,6 +18,8 @@ tokio = "1.49.0"
 base64 = { workspace = true }
 fast_qr = { version = "0.13.1", features = ["svg"] }
 lucide-dioxus = { version = "2.563.0", features = ["all-icons"] }
+tracing-subscriber = "0.3.22"
+tracing = "0.1.44"
 
 [target.'cfg(target_os = "macos")'.dependencies]
 apple-native-keyring-store = { version = "0.2.2", features = ["keychain", "protected"] }

@@ -6,7 +6,8 @@ use apple_native_keyring_store::protected::Store;
 use dbus_secret_service_keyring_store::Store;
 use dioxus::desktop::WindowBuilder;
 use dioxus::prelude::*;
-use keyring_core::set_default_store;
+use tracing::Level;
+use tracing_subscriber::FmtSubscriber;
 #[cfg(target_os = "windows")]
 use windows_native_keyring_store::Store;
 
@@ -40,7 +41,15 @@ enum Route {
 }
 
 fn main() {
-	set_default_store(Store::new().unwrap());
+	// init keyring store
+	keyring_core::set_default_store(Store::new().unwrap());
+
+	// init logging
+	// todo: use cli arg for determining log level, but still default to info
+	let subscriber = FmtSubscriber::builder()
+		.with_max_level(Level::INFO)
+		.finish();
+	tracing::subscriber::set_global_default(subscriber).unwrap();
 
 	let config = dioxus::desktop::Config::new()
 		.with_window(

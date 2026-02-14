@@ -44,7 +44,7 @@ pub fn Login() -> Element {
 	let remote_auth_state = use_signal(|| RemoteAuthState::Loading);
 
 	use_resource(move || async move {
-		println!("Remote auth login state: {remote_auth_state:?}");
+		trace!("Remote auth login state: {remote_auth_state:?}");
 	});
 
 	use_effect(move || {
@@ -53,7 +53,7 @@ pub fn Login() -> Element {
 				| Ok(_) => {
 					nav.replace("/channels/@me");
 				},
-				| Err(e) => println!("remote auth error: {e}"),
+				| Err(e) => error!("remote auth error: {e}"),
 			}
 		});
 	});
@@ -78,12 +78,10 @@ pub fn Login() -> Element {
 						}
 					},
 					| Err(err) => {
-						println!("error: {err}");
+						error!("login error: {err}");
 					},
 				}
 
-				std::thread::sleep(std::time::Duration::from_secs(5));
-				println!("heh");
 				loading.set(false);
 			}
 		});
@@ -260,7 +258,7 @@ async fn get_remote_auth_qr_url(
 			tokio::select! {
 				_ = hb_tick => {
 					if awaiting_ack {
-						println!("heartbeat ack expected but not recieved, reconnecting...");
+						warn!("heartbeat ack expected but not recieved, reconnecting...");
 						let _ = client.close(None).await;
 						continue 'reconnect;
 					}
@@ -271,7 +269,7 @@ async fn get_remote_auth_qr_url(
 				result = client.recv_json() => {
 					let opcode = result?
 						.ok_or("connection closed while waiting for mobile client")?;
-					println!("recieved {:?}", &opcode);
+					trace!("remote auth ws recieved {:?}", &opcode);
 
 					// if awaiting_ack {
 					// 	if !matches!(opcode, RemoteAuthGatewayServerOpCode::HeartbeatAck) {
@@ -328,8 +326,8 @@ async fn get_remote_auth_qr_url(
 
 							// if fingerprint isnt correct, close connection and reconnect
 							if !valid_fingerprint {
-								println!(
-									"fingerprint mismatch! discord: {fingerprint} expected: {expected_fingerprint}"
+								error!(
+									"fingerprint mismatch! discord: {fingerprint} expected: {expected_fingerprint}, reconnecting..."
 								);
 								let _ = client.close(None).await;
 								continue 'reconnect;
