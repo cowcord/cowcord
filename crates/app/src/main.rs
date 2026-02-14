@@ -1,7 +1,14 @@
 #![allow(non_snake_case)]
 
+#[cfg(target_os = "macos")]
+use apple_native_keyring_store::protected::Store;
+#[cfg(any(target_os = "freebsd", target_os = "openbsd", target_os = "linux"))]
+use dbus_secret_service_keyring_store::Store;
 use dioxus::desktop::WindowBuilder;
 use dioxus::prelude::*;
+use keyring_core::set_default_store;
+#[cfg(target_os = "windows")]
+use windows_native_keyring_store::Store;
 
 pub mod components;
 pub mod utils;
@@ -29,6 +36,8 @@ enum Route {
 }
 
 fn main() {
+	set_default_store(Store::new().unwrap());
+
 	let config = dioxus::desktop::Config::new()
 		.with_window(
 			WindowBuilder::new()

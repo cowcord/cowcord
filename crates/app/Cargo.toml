@@ -8,7 +8,7 @@ dioxus = { version = "0.7.3", features = ["router", "desktop"] }
 reqwest = { version = "0.13.2", features = ["json", "blocking", "multipart"] }
 serde = { workspace = true }
 serde_json = { workspace = true }
-keyring = "3.6.3"
+keyring-core = "0.7.2"
 discord-api = { workspace = true }
 tailwind_fuse = "0.3.2"
 futures = "0.3.31"
@@ -18,3 +18,12 @@ tokio = "1.49.0"
 base64 = { workspace = true }
 fast_qr = { version = "0.13.1", features = ["svg"] }
 lucide-dioxus = { version = "2.563.0", features = ["all-icons"] }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+apple-native-keyring-store = { version = "0.2.2", features = ["keychain", "protected"] }
+
+[target.'cfg(any(target_os = "linux", target_os = "freebsd", target_os = "openbsd"))'.dependencies]
+dbus-secret-service-keyring-store = { version = "0.3.3", features = ["crypto-rust", "vendored"] }
+
+[target.'cfg(target_os = "windows")'.dependencies]
+windows-native-keyring-store = "0.5.1"

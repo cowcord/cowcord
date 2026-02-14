@@ -1,5 +1,5 @@
 use discord_api::types::token::Token;
-use keyring::{Entry, Result};
+use keyring_core::{Entry, Result};
 
 pub fn save_token(token: &str) -> Result<()> {
 	let keyring = Entry::new("cowcord", "auth_token")?;
