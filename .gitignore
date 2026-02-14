@@ -5,4 +5,4 @@
 .rustc_info.json
 nul
 
-/crates/app/assets/tailwind.css
+**/tailwind.css
