@@ -1,8 +1,11 @@
+use std::time::Duration;
+
 use base64::Engine;
 use base64::prelude::{BASE64_STANDARD, BASE64_URL_SAFE_NO_PAD};
 use dioxus::prelude::*;
 use discord_api::CDN_URL;
 use discord_api::endpoints::auth::login::{
+	LOGIN_ACCOUNT,
 	LoginAccountRequest,
 	LoginAccountResponse,
 	REMOTE_AUTH_TICKET_EXCHANGE,
@@ -24,6 +27,7 @@ use openssl::hash::MessageDigest;
 use openssl::pkey::PKey;
 use openssl::rsa::{Padding, Rsa};
 use openssl::sha::sha256;
+use tokio::time::{Instant, Interval, interval_at};
 
 use crate::components::ui::Button;
 use crate::utils::request::{BaseUrl, RequestClient};
@@ -190,6 +194,7 @@ async fn login_request(
 	email: &str,
 	password: &str,
 ) -> Result<LoginAccountResponse, Box<dyn std::error::Error>> {
+	let client = RequestClient::new(BaseUrl::Discord, true);
 	let body = LoginAccountRequest {
 		login: email.to_owned(),
 		password: password.to_owned(),
@@ -197,6 +202,11 @@ async fn login_request(
 		login_source: None,
 		gift_code_sku_id: None,
 	};
+
+	// todo: mfa
+	// todo: new location stuff
+	// todo: suspended user token
+	let resp: LoginAccountResponse = client.post(LOGIN_ACCOUNT, Some(&body)).await?;
 
 	Err("fuck you".into())
 }
@@ -219,137 +229,178 @@ enum RemoteAuthState {
 	Cancelled,
 }
 
-// todo: heartbeats, though it currently still works if youre fast enough
 async fn get_remote_auth_qr_url(
 	mut remote_auth_state: Signal<RemoteAuthState>
 ) -> Result<(), Box<dyn std::error::Error>> {
-	let mut client = RemoteAuthWsClient::connect().await?;
+	'reconnect: loop {
+		let mut client = RemoteAuthWsClient::connect().await?;
 
-	// generate rsa and public key
-	let rsa = Rsa::generate(2048)?;
-	let public_key = rsa.public_key_to_der().unwrap();
+		// generate rsa and public key
+		let rsa = Rsa::generate(2048)?;
+		let public_key = rsa.public_key_to_der().unwrap();
 
-	let pkey = PKey::from_rsa(rsa.clone())?;
-	let mut decrypter = Decrypter::new(&pkey)?;
-	decrypter.set_rsa_padding(Padding::PKCS1_OAEP)?;
-	decrypter.set_rsa_oaep_md(MessageDigest::sha256())?;
+		let pkey = PKey::from_rsa(rsa.clone())?;
+		let mut decrypter = Decrypter::new(&pkey)?;
+		decrypter.set_rsa_padding(Padding::PKCS1_OAEP)?;
+		decrypter.set_rsa_oaep_md(MessageDigest::sha256())?;
 
-	loop {
-		let opcode = client
-			.recv_json()
-			.await?
-			.ok_or("connection closed while waiting for mobile client")?;
-		println!("recieved {:?}", &opcode);
+		let mut heartbeat_interval: Option<Interval> = None;
+		let mut awaiting_ack = false;
 
-		match opcode {
-			// server sends tihs after we connect
-			| RemoteAuthGatewayServerOpCode::Hello {
-				heartbeat_interval: _,
-				timeout_ms: _,
-			} => {
-				// we need to send Init opcode after recieving the Hello opcode
-				client
-					.send_json(&RemoteAuthGatewayClientOpCode::Init {
-						encoded_public_key: BASE64_STANDARD.encode(&public_key),
-					})
-					.await?;
-			},
-			// if gateway accepts the public key we sent in the Init
-			// then it will respond withan encrypted nonce
-			// that we have to verify with our private key
-			| RemoteAuthGatewayServerOpCode::NonceProof {
-				encrypted_nonce,
-			} => {
-				// decrypt the nonce
-				let encrypted_nonce_bytes = BASE64_STANDARD.decode(&encrypted_nonce)?;
-				let buf_len = decrypter.decrypt_len(&encrypted_nonce_bytes)?;
-				let mut decrypted_nonce = vec![0u8; buf_len];
-				let len = decrypter.decrypt(&encrypted_nonce_bytes, &mut decrypted_nonce)?;
-				let nonce_proof = BASE64_URL_SAFE_NO_PAD.encode(&decrypted_nonce[..len]);
+		loop {
+			let hb_tick = async {
+				match heartbeat_interval.as_mut() {
+					| Some(iv) => {
+						iv.tick().await;
+					},
+					| None => std::future::pending().await,
+				}
+			};
 
-				// send the decrypted nonce
-				client
-					.send_json(&RemoteAuthGatewayClientOpCode::NonceProof {
-						nonce: nonce_proof,
-					})
-					.await?;
-			},
-			// server verifies we're waiting on the mobile device to init
-			| RemoteAuthGatewayServerOpCode::PendingRemoteInit {
-				fingerprint,
-			} => {
-				// validate the fingerprint we recieved
-				let expected_fingerprint = BASE64_URL_SAFE_NO_PAD.encode(sha256(&public_key));
-				let valid_fingerprint = fingerprint == expected_fingerprint;
-
-				// if fingerprint isnt correct, close connection and reconnect
-				if !valid_fingerprint {
-					println!(
-						"fingerprint mismatch! discord: {fingerprint} expected: {expected_fingerprint}"
-					);
-					client.close(None).await?;
-					client = RemoteAuthWsClient::connect().await?;
+			tokio::select! {
+				_ = hb_tick => {
+					if awaiting_ack {
+						println!("heartbeat ack expected but not recieved, reconnecting...");
+						let _ = client.close(None).await;
+						continue 'reconnect;
+					}
+					client.send_json(&RemoteAuthGatewayClientOpCode::Heartbeat).await?;
+					awaiting_ack = true;
 				}
 
-				// generate qr code from the fingerprint discord gave
-				let url = REMOTE_AUTH_QR_CODE_URL(&fingerprint);
-				let qr = QRBuilder::new(url).ecl(ECL::L).build().unwrap();
-				let svg = SvgBuilder::default().margin(2).to_str(&qr);
+				result = client.recv_json() => {
+					let opcode = result?
+						.ok_or("connection closed while waiting for mobile client")?;
+					println!("recieved {:?}", &opcode);
 
-				remote_auth_state.set(RemoteAuthState::QrCode {
-					svg,
-				});
-			},
-			// mobile client has scanned the qr code
-			| RemoteAuthGatewayServerOpCode::PendingTicket {
-				encrypted_user_payload,
-			} => {
-				let encrypted_bytes = BASE64_STANDARD.decode(&encrypted_user_payload)?;
-				let buf_len = decrypter.decrypt_len(&encrypted_bytes)?;
-				let mut decrypted_payload = vec![0u8; buf_len];
-				let len = decrypter.decrypt(&encrypted_bytes, &mut decrypted_payload)?;
+					// if awaiting_ack {
+					// 	if !matches!(opcode, RemoteAuthGatewayServerOpCode::HeartbeatAck) {
+					// 		let _ = client.close(None).await;
+					// 		continue 'reconnect;
+					// 	}
+					// 	awaiting_ack = false;
+					// 	continue;
+					// }
 
-				let decrypted_str = str::from_utf8(&decrypted_payload[..len])?;
-				let mut parts = decrypted_str.split(':');
+					match opcode {
+						// server sends tihs after we connect
+						| RemoteAuthGatewayServerOpCode::Hello {
+							heartbeat_interval: interval_ms,
+							timeout_ms: _,
+						} => {
+							let start = Instant::now() + Duration::from_millis(interval_ms);
+							heartbeat_interval = Some(interval_at(start, Duration::from_millis(interval_ms)));
 
-				remote_auth_state.set(RemoteAuthState::Accepted {
-					user_id: parts.next().unwrap().to_owned(),
-					_discriminator: parts.next().unwrap().to_owned(),
-					avatar_hash: parts.next().unwrap().to_owned(),
-					username: parts.next().unwrap().to_owned(),
-				});
-			},
-			// mobile client has accepted the login attempt
-			// and now we need to take the ticket and get our token
-			| RemoteAuthGatewayServerOpCode::PendingLogin {
-				ticket,
-			} => {
-				// create request client without sending an authorization header
-				let http_client = RequestClient::new(BaseUrl::Discord, true);
+							// we need to send Init opcode after recieving the Hello opcode
+							client
+								.send_json(&RemoteAuthGatewayClientOpCode::Init {
+									encoded_public_key: BASE64_STANDARD.encode(&public_key),
+								})
+								.await?;
+						},
+						// if gateway accepts the public key we sent in the Init
+						// then it will respond withan encrypted nonce
+						// that we have to verify with our private key
+						| RemoteAuthGatewayServerOpCode::NonceProof {
+							encrypted_nonce,
+						} => {
+							// decrypt the nonce
+							let encrypted_nonce_bytes = BASE64_STANDARD.decode(&encrypted_nonce)?;
+							let buf_len = decrypter.decrypt_len(&encrypted_nonce_bytes)?;
+							let mut decrypted_nonce = vec![0u8; buf_len];
+							let len = decrypter.decrypt(&encrypted_nonce_bytes, &mut decrypted_nonce)?;
+							let nonce_proof = BASE64_URL_SAFE_NO_PAD.encode(&decrypted_nonce[..len]);
 
-				// send ticket to ticket exchange endpoint
-				let resp: RemoteAuthTicketExchangeResponse = http_client
-					.post(
-						REMOTE_AUTH_TICKET_EXCHANGE,
-						Some(&RemoteAuthTicketExchangeRequest {
+							// send the decrypted nonce
+							client
+								.send_json(&RemoteAuthGatewayClientOpCode::NonceProof {
+									nonce: nonce_proof,
+								})
+								.await?;
+						},
+						// server verifies we're waiting on the mobile device to init
+						| RemoteAuthGatewayServerOpCode::PendingRemoteInit {
+							fingerprint,
+						} => {
+							// validate the fingerprint we recieved
+							let expected_fingerprint = BASE64_URL_SAFE_NO_PAD.encode(sha256(&public_key));
+							let valid_fingerprint = fingerprint == expected_fingerprint;
+
+							// if fingerprint isnt correct, close connection and reconnect
+							if !valid_fingerprint {
+								println!(
+									"fingerprint mismatch! discord: {fingerprint} expected: {expected_fingerprint}"
+								);
+								let _ = client.close(None).await;
+								continue 'reconnect;
+							}
+
+							// generate qr code from the fingerprint discord gave
+							let url = REMOTE_AUTH_QR_CODE_URL(&fingerprint);
+							let qr = QRBuilder::new(url).ecl(ECL::L).build().unwrap();
+							let svg = SvgBuilder::default().margin(2).to_str(&qr);
+
+							remote_auth_state.set(RemoteAuthState::QrCode {
+								svg,
+							});
+						},
+						// mobile client has scanned the qr code
+						| RemoteAuthGatewayServerOpCode::PendingTicket {
+							encrypted_user_payload,
+						} => {
+							let encrypted_bytes = BASE64_STANDARD.decode(&encrypted_user_payload)?;
+							let buf_len = decrypter.decrypt_len(&encrypted_bytes)?;
+							let mut decrypted_payload = vec![0u8; buf_len];
+							let len = decrypter.decrypt(&encrypted_bytes, &mut decrypted_payload)?;
+
+							let decrypted_str = str::from_utf8(&decrypted_payload[..len])?;
+							let mut parts = decrypted_str.split(':');
+
+							remote_auth_state.set(RemoteAuthState::Accepted {
+								user_id: parts.next().unwrap().to_owned(),
+								_discriminator: parts.next().unwrap().to_owned(),
+								avatar_hash: parts.next().unwrap().to_owned(),
+								username: parts.next().unwrap().to_owned(),
+							});
+						},
+						// mobile client has accepted the login attempt
+						// and now we need to take the ticket and get our token
+						| RemoteAuthGatewayServerOpCode::PendingLogin {
 							ticket,
-						}),
-					)
-					.await?;
+						} => {
+							// create request client without sending an authorization header
+							let http_client = RequestClient::new(BaseUrl::Discord, true);
 
-				// decrypt response token
-				let encrypted_bytes = BASE64_STANDARD.decode(&resp.encrypted_token)?;
-				let buf_len = decrypter.decrypt_len(&encrypted_bytes)?;
-				let mut decrypted_payload = vec![0u8; buf_len];
-				let len = decrypter.decrypt(&encrypted_bytes, &mut decrypted_payload)?;
-				let token = str::from_utf8(&decrypted_payload[..len])?;
+							// send ticket to ticket exchange endpoint
+							let resp: RemoteAuthTicketExchangeResponse = http_client
+								.post(
+									REMOTE_AUTH_TICKET_EXCHANGE,
+									Some(&RemoteAuthTicketExchangeRequest {
+										ticket,
+									}),
+								)
+								.await?;
 
-				save_token(token)?;
-			},
-			| RemoteAuthGatewayServerOpCode::HeartbeatAck => {},
-			| RemoteAuthGatewayServerOpCode::Cancel => {
-				remote_auth_state.set(RemoteAuthState::Cancelled);
-			},
+							// decrypt response token
+							let encrypted_bytes = BASE64_STANDARD.decode(&resp.encrypted_token)?;
+							let buf_len = decrypter.decrypt_len(&encrypted_bytes)?;
+							let mut decrypted_payload = vec![0u8; buf_len];
+							let len = decrypter.decrypt(&encrypted_bytes, &mut decrypted_payload)?;
+							let token = str::from_utf8(&decrypted_payload[..len])?;
+
+							save_token(token)?;
+
+							return Ok(());
+						},
+						| RemoteAuthGatewayServerOpCode::HeartbeatAck => {
+							awaiting_ack = false;
+						},
+						| RemoteAuthGatewayServerOpCode::Cancel => {
+							remote_auth_state.set(RemoteAuthState::Cancelled);
+						},
+					}
+				}
+			}
 		}
 	}
 }

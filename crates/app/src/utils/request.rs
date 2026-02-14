@@ -7,6 +7,7 @@ use tokio_tungstenite::tungstenite::Bytes;
 
 use crate::utils::token::load_token;
 
+// todo: json error code support
 pub struct RequestClient {
 	client: Client,
 	api_base: String,
