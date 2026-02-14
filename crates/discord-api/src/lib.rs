@@ -16,6 +16,10 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 
+use serde::{Deserialize, Serialize};
+
+use crate::types::error::Error;
+
 pub mod endpoints;
 pub mod types;
 
@@ -34,4 +38,11 @@ pub enum ApiVerion {
 	v7,
 	#[deprecated]
 	v6,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum ApiResponse<T> {
+	Success(T),
+	Error(Error),
 }

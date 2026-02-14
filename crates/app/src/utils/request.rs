@@ -1,5 +1,5 @@
 use dioxus::prelude::use_navigator;
-use discord_api::{ApiVerion, CDN_URL, DISCORD_URL};
+use discord_api::{ApiResponse, ApiVerion, CDN_URL, DISCORD_URL};
 use reqwest::{Client, RequestBuilder, Response};
 use serde::Serialize;
 use serde::de::DeserializeOwned;
@@ -7,7 +7,6 @@ use tokio_tungstenite::tungstenite::Bytes;
 
 use crate::utils::token::load_token;
 
-// todo: json error code support
 pub struct RequestClient {
 	client: Client,
 	api_base: String,
@@ -36,7 +35,9 @@ impl RequestClient {
 		}
 	}
 
-	async fn handle_response<T>(response: Response) -> Result<T, Box<dyn std::error::Error>>
+	async fn handle_response<T>(
+		response: Response
+	) -> Result<ApiResponse<T>, Box<dyn std::error::Error>>
 	where
 		T: DeserializeOwned,
 	{
@@ -44,7 +45,7 @@ impl RequestClient {
 		let response_text = response.text().await?;
 
 		if status.is_success() {
-			let result: T = serde_json::from_str(&response_text)?;
+			let result: ApiResponse<T> = serde_json::from_str(&response_text)?;
 			Ok(result)
 		} else {
 			Err(format!(
@@ -59,7 +60,7 @@ impl RequestClient {
 		&self,
 		endpoint: &str,
 		body: Option<&T>,
-	) -> Result<R, Box<dyn std::error::Error>>
+	) -> Result<ApiResponse<R>, Box<dyn std::error::Error>>
 	where
 		T: Serialize,
 		R: DeserializeOwned,
@@ -80,7 +81,7 @@ impl RequestClient {
 		&self,
 		endpoint: &str,
 		body: Option<&T>,
-	) -> Result<R, Box<dyn std::error::Error>>
+	) -> Result<ApiResponse<R>, Box<dyn std::error::Error>>
 	where
 		T: Serialize,
 		R: DeserializeOwned,
@@ -118,7 +119,7 @@ impl RequestClient {
 		&self,
 		endpoint: &str,
 		body: Option<&T>,
-	) -> Result<R, Box<dyn std::error::Error>>
+	) -> Result<ApiResponse<R>, Box<dyn std::error::Error>>
 	where
 		T: Serialize,
 		R: DeserializeOwned,
@@ -139,7 +140,7 @@ impl RequestClient {
 		&self,
 		endpoint: &str,
 		body: Option<&T>,
-	) -> Result<R, Box<dyn std::error::Error>>
+	) -> Result<ApiResponse<R>, Box<dyn std::error::Error>>
 	where
 		T: Serialize,
 		R: DeserializeOwned,
@@ -160,7 +161,7 @@ impl RequestClient {
 		&self,
 		endpoint: &str,
 		body: Option<&T>,
-	) -> Result<R, Box<dyn std::error::Error>>
+	) -> Result<ApiResponse<R>, Box<dyn std::error::Error>>
 	where
 		T: Serialize,
 		R: DeserializeOwned,

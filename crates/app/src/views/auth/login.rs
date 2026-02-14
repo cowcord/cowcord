@@ -3,7 +3,6 @@ use std::time::Duration;
 use base64::Engine;
 use base64::prelude::{BASE64_STANDARD, BASE64_URL_SAFE_NO_PAD};
 use dioxus::prelude::*;
-use discord_api::CDN_URL;
 use discord_api::endpoints::auth::login::{
 	LOGIN_ACCOUNT,
 	LoginAccountRequest,
@@ -18,6 +17,7 @@ use discord_api::types::ws::remote_auth::{
 	RemoteAuthGatewayClientOpCode,
 	RemoteAuthGatewayServerOpCode,
 };
+use discord_api::{ApiResponse, CDN_URL};
 use fast_qr::convert::Builder;
 use fast_qr::convert::svg::SvgBuilder;
 use fast_qr::{ECL, QRBuilder};
@@ -206,7 +206,7 @@ async fn login_request(
 	// todo: mfa
 	// todo: new location stuff
 	// todo: suspended user token
-	let resp: LoginAccountResponse = client.post(LOGIN_ACCOUNT, Some(&body)).await?;
+	let resp: ApiResponse<LoginAccountResponse> = client.post(LOGIN_ACCOUNT, Some(&body)).await?;
 
 	Err("fuck you".into())
 }
@@ -372,7 +372,7 @@ async fn get_remote_auth_qr_url(
 							let http_client = RequestClient::new(BaseUrl::Discord, true);
 
 							// send ticket to ticket exchange endpoint
-							let resp: RemoteAuthTicketExchangeResponse = http_client
+							let resp: ApiResponse<RemoteAuthTicketExchangeResponse> = http_client
 								.post(
 									REMOTE_AUTH_TICKET_EXCHANGE,
 									Some(&RemoteAuthTicketExchangeRequest {
@@ -381,16 +381,19 @@ async fn get_remote_auth_qr_url(
 								)
 								.await?;
 
-							// decrypt response token
-							let encrypted_bytes = BASE64_STANDARD.decode(&resp.encrypted_token)?;
-							let buf_len = decrypter.decrypt_len(&encrypted_bytes)?;
-							let mut decrypted_payload = vec![0u8; buf_len];
-							let len = decrypter.decrypt(&encrypted_bytes, &mut decrypted_payload)?;
-							let token = str::from_utf8(&decrypted_payload[..len])?;
+							return match resp {
+								ApiResponse::Success(v) => {
+									let encrypted_bytes=BASE64_STANDARD.decode(&v.encrypted_token)?;
+									let buf_len=decrypter.decrypt_len(&encrypted_bytes)?;
+									let mut decrypted_payload=vec![0u8;buf_len];
+									let len=decrypter.decrypt(&encrypted_bytes, &mut decrypted_payload)?;
+									let token=str::from_utf8(&decrypted_payload[..len])?;
 
-							save_token(token)?;
-
-							return Ok(());
+									save_token(token)?;
+									Ok(())
+								},
+								ApiResponse::Error(e) => Err(format!("{:?}", e).into()),
+							}
 						},
 						| RemoteAuthGatewayServerOpCode::HeartbeatAck => {
 							awaiting_ack = false;

@@ -4,7 +4,7 @@ use crate::types::token::Token;
 
 pub const LOGIN_ACCOUNT: &str = "/auth/login";
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LoginAccountRequest {
 	/// The user's email or E.164-formatted phone number
 	pub login: String,
@@ -21,7 +21,7 @@ pub struct LoginAccountRequest {
 	pub gift_code_sku_id: Option<Option<String>>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LoginAccountResponse {
 	/// The ID of the user that was logged in
 	// pub user_id: UserId,
@@ -60,7 +60,7 @@ pub struct LoginAccountResponse {
 
 // todo: move to `types` dir, i dont think its endpoint specific
 /// A partial settings object to bootstrap the client with.
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LoginSettings {
 	/// The language option chosen by the user
 	pub locale: String,
@@ -69,7 +69,7 @@ pub struct LoginSettings {
 }
 
 /// Where a login is initiated from outside of the normal login flow.
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum LoginSource {
 	/// Login request initiated from a gift code
 	gift,
@@ -88,7 +88,7 @@ pub enum LoginSource {
 }
 
 /// Actions the user must complete after a successful login.
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum LoginRequiredActionType {
 	/// The user must change their password to meet Discord's new password requirements
 	update_password,
@@ -96,13 +96,13 @@ pub enum LoginRequiredActionType {
 
 pub const REMOTE_AUTH_TICKET_EXCHANGE: &str = "/users/@me/remote-auth/login";
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RemoteAuthTicketExchangeRequest {
 	/// The ticket obtained from the remote authentication flow
 	pub ticket: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RemoteAuthTicketExchangeResponse {
 	/// The authentication token encrypted with the client's public key
 	pub encrypted_token: String,
