@@ -4,14 +4,21 @@ use base64::Engine;
 use base64::prelude::{BASE64_STANDARD, BASE64_URL_SAFE_NO_PAD};
 use dioxus::prelude::*;
 use discord_api::endpoints::auth::login::{
+	AuthenticatorType,
 	LOGIN_ACCOUNT,
 	LoginAccountRequest,
 	LoginAccountResponse,
+	LoginAccountSuspendedResponse,
+	LoginRequiredActionType,
 	REMOTE_AUTH_TICKET_EXCHANGE,
 	RemoteAuthTicketExchangeRequest,
 	RemoteAuthTicketExchangeResponse,
+	VERIFY_MFA_LOGIN,
+	VerifyMfaLoginRequest,
+	VerifyMfaLoginResponse,
 };
 use discord_api::endpoints::cdn::USER_AVATAR;
+use discord_api::types::token::Token;
 use discord_api::types::ws::remote_auth::{
 	REMOTE_AUTH_QR_CODE_URL,
 	RemoteAuthGatewayClientOpCode,
@@ -30,7 +37,7 @@ use openssl::sha::sha256;
 use tokio::time::{Instant, Interval, interval_at};
 
 use crate::components::ui::Button;
-use crate::utils::request::{BaseUrl, RequestClient};
+use crate::utils::request::{AutoHandle, BaseUrl, RequestClient};
 use crate::utils::token::save_token;
 use crate::ws::remote_auth::RemoteAuthWsClient;
 
@@ -40,8 +47,9 @@ pub fn Login() -> Element {
 
 	let mut email = use_signal(String::new);
 	let mut password = use_signal(String::new);
-	let loading = use_signal(|| false);
 	let remote_auth_state = use_signal(|| RemoteAuthState::Loading);
+	let password_login_state = use_signal(|| PasswordLoginState::Loading);
+	let mut mfa_code = use_signal(String::new);
 
 	use_resource(move || async move {
 		trace!("Remote auth login state: {remote_auth_state:?}");
@@ -58,22 +66,34 @@ pub fn Login() -> Element {
 		});
 	});
 
-	let onsubmit = move |e: FormEvent| {
+	let password_onsubmit = move |e: FormEvent| {
 		e.prevent_default();
 
 		spawn({
-			let mut loading = loading.clone();
 			let email = email.read().clone();
 			let password = password.read().clone();
 			let nav = nav.clone();
 
 			async move {
-				loading.set(true);
-
-				match login_request(&email, &password).await {
-					| Ok(resp) => {
-						if let Some(token) = resp.token {
-							let _ = save_token(&token.0);
+				match password_login(
+					&LoginAccountRequest {
+						login: email,
+						password,
+						undelete: None,
+						login_source: None,
+						gift_code_sku_id: None,
+					},
+					password_login_state,
+				)
+				.await
+				{
+					| Ok(_) => {
+						if let PasswordLoginState::NeedMfa {
+							authn_type: _,
+							response: _,
+						} = &*password_login_state.read()
+						{
+						} else {
 							nav.replace("/channels/@me");
 						}
 					},
@@ -81,8 +101,33 @@ pub fn Login() -> Element {
 						error!("login error: {err}");
 					},
 				}
+			}
+		});
+	};
 
-				loading.set(false);
+	let mfa_onsubmit = move |e: FormEvent| {
+		e.prevent_default();
+
+		spawn({
+			let mfa_code = mfa_code.read().clone();
+			let password = password.read().clone();
+			let nav = nav.clone();
+
+			async move {
+				if let PasswordLoginState::NeedMfa {
+					authn_type,
+					response,
+				} = password_login_state()
+				{
+					match mfa_verify(&authn_type, response, mfa_code, password).await {
+						| Ok(_) => {
+							nav.replace("/channels/@me");
+						},
+						| Err(err) => {
+							error!("mfa verify error: {err}");
+						},
+					}
+				}
 			}
 		});
 	};
@@ -96,8 +141,10 @@ pub fn Login() -> Element {
 		| RemoteAuthState::QrCode {
 			svg,
 		} => {
-			let svg_b64 = base64::engine::general_purpose::STANDARD.encode(svg.as_bytes());
-			let src = format!("data:image/svg+xml;base64,{svg_b64}");
+			let src = format!(
+				"data:image/svg+xml;base64,{}",
+				BASE64_STANDARD.encode(svg.as_bytes())
+			);
 			rsx! {
 				PreAccepted {
 					img {
@@ -133,44 +180,56 @@ pub fn Login() -> Element {
 
 	rsx! {
 		div { class: "flex justify-center items-center h-screen flex-row",
-			div { class: "flex flex-row bg-muted p-6 gap-x-10 rounded-lg w-1/2 max-w-180",
-				form { class: "flex flex-col gap-y-3 w-2/3", onsubmit,
-					h2 { class: "text-2xl font-bold text-center mb-4", "Welcome to Cowcord!" }
-					div { class: "flex flex-col gap-y-1",
-						p { "Email or Phone Number" }
+			div { class: "flex flex-row bg-muted p-6 gap-x-10 rounded-lg w-1/2 max-w-180 min-h-1/3",
+				if let PasswordLoginState::NeedMfa { authn_type, response: _ } = &*password_login_state
+					.read()
+				{
+					form { class: "flex flex-col gap-y-3", onsubmit: mfa_onsubmit,
+						p { "Enter your {authn_type} code" }
 						input {
 							required: true,
 							class: "border-border border bg-muted-darker rounded-md h-8",
-							oninput: move |e| email.set(e.value()),
-							"{email}"
+							oninput: move |e| mfa_code.set(e.value()),
+						}
+						Button { button_type: "submit", "Verify" }
+					}
+					a { class: "text-xs text-link", "Choose another MFA method" }
+				} else {
+					form { class: "flex flex-col gap-y-3 w-2/3", onsubmit: password_onsubmit,
+						h2 { class: "text-2xl font-bold text-center mb-4", "Welcome to Cowcord!" }
+						div { class: "flex flex-col gap-y-1",
+							p { "Email or Phone Number" }
+							input {
+								required: true,
+								class: "border-border border bg-muted-darker rounded-md h-8",
+								oninput: move |e| email.set(e.value()),
+								"{email}"
+							}
+						}
+						div { class: "flex flex-col gap-y-1",
+							p { "Password" }
+							input {
+								r#type: "password",
+								required: true,
+								class: "border-border border bg-muted-darker rounded-md h-8",
+								oninput: move |e| password.set(e.value()),
+								"{password}"
+							}
+							a { class: "text-xs text-link", href: "", "Forgot your password?" }
+						}
+						Button { button_type: "submit", class: "py-2",
+							// disabled: loading(),
+							"Log In"
+						}
+						div { class: "flex flex-row text-xs gap-x-1",
+							p { "Need an account?" }
+							a { class: "text-link", href: "/register", "Register" }
 						}
 					}
-					div { class: "flex flex-col gap-y-1",
-						p { "Password" }
-						input {
-							r#type: "password",
-							required: true,
-							class: "border-border border bg-muted-darker rounded-md h-8",
-							oninput: move |e| password.set(e.value()),
-							"{password}"
-						}
-						a { class: "text-xs text-link", href: "", "Forgot your password?" }
-					}
-					Button {
-						button_type: "submit",
-						class: "py-2",
-						disabled: loading(),
-						"Log In"
-					}
-					div { class: "flex flex-row text-xs gap-x-1",
-						p { "Need an account?" }
-						a { class: "text-link", href: "/register", "Register" }
-					}
+					div { class: "justify-center items-center flex m-auto", {qrcode_component} }
 				}
-				div { class: "justify-center items-center flex m-auto", {qrcode_component} }
 			}
 		}
-
 	}
 }
 
@@ -188,25 +247,154 @@ fn PreAccepted(children: Element) -> Element {
 	}
 }
 
-async fn login_request(
-	email: &str,
-	password: &str,
-) -> Result<LoginAccountResponse, Box<dyn std::error::Error>> {
+#[derive(Debug, Clone)]
+enum PasswordLoginState {
+	Loading,
+	/// awaiting mfa verification
+	NeedMfa {
+		authn_type: AuthenticatorType,
+		response: LoginAccountResponse,
+	},
+	/// account is suspended
+	AccountSuspended {
+		suspended_token: Token,
+	},
+	/// account marked for deletion, need to rerun with `undelete` set to true
+	AccountDeleted,
+	/// account was disabled, need to rerun with `undelete` set to true
+	AccountDisabled,
+	Success {
+		required_actions: Vec<LoginRequiredActionType>,
+	},
+}
+
+async fn password_login(
+	payload: &LoginAccountRequest,
+	mut password_login_state: Signal<PasswordLoginState>,
+) -> Result<(), Box<dyn std::error::Error>> {
+	trace!("Attempting login via email and password");
 	let client = RequestClient::new(BaseUrl::Discord, true);
-	let body = LoginAccountRequest {
-		login: email.to_owned(),
-		password: password.to_owned(),
-		undelete: None,
-		login_source: None,
-		gift_code_sku_id: None,
+
+	// todo: new location stuff
+
+	let resp = client
+		.post::<LoginAccountRequest>(LOGIN_ACCOUNT, Some(payload))
+		.await?;
+	let status = resp.status();
+	let body = resp.text().await?;
+
+	if status.as_u16() == 403 {
+		trace!("Account is suspended, getting suspended token");
+		match serde_json::from_str::<LoginAccountSuspendedResponse>(&body) {
+			| Ok(d) => {
+				trace!("User account is suspended");
+				password_login_state.set(PasswordLoginState::AccountSuspended {
+					suspended_token: d.suspended_user_token,
+				})
+				// todo: handle suspended account
+			},
+			| Err(e) => return Err(e.into()),
+		};
+	}
+
+	match serde_json::from_str::<ApiResponse<LoginAccountResponse>>(&body)? {
+		| ApiResponse::Success(r) => {
+			if r.mfa.unwrap_or_default() {
+				trace!("MFA required for login");
+				let authn_type = if r.totp.unwrap_or_default() {
+					AuthenticatorType::totp
+				} else if r.backup.unwrap_or_default() {
+					AuthenticatorType::backup
+				} else if r.sms.unwrap_or_default() {
+					// todo: send mfa code to sms via endpoint
+					AuthenticatorType::sms
+				} else if let Some(Some(credential_request_options)) = &r.webauthn {
+					AuthenticatorType::webauthn {
+						credential_request_options: credential_request_options.to_owned(),
+					}
+				} else {
+					AuthenticatorType::password
+				};
+
+				password_login_state.set(PasswordLoginState::NeedMfa {
+					authn_type,
+					response: r,
+				});
+
+				return Ok(());
+			}
+
+			// can probably unwrap here cus if token is not provided
+			// then the mfa and suspended token thing should catch that
+			// and return before this is called
+			let _ = save_token(&r.token.unwrap().0);
+			password_login_state.set(PasswordLoginState::Success {
+				required_actions: r.required_actions.unwrap_or_default(),
+			});
+		},
+		| ApiResponse::Error(e) => {
+			match e.code {
+				| 70007 => {
+					// password_login_state.set(PasswordLoginState::);
+					// phone verification
+				},
+				| 20013 => {
+					password_login_state.set(PasswordLoginState::AccountDisabled);
+					// account disabled, redo request with `undelete` set to true to enable account
+				},
+				| 20011 => {
+					password_login_state.set(PasswordLoginState::AccountDeleted);
+					// account marked for deletion, redo request with `undelete` set to true to enable account
+				},
+				| _ => {},
+			}
+
+			return Err(format!("{:?}", e).into());
+		},
+	}
+
+	Ok(())
+}
+
+async fn mfa_verify(
+	authn_type: &AuthenticatorType,
+	login_response: LoginAccountResponse,
+	code: String,
+	password: String,
+) -> Result<(), Box<dyn std::error::Error>> {
+	let client = RequestClient::new(BaseUrl::Discord, true);
+
+	let code = match authn_type {
+		| AuthenticatorType::webauthn {
+			credential_request_options: _,
+		} => return Err("webauthn is not yet supported".into()),
+		| AuthenticatorType::password => password,
+		| _ => code,
 	};
 
-	// todo: mfa
-	// todo: new location stuff
-	// todo: suspended user token
-	let resp: ApiResponse<LoginAccountResponse> = client.post(LOGIN_ACCOUNT, Some(&body)).await?;
+	let payload = VerifyMfaLoginRequest {
+		code,
+		ticket: login_response.ticket.unwrap_or_default(),
+		login_source: Some(None),
+		gift_code_sku_id: Some(None),
+		login_instance_id: login_response.login_instance_id,
+	};
 
-	Err("fuck you".into())
+	println!("{}", serde_json::to_string(&payload)?);
+
+	let resp: ApiResponse<VerifyMfaLoginResponse> = client
+		.post::<VerifyMfaLoginRequest>(&VERIFY_MFA_LOGIN(authn_type), Some(&payload))
+		.await?
+		.with_auto_handle()
+		.await?;
+
+	return match resp {
+		| ApiResponse::Success(r) => {
+			let _ = save_token(&r.token);
+			Ok(())
+		},
+		| ApiResponse::Error(e) => Err(format!("{e:?}").into()),
+	};
 }
 
 #[derive(Debug)]
@@ -377,6 +565,8 @@ async fn get_remote_auth_qr_url(
 										ticket,
 									}),
 								)
+								.await?
+								.with_auto_handle()
 								.await?;
 
 							return match resp {

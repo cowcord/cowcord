@@ -35,35 +35,13 @@ impl RequestClient {
 		}
 	}
 
-	async fn handle_response<T>(
-		response: Response
-	) -> Result<ApiResponse<T>, Box<dyn std::error::Error>>
-	where
-		T: DeserializeOwned,
-	{
-		let status = response.status();
-		let response_text = response.text().await?;
-
-		if status.is_success() {
-			let result: ApiResponse<T> = serde_json::from_str(&response_text)?;
-			Ok(result)
-		} else {
-			Err(format!(
-				"Request failed with status: {}. Response: {}",
-				status, response_text
-			)
-			.into())
-		}
-	}
-
-	pub async fn post<T, R>(
+	pub async fn post<T>(
 		&self,
 		endpoint: &str,
 		body: Option<&T>,
-	) -> Result<ApiResponse<R>, Box<dyn std::error::Error>>
+	) -> Result<Response, Box<dyn std::error::Error>>
 	where
 		T: Serialize,
-		R: DeserializeOwned,
 	{
 		let url = format!("{}{}", self.api_base, endpoint);
 		let mut request = self.client.post(&url).add_headers(self.no_auth)?;
@@ -72,19 +50,16 @@ impl RequestClient {
 			request = request.json(body);
 		}
 
-		let response = request.send().await?;
-
-		Self::handle_response(response).await
+		Ok(request.send().await?)
 	}
 
-	pub async fn get<T, R>(
+	pub async fn get<T>(
 		&self,
 		endpoint: &str,
 		body: Option<&T>,
-	) -> Result<ApiResponse<R>, Box<dyn std::error::Error>>
+	) -> Result<Response, Box<dyn std::error::Error>>
 	where
 		T: Serialize,
-		R: DeserializeOwned,
 	{
 		let url = format!("{}{}", self.api_base, endpoint);
 		let mut request = self.client.get(&url).add_headers(self.no_auth)?;
@@ -93,9 +68,7 @@ impl RequestClient {
 			request = request.json(body);
 		}
 
-		let response = request.send().await?;
-
-		Self::handle_response(response).await
+		Ok(request.send().await?)
 	}
 
 	pub async fn get_bytes(
@@ -115,14 +88,13 @@ impl RequestClient {
 		}
 	}
 
-	pub async fn delete<T, R>(
+	pub async fn delete<T>(
 		&self,
 		endpoint: &str,
 		body: Option<&T>,
-	) -> Result<ApiResponse<R>, Box<dyn std::error::Error>>
+	) -> Result<Response, Box<dyn std::error::Error>>
 	where
 		T: Serialize,
-		R: DeserializeOwned,
 	{
 		let url = format!("{}{}", self.api_base, endpoint);
 		let mut request = self.client.delete(&url).add_headers(self.no_auth)?;
@@ -131,19 +103,16 @@ impl RequestClient {
 			request = request.json(body);
 		}
 
-		let response = request.send().await?;
-
-		Self::handle_response(response).await
+		Ok(request.send().await?)
 	}
 
-	pub async fn put<T, R>(
+	pub async fn put<T>(
 		&self,
 		endpoint: &str,
 		body: Option<&T>,
-	) -> Result<ApiResponse<R>, Box<dyn std::error::Error>>
+	) -> Result<Response, Box<dyn std::error::Error>>
 	where
 		T: Serialize,
-		R: DeserializeOwned,
 	{
 		let url = format!("{}{}", self.api_base, endpoint);
 		let mut request = self.client.put(&url).add_headers(self.no_auth)?;
@@ -152,19 +121,16 @@ impl RequestClient {
 			request = request.json(body);
 		}
 
-		let response = request.send().await?;
-
-		Self::handle_response(response).await
+		Ok(request.send().await?)
 	}
 
-	pub async fn patch<T, R>(
+	pub async fn patch<T>(
 		&self,
 		endpoint: &str,
 		body: Option<&T>,
-	) -> Result<ApiResponse<R>, Box<dyn std::error::Error>>
+	) -> Result<Response, Box<dyn std::error::Error>>
 	where
 		T: Serialize,
-		R: DeserializeOwned,
 	{
 		let url = format!("{}{}", self.api_base, endpoint);
 		let mut request = self.client.patch(&url).add_headers(self.no_auth)?;
@@ -173,9 +139,7 @@ impl RequestClient {
 			request = request.json(body);
 		}
 
-		let response = request.send().await?;
-
-		Self::handle_response(response).await
+		Ok(request.send().await?)
 	}
 }
 
@@ -207,5 +171,32 @@ impl RequestBuilderExt for RequestBuilder {
 		}
 
 		Ok(builder)
+	}
+}
+
+pub trait AutoHandle {
+	/// Simple error handling for requests giving the deserialized body on `2xx`, otherwise throwing an error
+	async fn with_auto_handle<T: DeserializeOwned>(
+		self
+	) -> Result<ApiResponse<T>, Box<dyn std::error::Error>>;
+}
+
+impl AutoHandle for Response {
+	async fn with_auto_handle<T: DeserializeOwned>(
+		self
+	) -> Result<ApiResponse<T>, Box<dyn std::error::Error>> {
+		let status = self.status();
+		let response_text = self.text().await?;
+
+		if status.is_success() {
+			let result: ApiResponse<T> = serde_json::from_str(&response_text)?;
+			Ok(result)
+		} else {
+			Err(format!(
+				"Request failed with status: {}. Response: {}",
+				status, response_text
+			)
+			.into())
+		}
 	}
 }

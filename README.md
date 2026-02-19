@@ -21,9 +21,11 @@ dx serve
 
 ### Basic features
 - [ ] Logging in
-	- [ ] with email/phone + password
+	- [x] with email/phone + password
 	- [x] with qr code and mobile
+	- [ ] with passkey
 	- [ ] mfa support
+	- [ ] reset password
 - [ ] view servers
 - [ ] view a server's channels
 - [ ] view a channel and its messages
