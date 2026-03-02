@@ -7,9 +7,12 @@ pkgs.mkShell rec {
     nativeBuildInputs = with pkgs; [
       dioxus-cli
       tailwindcss_4
+      # cargo
 
+      cmake
+      perl
       gcc
-      openssl
+      # openssl
       pkg-config
       rustPlatform.bindgenHook # needed?
     ];

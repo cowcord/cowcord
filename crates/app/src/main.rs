@@ -6,6 +6,7 @@ use apple_native_keyring_store::protected::Store;
 use dbus_secret_service_keyring_store::Store;
 use dioxus::desktop::WindowBuilder;
 use dioxus::prelude::*;
+use rustls::crypto::CryptoProvider;
 use tracing::Level;
 use tracing_subscriber::FmtSubscriber;
 #[cfg(target_os = "windows")]
@@ -59,9 +60,12 @@ fn main() {
 				.with_title("cowcord"), // .with_decorations(false), // .with_transparent(true),
 		)
 		.with_menu(None);
-
 	// #[cfg(debug_assertions)]
 	// config = config.with_disable_context_menu(true);
+
+	rustls::crypto::ring::default_provider()
+		.install_default()
+		.unwrap();
 
 	LaunchBuilder::desktop().with_cfg(config).launch(App);
 }

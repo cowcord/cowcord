@@ -7,8 +7,6 @@ use discord_api::endpoints::experiments::{
 	GetExperimentAssignmentsResponse,
 };
 
-use crate::utils::fingerprint;
-
 pub static FINGERPRINT: OnceLock<String> = OnceLock::new();
 
 pub async fn get_fingerprint() -> Result<String, Box<dyn std::error::Error>> {
@@ -17,7 +15,7 @@ pub async fn get_fingerprint() -> Result<String, Box<dyn std::error::Error>> {
 		platform: None,
 	};
 
-	let resp = reqwest::Client::new()
+	let resp = wreq::Client::new()
 		.get(format!(
 			"{DISCORD_URL}/api/v9{}",
 			&GET_EXPERIMENT_ASSIGNMENTS(&query)
@@ -25,8 +23,6 @@ pub async fn get_fingerprint() -> Result<String, Box<dyn std::error::Error>> {
 		.header("Origin", format!("{DISCORD_URL}/login"))
 		.send()
 		.await?;
-
-	println!("{resp:?}");
 
 	let body: GetExperimentAssignmentsResponse = resp.json().await?;
 

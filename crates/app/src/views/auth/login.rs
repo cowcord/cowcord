@@ -29,11 +29,10 @@ use fast_qr::convert::Builder;
 use fast_qr::convert::svg::SvgBuilder;
 use fast_qr::{ECL, QRBuilder};
 use lucide_dioxus::LoaderCircle;
-use openssl::encrypt::Decrypter;
-use openssl::hash::MessageDigest;
-use openssl::pkey::PKey;
-use openssl::rsa::{Padding, Rsa};
-use openssl::sha::sha256;
+use rsa::pkcs8::EncodePublicKey;
+use rsa::rand_core::OsRng;
+use rsa::{Oaep, RsaPrivateKey};
+use sha2::{Digest, Sha256};
 use tokio::time::{Instant, Interval, interval_at};
 
 use crate::components::ui::Button;
@@ -422,13 +421,13 @@ async fn get_remote_auth_qr_url(
 		let mut client = RemoteAuthWsClient::connect().await?;
 
 		// generate rsa and public key
-		let rsa = Rsa::generate(2048)?;
-		let public_key = rsa.public_key_to_der().unwrap();
+		let private_key = RsaPrivateKey::new(&mut OsRng, 2048)?;
+		let public_key = private_key.to_public_key().to_public_key_der()?.to_vec();
 
-		let pkey = PKey::from_rsa(rsa.clone())?;
-		let mut decrypter = Decrypter::new(&pkey)?;
-		decrypter.set_rsa_padding(Padding::PKCS1_OAEP)?;
-		decrypter.set_rsa_oaep_md(MessageDigest::sha256())?;
+		// let pkey = PKey::from_rsa(rsa.clone())?;
+		// let mut decrypter = Decrypter::new(&pkey)?;
+		// decrypter.set_rsa_padding(Padding::PKCS1_OAEP)?;
+		// decrypter.set_rsa_oaep_md(MessageDigest::sha256())?;
 
 		let mut heartbeat_interval: Option<Interval> = None;
 		let mut awaiting_ack = false;
@@ -492,10 +491,11 @@ async fn get_remote_auth_qr_url(
 						} => {
 							// decrypt the nonce
 							let encrypted_nonce_bytes = BASE64_STANDARD.decode(&encrypted_nonce)?;
-							let buf_len = decrypter.decrypt_len(&encrypted_nonce_bytes)?;
-							let mut decrypted_nonce = vec![0u8; buf_len];
-							let len = decrypter.decrypt(&encrypted_nonce_bytes, &mut decrypted_nonce)?;
-							let nonce_proof = BASE64_URL_SAFE_NO_PAD.encode(&decrypted_nonce[..len]);
+							let decrypted_nonce = private_key.decrypt(
+								Oaep::new::<Sha256>(),
+								&encrypted_nonce_bytes
+							)?;
+							let nonce_proof = BASE64_URL_SAFE_NO_PAD.encode(&decrypted_nonce);
 
 							// send the decrypted nonce
 							client
@@ -509,11 +509,10 @@ async fn get_remote_auth_qr_url(
 							fingerprint,
 						} => {
 							// validate the fingerprint we recieved
-							let expected_fingerprint = BASE64_URL_SAFE_NO_PAD.encode(sha256(&public_key));
-							let valid_fingerprint = fingerprint == expected_fingerprint;
+							let expected_fingerprint = BASE64_URL_SAFE_NO_PAD.encode(Sha256::digest(&public_key));
 
 							// if fingerprint isnt correct, close connection and reconnect
-							if !valid_fingerprint {
+							if !(fingerprint == expected_fingerprint) {
 								error!(
 									"fingerprint mismatch! discord: {fingerprint} expected: {expected_fingerprint}, reconnecting..."
 								);
@@ -535,11 +534,12 @@ async fn get_remote_auth_qr_url(
 							encrypted_user_payload,
 						} => {
 							let encrypted_bytes = BASE64_STANDARD.decode(&encrypted_user_payload)?;
-							let buf_len = decrypter.decrypt_len(&encrypted_bytes)?;
-							let mut decrypted_payload = vec![0u8; buf_len];
-							let len = decrypter.decrypt(&encrypted_bytes, &mut decrypted_payload)?;
+							let decrypted_payload = private_key.decrypt(
+								Oaep::new::<Sha256>(),
+								&encrypted_bytes
+							)?;
 
-							let decrypted_str = str::from_utf8(&decrypted_payload[..len])?;
+							let decrypted_str = str::from_utf8(&decrypted_payload)?;
 							let mut parts = decrypted_str.split(':');
 
 							remote_auth_state.set(RemoteAuthState::Accepted {
@@ -571,11 +571,12 @@ async fn get_remote_auth_qr_url(
 
 							return match resp {
 								ApiResponse::Success(v) => {
-									let encrypted_bytes=BASE64_STANDARD.decode(&v.encrypted_token)?;
-									let buf_len=decrypter.decrypt_len(&encrypted_bytes)?;
-									let mut decrypted_payload=vec![0u8;buf_len];
-									let len=decrypter.decrypt(&encrypted_bytes, &mut decrypted_payload)?;
-									let token=str::from_utf8(&decrypted_payload[..len])?;
+									let encrypted_bytes = BASE64_STANDARD.decode(&v.encrypted_token)?;
+									let decrypted_payload = private_key.decrypt(
+										Oaep::new::<Sha256>(),
+										&encrypted_bytes
+									)?;
+									let token = str::from_utf8(&decrypted_payload)?;
 
 									save_token(token)?;
 									let _ = client.close(None).await;

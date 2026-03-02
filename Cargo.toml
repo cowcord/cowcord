@@ -23,3 +23,6 @@ incremental = true
 
 [profile.wasm-dev]
 inherits = "dev"
+
+[patch.crates-io]
+dioxus = { git = "https://github.com/not-a-cowfr/dioxus" }

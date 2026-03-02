@@ -1,11 +1,12 @@
 use dioxus::prelude::use_navigator;
 use discord_api::{ApiResponse, ApiVerion, CDN_URL, DISCORD_URL};
-use reqwest::{Client, RequestBuilder, Response};
 use serde::Serialize;
 use serde::de::DeserializeOwned;
 use tokio_tungstenite::tungstenite::Bytes;
+use wreq::{Client, RequestBuilder, Response};
+use wreq_util::Emulation;
 
-use crate::utils::fingerprint::{FINGERPRINT, get_fingerprint};
+use crate::utils::fingerprint::FINGERPRINT;
 use crate::utils::token::load_token;
 
 pub struct RequestClient {
@@ -30,7 +31,10 @@ impl RequestClient {
 		};
 
 		RequestClient {
-			client: Client::new(),
+			client: Client::builder()
+				.emulation(Emulation::Chrome145)
+				.build()
+				.unwrap(),
 			api_base,
 			no_auth,
 		}
