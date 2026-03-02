@@ -19,6 +19,8 @@ mod views;
 use channels::me::Me;
 use views::*;
 
+use crate::utils::fingerprint::{FINGERPRINT, get_fingerprint};
+
 const TAILWIND: Asset = asset!("/assets/tailwind.css");
 
 #[derive(Routable, Clone, Debug, PartialEq)]
@@ -50,7 +52,6 @@ fn main() {
 		.with_max_level(Level::INFO)
 		.finish();
 	tracing::subscriber::set_global_default(subscriber).unwrap();
-
 	let config = dioxus::desktop::Config::new()
 		.with_window(
 			WindowBuilder::new()
@@ -62,10 +63,20 @@ fn main() {
 	// #[cfg(debug_assertions)]
 	// config = config.with_disable_context_menu(true);
 
-	LaunchBuilder::desktop().with_cfg(config).launch(|| {
-		rsx! {
-			Stylesheet { href: TAILWIND }
-			Router::<Route> {}
-		}
+	LaunchBuilder::desktop().with_cfg(config).launch(App);
+}
+
+#[component]
+fn App() -> Element {
+	// init fingerprint
+	use_effect(move || {
+		spawn(async move {
+			FINGERPRINT.set(get_fingerprint().await.unwrap()).unwrap();
+		});
 	});
+
+	rsx! {
+		Stylesheet { href: TAILWIND }
+		Router::<Route> {}
+	}
 }

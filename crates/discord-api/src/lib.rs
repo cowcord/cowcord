@@ -46,3 +46,9 @@ pub enum ApiResponse<T> {
 	Success(T),
 	Error(Error),
 }
+
+pub(crate) fn serialize_query_params(s: impl Serialize) -> String {
+	serde_urlencoded::to_string(s)
+		.map(|ser| format!("?{ser}"))
+		.unwrap_or_default()
+}

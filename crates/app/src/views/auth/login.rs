@@ -218,7 +218,7 @@ pub fn Login() -> Element {
 							a { class: "text-xs text-link", href: "", "Forgot your password?" }
 						}
 						Button { button_type: "submit", class: "py-2",
-							// disabled: loading(),
+							// disa	ed: loading(),
 							"Log In"
 						}
 						div { class: "flex flex-row text-xs gap-x-1",

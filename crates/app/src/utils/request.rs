@@ -5,6 +5,7 @@ use serde::Serialize;
 use serde::de::DeserializeOwned;
 use tokio_tungstenite::tungstenite::Bytes;
 
+use crate::utils::fingerprint::{FINGERPRINT, get_fingerprint};
 use crate::utils::token::load_token;
 
 pub struct RequestClient {
@@ -158,8 +159,11 @@ impl RequestBuilderExt for RequestBuilder {
 		let nav = use_navigator();
 		let token = load_token()?;
 		let mut builder = self.header("Origin", DISCORD_URL);
+		// todo super props
 
-		if !no_auth {
+		if no_auth {
+			builder = builder.header("X-Fingerprint", FINGERPRINT.get().unwrap());
+		} else {
 			if let Some(token) = token
 				&& token.is_valid()
 			{
@@ -176,9 +180,9 @@ impl RequestBuilderExt for RequestBuilder {
 
 pub trait AutoHandle {
 	/// Simple error handling for requests giving the deserialized body on `2xx`, otherwise throwing an error
-	async fn with_auto_handle<T: DeserializeOwned>(
+	fn with_auto_handle<T: DeserializeOwned>(
 		self
-	) -> Result<ApiResponse<T>, Box<dyn std::error::Error>>;
+	) -> impl Future<Output = Result<ApiResponse<T>, Box<dyn std::error::Error>>> + Send;
 }
 
 impl AutoHandle for Response {
