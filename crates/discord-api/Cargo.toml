@@ -10,36 +10,14 @@ repository = "https://github.com/cowcord/cowcord"
 readme = "README.md"
 
 [dependencies]
-base64 = { workspace = true }
+const_format = { version = "0.2.35", features = ["fmt"] }
 
 # serialization/deserialization
-# bitflags = "2.9.0"
 serde = { workspace = true }
 serde_json = { workspace = true }
 serde_urlencoded = "0.7.1"
-# serde_urlencoded = "0.7.1"
-# serde_repr = "0.1.20"
-# prost-types = "0.14.1"
-
-# custom types
-# typesize = { version = "0.1.14", optional = true, features = [
-#     "url",
-#     "time",
-#     "serde_json",
-#     "secrecy",
-#     "dashmap",
-#     "parking_lot",
-#     "details",
-# ] }
-# time = { version = "0.3.41", features = [
-#     "formatting",
-#     "parsing",
-#     "serde-well-known",
-# ] }
-# chrono = { version = "0.4.41", optional = true, features = ["serde"] }
-# arrayvec = { version = "0.7.6", features = ["serde"] }
-# hex = { workspace = true }
-# phf = { version = "0.12.1", features = ["macros"] }
+base64 = { workspace = true }
+uuid = { version = "1.22.0", features = ["v4", "serde"] }
 
 [features]
 # default = ["chrono"]

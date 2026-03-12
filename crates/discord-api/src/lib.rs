@@ -20,6 +20,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::types::error::Error;
 
+#[macro_use]
+pub(crate) mod macros;
 pub mod endpoints;
 pub mod types;
 

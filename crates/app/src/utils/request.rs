@@ -1,4 +1,8 @@
+use base64::Engine;
+use base64::prelude::BASE64_STANDARD;
 use dioxus::prelude::use_navigator;
+use discord_api::types::locale::Locale;
+use discord_api::types::super_properties::ClientProperties;
 use discord_api::{ApiResponse, ApiVerion, CDN_URL, DISCORD_URL};
 use serde::Serialize;
 use serde::de::DeserializeOwned;
@@ -32,7 +36,7 @@ impl RequestClient {
 
 		RequestClient {
 			client: Client::builder()
-				.emulation(Emulation::Chrome145)
+				.emulation(Emulation::Chrome140)
 				.build()
 				.unwrap(),
 			api_base,
@@ -162,8 +166,13 @@ impl RequestBuilderExt for RequestBuilder {
 	) -> Result<RequestBuilder, Box<dyn std::error::Error>> {
 		let nav = use_navigator();
 		let token = load_token()?;
-		let mut builder = self.header("Origin", DISCORD_URL);
-		// todo super props
+		let mut builder = self
+			.header("Origin", DISCORD_URL)
+			.header(
+				"X-Super-Properties",
+				BASE64_STANDARD.encode(serde_json::to_string(&ClientProperties::new())?),
+			)
+			.header("X-Discord-Locale", serde_json::to_string(&Locale::en_US)?);
 
 		if no_auth {
 			builder = builder.header("X-Fingerprint", FINGERPRINT.get().unwrap());
