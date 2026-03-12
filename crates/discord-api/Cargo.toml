@@ -11,6 +11,7 @@ readme = "README.md"
 
 [dependencies]
 const_format = { version = "0.2.35", features = ["fmt"] }
+cowcord-macros = { workspace = true }
 
 # serialization/deserialization
 serde = { workspace = true }

@@ -1,12 +1,13 @@
 #![allow(non_snake_case)]
 
+use std::sync::OnceLock;
+
 #[cfg(target_os = "macos")]
 use apple_native_keyring_store::protected::Store;
 #[cfg(any(target_os = "freebsd", target_os = "openbsd", target_os = "linux"))]
 use dbus_secret_service_keyring_store::Store;
 use dioxus::desktop::WindowBuilder;
 use dioxus::prelude::*;
-use rustls::crypto::CryptoProvider;
 use tracing::Level;
 use tracing_subscriber::FmtSubscriber;
 #[cfg(target_os = "windows")]
@@ -43,6 +44,8 @@ enum Route {
     },
 }
 
+pub static CONFIG: OnceLock<cowcord_config::Config> = OnceLock::new();
+
 fn main() {
 	// init keyring store
 	keyring_core::set_default_store(Store::new().unwrap());
@@ -65,6 +68,11 @@ fn main() {
 
 	rustls::crypto::ring::default_provider()
 		.install_default()
+		.unwrap();
+
+	cowcord_config::Config::init().unwrap();
+	CONFIG
+		.set(cowcord_config::Config::get().expect("hi"))
 		.unwrap();
 
 	LaunchBuilder::desktop().with_cfg(config).launch(App);

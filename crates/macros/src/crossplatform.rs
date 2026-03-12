@@ -13,6 +13,7 @@
 /// 	"android"
 /// );
 /// ```
+#[macro_export]
 macro_rules! crossplatform_const {
 	($name:ident, $type:ty, $linux:expr, $macos:expr, $windows:expr, $ios:expr, $android:expr) => {
 		#[cfg(any(

@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug, Default, Clone, Copy)]
 pub enum Locale {
 	ar,
 	bg,
@@ -12,6 +12,7 @@ pub enum Locale {
 	el,
 	#[serde(rename = "en-GB")]
 	en_GB,
+	#[default]
 	#[serde(rename = "en-US")]
 	en_US,
 	#[serde(rename = "es-ES")]

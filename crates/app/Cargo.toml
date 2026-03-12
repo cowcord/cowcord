@@ -9,6 +9,7 @@ tokio = "1.49.0"
 dioxus = { version = "0.7.3", features = ["router", "desktop"] }
 lucide-dioxus = { version = "2.563.0", features = ["all-icons"] }
 tailwind_fuse = "0.3.2"
+cowcord-config = { workspace = true }
 
 # requests
 discord-api = { workspace = true }

@@ -7,6 +7,7 @@ use std::time::{Duration, Instant};
 
 #[cfg(target_os = "linux")]
 use const_format::formatc;
+use cowcord_macros::crossplatform_const;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 

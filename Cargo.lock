@@ -565,6 +565,7 @@ version = "0.0.1"
 dependencies = [
  "apple-native-keyring-store",
  "base64",
+ "cowcord-config",
  "dbus-secret-service-keyring-store",
  "dioxus",
  "discord-api",
@@ -586,6 +587,20 @@ dependencies = [
  "wreq",
  "wreq-util",
 ]
+
+[[package]]
+name = "cowcord-config"
+version = "0.0.1"
+dependencies = [
+ "discord-api",
+ "serde",
+ "serde_json",
+ "tracing",
+]
+
+[[package]]
+name = "cowcord-macros"
+version = "0.0.1"
 
 [[package]]
 name = "cpufeatures"
@@ -1217,6 +1232,7 @@ version = "0.0.1"
 dependencies = [
  "base64",
  "const_format",
+ "cowcord-macros",
  "serde",
  "serde_json",
  "serde_urlencoded",

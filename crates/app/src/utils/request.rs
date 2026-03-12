@@ -10,6 +10,7 @@ use tokio_tungstenite::tungstenite::Bytes;
 use wreq::{Client, RequestBuilder, Response};
 use wreq_util::Emulation;
 
+use crate::CONFIG;
 use crate::utils::fingerprint::FINGERPRINT;
 use crate::utils::token::load_token;
 
@@ -166,13 +167,17 @@ impl RequestBuilderExt for RequestBuilder {
 	) -> Result<RequestBuilder, Box<dyn std::error::Error>> {
 		let nav = use_navigator();
 		let token = load_token()?;
+		let locale = &CONFIG.get().unwrap().locale;
+		let mut superprops = ClientProperties::new();
+		superprops.system_locale = *locale;
+
 		let mut builder = self
 			.header("Origin", DISCORD_URL)
 			.header(
 				"X-Super-Properties",
-				BASE64_STANDARD.encode(serde_json::to_string(&ClientProperties::new())?),
+				BASE64_STANDARD.encode(serde_json::to_string(&superprops)?),
 			)
-			.header("X-Discord-Locale", serde_json::to_string(&Locale::en_US)?);
+			.header("X-Discord-Locale", serde_json::to_string(locale)?);
 
 		if no_auth {
 			builder = builder.header("X-Fingerprint", FINGERPRINT.get().unwrap());
