@@ -1,10 +1,13 @@
 use std::io::Write;
 use std::path::PathBuf;
+use std::sync::OnceLock;
 use std::{env, fs};
 
 use discord_api::types::locale::Locale;
 use serde::{Deserialize, Serialize};
 use tracing::warn;
+
+pub static CONFIG_PATH: OnceLock<PathBuf> = OnceLock::new();
 
 #[derive(Serialize, Deserialize, Debug, Default)]
 pub struct Config {
@@ -26,11 +29,8 @@ impl Config {
 	/// creates the default config if no config already exists
 	pub fn init() -> Result<(), Box<dyn std::error::Error>> {
 		let config_path = get_config_path();
-		let conf_dir = get_config_dir();
-		println!("{}", conf_dir.display());
-		println!("{}", config_path.display());
 
-		fs::create_dir_all(get_config_dir())?;
+		fs::create_dir_all(CONFIG_PATH.get().unwrap())?;
 		let mut file = fs::OpenOptions::new()
 			.write(true)
 			.create(true)
@@ -83,7 +83,9 @@ pub fn get_config_dir() -> PathBuf {
 	}
 }
 
+/// # Panics
+/// If `CONFIG_PATH` has not been initialized
 #[inline(always)]
 pub fn get_config_path() -> PathBuf {
-	get_config_dir().join("settings.json")
+	CONFIG_PATH.get().unwrap().join("settings.json")
 }
