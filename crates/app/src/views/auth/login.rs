@@ -421,8 +421,17 @@ async fn get_remote_auth_qr_url(
 		let mut client = RemoteAuthWsClient::connect().await?;
 
 		// generate rsa and public key
-		let private_key = RsaPrivateKey::new(&mut OsRng, 2048)?;
-		let public_key = private_key.to_public_key().to_public_key_der()?.to_vec();
+		let (private_key, public_key) = tokio::task::spawn_blocking(|| {
+			let private_key = RsaPrivateKey::new(&mut OsRng, 2048).map_err(|e| e.to_string())?;
+			let public_key = private_key
+				.to_public_key()
+				.to_public_key_der()
+				.map_err(|e| e.to_string())?
+				.to_vec();
+			Ok::<_, String>((private_key, public_key))
+		})
+		.await
+		.map_err(|e| e.to_string())??;
 
 		// let pkey = PKey::from_rsa(rsa.clone())?;
 		// let mut decrypter = Decrypter::new(&pkey)?;
