@@ -1,8 +1,8 @@
 /target
+/result
+
 .DS_Store
 **/*.rs.bk
-/dist
-.rustc_info.json
 nul
 
 **/tailwind.css

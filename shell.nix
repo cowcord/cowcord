@@ -1,42 +1,22 @@
 {
   pkgs ? import <nixpkgs> { },
 }:
-pkgs.mkShell rec {
-    strictDeps = true;
+let
+  deps = import ./nix/deps.nix { inherit pkgs; };
+  platform = if pkgs.stdenv.isLinux then "linux" else "macos";
+in
+pkgs.mkShell {
+  inherit (deps) buildInputs;
+  nativeBuildInputs = deps.nativeBuildInputs ++ [ pkgs.rustup ];
 
-    nativeBuildInputs = with pkgs; [
-      dioxus-cli
-      tailwindcss_4
-      rustup
+  strictDeps = true;
 
+  LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath deps.buildInputs;
+  PKG_CONFIG_PATH = "${pkgs.openssl.dev}/lib/pkgconfig";
+  GIO_MODULE_DIR = "${pkgs.glib-networking}/lib/gio/modules/";
 
-      git
-      cacert
-      cmake
-      pkg-config
-      rustPlatform.bindgenHook
-    ];
-
-    buildInputs = with pkgs; [
-      atkmm
-      cairo
-      gdk-pixbuf
-      glib
-      gtk3
-      pango
-      webkitgtk_4_1
-      xdotool
-    ];
-
-    platform = if pkgs.stdenv.isLinux then "linux" else "macos";
-
-    LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath buildInputs;
-    PKG_CONFIG_PATH = "${pkgs.openssl.dev}/lib/pkgconfig";
-    GIO_MODULE_DIR = "${pkgs.glib-networking}/lib/gio/modules/";
-
-    shellHook = ''
-      ROOT=$(git rev-parse --show-toplevel)
-      export PATH="$PATH:$ROOT/target/dx/cowcord/debug/${platform}/app:$ROOT/target/dx/cowcord/release/${platform}/app"
-    '';
-  }
-
+  shellHook = ''
+    ROOT=$(git rev-parse --show-toplevel)
+    export PATH="$PATH:$ROOT/target/dx/cowcord/debug/${platform}/app:$ROOT/target/dx/cowcord/release/${platform}/app"
+  '';
+}

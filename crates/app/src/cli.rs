@@ -61,7 +61,7 @@ pub fn parse_args() -> Option<CliArgs> {
 
 fn print_help() {
 	println!(
-		r#"Cowcord v{}
+		r#"Cowcord v{}{}
 
 Usage:
   -h --help:		prints this help message
@@ -69,5 +69,8 @@ Usage:
   --config-dir <PATH>:	override the config directory
 "#,
 		env!("CARGO_PKG_VERSION"),
+		option_env!("PACKAGE_MANAGER")
+			.map(|pm| format!(" from {pm}"))
+			.unwrap_or_default(),
 	);
 }
